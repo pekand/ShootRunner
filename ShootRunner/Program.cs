@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
@@ -23,6 +24,7 @@ namespace ShootRunner
         public static string configPath = "";
         public static string configFielPath = "";
         public static string commandFielPath = "";
+        public static string commandFielName = "commands.xml";
         public static DateTime commandFielPathLastChange;
 
         public static bool autorun = false;
@@ -34,6 +36,7 @@ namespace ShootRunner
             using (StreamWriter sw = new StreamWriter(filePath, true))
             {
                 sw.WriteLine(unixTime + " " + message);
+                Console.WriteLine(unixTime + " " + message);
             }
 #endif
         }
@@ -42,30 +45,38 @@ namespace ShootRunner
         {
             if (File.Exists(Program.commandFielPath))
             {
-                try
+                int attemps = 10;
+                bool error = false;
+                do
                 {
-                    Program.commands.Clear();
-                    Program.commandFielPathLastChange = File.GetLastWriteTime(Program.commandFielPath);
-                    XDocument xdoc = XDocument.Load(Program.commandFielPath);
-                    var commands = xdoc.Descendants("command");
-                    foreach (var commandElement in commands)
+                    error = false;
+                    try
                     {
-                        Command newCommand = new Command();
-                        Program.commands.Add(newCommand);
+                        Program.commands.Clear();
+                        Program.commandFielPathLastChange = File.GetLastWriteTime(Program.commandFielPath);
+                        XDocument xdoc = XDocument.Load(Program.commandFielPath);
+                        var commands = xdoc.Descendants("command");
+                        foreach (var commandElement in commands)
+                        {
+                            Command newCommand = new Command();
+                            Program.commands.Add(newCommand);
 
-                        newCommand.shortcut = commandElement.Element("shortcut")?.Value;
-                        newCommand.open = commandElement.Element("open")?.Value;
-                        newCommand.command = commandElement.Element("command")?.Value;
-                        newCommand.parameters = commandElement.Element("parameters")?.Value;
-                        newCommand.window = commandElement.Element("window")?.Value;
+                            newCommand.shortcut = commandElement.Element("shortcut")?.Value;
+                            newCommand.open = commandElement.Element("open")?.Value;
+                            newCommand.command = commandElement.Element("command")?.Value;
+                            newCommand.parameters = commandElement.Element("parameters")?.Value;
+                            newCommand.window = commandElement.Element("window")?.Value;
+                        }
                     }
-                }
-                catch (Exception ex)
-                {
+                    catch (Exception ex)
+                    {
+                        error = true;
+                        Thread.Sleep(50);
+                        Program.log("An error occurred: " + ex.Message);
+                    }
 
-                    MessageBox.Show("An error occurred: " + ex.Message);
-                }
-                
+                    attemps--;
+                } while (error && attemps > 0);
             }
         }
         
@@ -77,7 +88,7 @@ namespace ShootRunner
             Program.directoryName = "ShootRunner";
             Program.configPath = Path.Combine(Program.roamingAppDataPath, Program.directoryName);
             Program.configFielPath = Path.Combine(Program.configPath, "config.xml");
-            Program.commandFielPath = Path.Combine(Program.configPath, "commands.xml");
+            Program.commandFielPath = Path.Combine(Program.configPath, Program.commandFielName);
 
             if (File.Exists(configFielPath)) {
                 XmlDocument xmlDoc = new XmlDocument();

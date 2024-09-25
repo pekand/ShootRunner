@@ -9,26 +9,44 @@ namespace ShootRunner
 {
     public class ToolsWindow
     {
-        // Import necessary functions from user32.dll
+        // FOCUS WINDOW
         [DllImport("user32.dll", SetLastError = true)]
         private static extern bool SetForegroundWindow(IntPtr hWnd);
 
+        // FOCUS WINDOW
         [DllImport("user32.dll")]
         private static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
 
+        // FOCUS WINDOW
         [DllImport("user32.dll")]
         private static extern bool EnumWindows(EnumWindowsProc lpEnumFunc, IntPtr lParam);
 
+        // FOCUS WINDOW
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         private static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
 
+        // FOCUS WINDOW
         private delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
 
+        // FOCUS WINDOW
         [DllImport("user32.dll")]
         static extern void mouse_event(uint dwFlags, int dx, int dy, uint dwData, UIntPtr dwExtraInfo);
 
         const uint MOUSEEVENTF_MOVE = 0x0001;
 
+        // RESTORE WINDOW
+        [DllImport("user32.dll")]
+        private static extern IntPtr GetForegroundWindow();
+
+        // RESTORE WINDOW
+        [DllImport("user32.dll")]
+        private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+        // RESTORE WINDOW
+        private const int SW_SHOW = 5;
+        private const int SW_RESTORE = 9;
+
+        // FOCUS WINDOW
         static void SimulateMouseInput()
         {
             mouse_event(MOUSEEVENTF_MOVE, 0, 1, 0, UIntPtr.Zero);
@@ -43,6 +61,7 @@ namespace ShootRunner
             if (hWnd != IntPtr.Zero)
             {
                 SimulateMouseInput();
+                ShowWindow(hWnd, SW_RESTORE);
                 SetForegroundWindow(hWnd);
                 SimulateMouseInput();
                 return true;
@@ -58,6 +77,7 @@ namespace ShootRunner
 
             EnumWindows((hWnd, lParam) =>
             {
+
                 StringBuilder windowText = new StringBuilder(256);
                 GetWindowText(hWnd, windowText, windowText.Capacity);
 

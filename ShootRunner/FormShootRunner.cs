@@ -17,50 +17,50 @@ namespace ShootRunner
 {
     public partial class FormShootRunner : Form
     {
+        // HOOK
         [DllImport("user32.dll", CharSet = CharSet.Auto, ExactSpelling = true, CallingConvention = CallingConvention.Winapi)]
         public static extern short GetKeyState(int keyCode);
 
+        // HOOK
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         private static extern IntPtr SetWindowsHookEx(int idHook, LowLevelKeyboardProc lpfn, IntPtr hMod, uint dwThreadId);
 
+        // HOOK
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool UnhookWindowsHookEx(IntPtr hhk);
 
+        // HOOK
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         private static extern IntPtr CallNextHookEx(IntPtr hhk, int nCode, IntPtr wParam, IntPtr lParam);
 
+        // HOOK
         [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         private static extern IntPtr GetModuleHandle(string lpModuleName);
 
+        // HOOK
         private const int WH_KEYBOARD_LL = 13;
-
         private const int WM_KEYDOWN = 0x0100;
         private const int WM_SYSKEYDOWN = 0x0104;
-        
         private const int WM_KEYUP = 0x0101;
-
         private const int VK_LWIN = 0x5B;
         private const int VK_RWIN = 0x5C;
-
-
         private static IntPtr _hookID = IntPtr.Zero;
-
         private delegate IntPtr LowLevelKeyboardProc(int nCode, IntPtr wParam, IntPtr lParam);
-
         private static LowLevelKeyboardProc _proc = HookCallback;
 
+        // FILE WATCH
+        private FileSystemWatcher watcher = null;
+
+        // CONSTRUCTOR
         public FormShootRunner()
         {
             InitializeComponent();
             _hookID = SetHook(_proc);
+            this.RegisterCommandFileWatch();
         }
 
-        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            Application.Exit();
-        }
-
+        // LOAD
         private void FormShootRunner_Load(object sender, EventArgs e)
         {
             this.WindowState = FormWindowState.Minimized;
@@ -68,6 +68,7 @@ namespace ShootRunner
             this.Hide();
         }
 
+        // HOOK
         private static IntPtr SetHook(LowLevelKeyboardProc proc)
         {
             using (Process curProcess = Process.GetCurrentProcess())
@@ -76,18 +77,8 @@ namespace ShootRunner
                 return SetWindowsHookEx(WH_KEYBOARD_LL, proc, GetModuleHandle(curModule.ModuleName), 0);
             }
         }
-        private static bool IsLWinPressed()
-        {
-            // GetKeyState returns a short where the most significant bit indicates if the key is down
-            return (GetKeyState(VK_RWIN) & 0x8000) != 0;
-        }
-
-        private static bool IsRWinPressed()
-        {
-            // GetKeyState returns a short where the most significant bit indicates if the key is down
-            return (GetKeyState(VK_LWIN) & 0x8000) != 0;
-        }
-
+        
+        // HOOK
         private static IntPtr HookCallback(int nCode, IntPtr wParam, IntPtr lParam)
         {
             if (nCode >= 0 && (wParam == (IntPtr)WM_KEYDOWN || wParam == (IntPtr)WM_SYSKEYDOWN))
@@ -154,11 +145,25 @@ namespace ShootRunner
             return CallNextHookEx(_hookID, nCode, wParam, lParam);
         }
 
+        // HOOK
         private void FormShootRunner_InputLanguageChanging(object sender, InputLanguageChangingEventArgs e)
         {
             UnhookWindowsHookEx(_hookID);
         }
 
+        // SHORCUT LWIN
+        private static bool IsLWinPressed()
+        {
+            return (GetKeyState(VK_RWIN) & 0x8000) != 0;
+        }
+
+        // SHORCUT RWIN
+        private static bool IsRWinPressed()
+        {            
+            return (GetKeyState(VK_LWIN) & 0x8000) != 0;
+        }
+
+        // SHORTCUT
         private string KeyToName(Keys key) {
             string keyName = "";
 
@@ -359,7 +364,8 @@ namespace ShootRunner
 
             return keyName;
         }
-
+       
+        // COMMAND
         private bool  RunScript(Shortcut shortcut)
         {
 
@@ -375,6 +381,7 @@ namespace ShootRunner
             return false;
         }
 
+        // SHORTCUT
         private bool ParseShortcut(string commandShortcut, Shortcut shortcut)
         {
             if (commandShortcut == null)
@@ -433,8 +440,7 @@ namespace ShootRunner
             return false;
         }
 
-        
-
+        // COMMAND
         private bool RunCommand(Command command)
         {
             if (command.open != null && command.open != "")
@@ -475,20 +481,7 @@ namespace ShootRunner
             return false;
         }
 
-        private void timer1_Tick(object sender, EventArgs e)
-        {
-            if (File.Exists(Program.commandFielPath))
-            {
-                DateTime currentModificationTime = File.GetLastWriteTime(Program.commandFielPath);
-                if (Program.commandFielPathLastChange != currentModificationTime)
-                {
-                    Program.loadCommands();
-                }
-            }
-        }
-
-
-
+        //AUTORUN
         public bool IsAutoRunSet(string appName, string appPath)
         {
             RegistryKey registryKey = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run", true);
@@ -507,6 +500,7 @@ namespace ShootRunner
             return isSet;
         }
 
+        //AUTORUN
         public void SetAutoRun(string appName, string appPath)
         {
             RegistryKey registryKey = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run", true);
@@ -520,6 +514,7 @@ namespace ShootRunner
             registryKey.Close();
         }
 
+        //AUTORUN
         public void RemoveAutoRun(string appName)
         {
             RegistryKey registryKey = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run", true);
@@ -537,6 +532,54 @@ namespace ShootRunner
             registryKey.Close();
         }
 
+        // FILE WATCH
+        private void RegisterCommandFileWatch() {
+            if (watcher != null) {
+                return;
+            }
+                        
+
+            try
+            {
+
+                watcher = new FileSystemWatcher();
+                watcher.Path = Program.configPath;
+                watcher.Filter = Program.commandFielName;
+                watcher.NotifyFilter = NotifyFilters.LastWrite;
+                watcher.Changed += OnChanged;
+                watcher.Created += OnChanged;
+                watcher.Deleted += OnChanged;
+                watcher.EnableRaisingEvents = true;
+            }
+            catch (Exception ex)
+            {
+
+                Program.log("FILE WATCH:" + ex.Message);
+            }
+            
+
+        }
+
+        // FILE WATCH
+        private static void OnChanged(object source, FileSystemEventArgs e)
+        {
+            if (File.Exists(Program.commandFielPath))
+            {
+                DateTime currentModificationTime = File.GetLastWriteTime(Program.commandFielPath);
+                if (Program.commandFielPathLastChange != currentModificationTime)
+                {
+                    Program.loadCommands();
+                }
+            }
+        }
+
+        // TIMER
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+           
+        }
+
+        //POPUP
         private void optionsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (this.IsAutoRunSet(Program.AppName, Application.ExecutablePath)) {
@@ -545,6 +588,7 @@ namespace ShootRunner
             autorunToolStripMenuItem.Checked = Program.autorun;
         }
 
+        //POPUP
         private void autorunToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Program.autorun = !Program.autorun;
@@ -557,6 +601,25 @@ namespace ShootRunner
                 this.RemoveAutoRun(Program.AppName);
 
             }
+        }
+
+        //POPUP
+        private void commandsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                Process.Start(new ProcessStartInfo(Program.commandFielPath) { UseShellExecute = true });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("An error occurred: " + ex.Message);
+            }
+        }
+
+        // POPUP
+        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Application.Exit();
         }
     }
 }
