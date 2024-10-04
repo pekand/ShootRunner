@@ -22,6 +22,7 @@ namespace ShootRunner
         public static string roamingAppDataPath = "";
         public static string directoryName = "";
         public static string configPath = "";
+        public static string errorLogPath = "";
         public static string configFielPath = "";
         public static string commandFielPath = "";
         public static string commandFielName = "commands.xml";
@@ -39,6 +40,17 @@ namespace ShootRunner
                 Console.WriteLine(unixTime + " " + message);
             }
 #endif
+        }
+
+        public static void error(string message)
+        {
+            string filePath = "application.log";
+            string unixTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+            using (StreamWriter sw = new StreamWriter(Program.errorLogPath, true))
+            {
+                sw.WriteLine(unixTime + " " + message);
+                Console.WriteLine(unixTime + " " + message);
+            }
         }
 
         public static void loadCommands()
@@ -66,13 +78,16 @@ namespace ShootRunner
                             newCommand.command = commandElement.Element("command")?.Value;
                             newCommand.parameters = commandElement.Element("parameters")?.Value;
                             newCommand.window = commandElement.Element("window")?.Value;
+                            newCommand.workdir = commandElement.Element("workdir")?.Value;
+                            newCommand.keypress = commandElement.Element("keypress")?.Value;
+                            newCommand.action = commandElement.Element("action")?.Value;
                         }
                     }
                     catch (Exception ex)
                     {
                         error = true;
                         Thread.Sleep(50);
-                        Program.log("An error occurred: " + ex.Message);
+                        Program.error(ex.Message);
                     }
 
                     attemps--;
@@ -89,6 +104,7 @@ namespace ShootRunner
             Program.configPath = Path.Combine(Program.roamingAppDataPath, Program.directoryName);
             Program.configFielPath = Path.Combine(Program.configPath, "config.xml");
             Program.commandFielPath = Path.Combine(Program.configPath, Program.commandFielName);
+            Program.errorLogPath = Path.Combine(Program.configPath, "error.log");
 
             if (File.Exists(configFielPath)) {
                 XmlDocument xmlDoc = new XmlDocument();

@@ -13,5 +13,8 @@ namespace ShootRunner
         public string command = "";
         public string parameters = "";
         public string window = "";
+        public string workdir = "";
+        public string keypress = "";
+        public string action = "";
     }
 }
