@@ -17,6 +17,8 @@ namespace ShootRunner
 {
     public partial class FormShootRunner : Form
     {
+        
+
         // HOOK
         [DllImport("user32.dll", CharSet = CharSet.Auto, ExactSpelling = true, CallingConvention = CallingConvention.Winapi)]
         public static extern short GetKeyState(int keyCode);
@@ -45,6 +47,7 @@ namespace ShootRunner
         private const int WM_KEYUP = 0x0101;
         private const int VK_LWIN = 0x5B;
         private const int VK_RWIN = 0x5C;
+        private const int VK_APPS = 0x5D;
         private static IntPtr _hookID = IntPtr.Zero;
         private delegate IntPtr LowLevelKeyboardProc(int nCode, IntPtr wParam, IntPtr lParam);
         private static LowLevelKeyboardProc _proc = HookCallback;
@@ -81,65 +84,133 @@ namespace ShootRunner
         // HOOK
         private static IntPtr HookCallback(int nCode, IntPtr wParam, IntPtr lParam)
         {
+            if (Program.pause) {
+                return CallNextHookEx(_hookID, nCode, wParam, lParam);
+            }
+
             if (nCode >= 0 && (wParam == (IntPtr)WM_KEYDOWN || wParam == (IntPtr)WM_SYSKEYDOWN))
             {
+                Program.tick = 0;
+
                 int vkCode = Marshal.ReadInt32(lParam);
                 Keys key = (Keys)vkCode;
 
                 Keys ModifierKeys = Control.ModifierKeys;
 
-                Shortcut shortcut = new Shortcut();
-                shortcut.ctrl = (ModifierKeys & Keys.Control) == Keys.Control;
-                shortcut.alt = (ModifierKeys & Keys.Alt) == Keys.Alt;
-                shortcut.shift = (ModifierKeys & Keys.Shift) == Keys.Shift;
-                shortcut.apps = (ModifierKeys & Keys.Apps) == Keys.Apps;
-                shortcut.lwin = IsLWinPressed();
-                shortcut.rwin = IsRWinPressed();
-                shortcut.win = shortcut.lwin || shortcut.rwin;
-                shortcut.key = key.ToString();
 
-                Program.log("KeyDOWN"+
-                    " CTRL=" + (shortcut.ctrl ? "1" : "0") +
-                    " ALT=" + (shortcut.alt ? "1" : "0") +
-                    " SHIFT=" + (shortcut.shift ? "1" : "0") +
-                    " LWIN=" +(shortcut.lwin ? "1":"0") + 
-                    " RWIN=" + (shortcut.rwin ? "1" : "0") +
-                    " win=" + (shortcut.win ? "1" : "0") +
-                    " APPS=" + (shortcut.apps ? "1" : "0") +
-                    " key=" + shortcut.key
-                 );
+                Program.shortcut.key = key.ToString();
+                switch (Program.shortcut.key)
+                {
+                    case "LControlKey":
+                        Program.shortcut.ctrl = true;
+                        break;
+                    case "RControlKey":
+                        Program.shortcut.ctrl = true;
+                        break;
+                    case "LMenu":
+                        Program.shortcut.alt = true;
+                        break;
+                    case "RMenu":
+                        Program.shortcut.alt = true;
+                        break;
+                    case "LShiftKey":
+                        Program.shortcut.shift = true;
+                        break;
+                    case "RShiftKey":
+                        Program.shortcut.shift = true;
+                        break;
+                    case "LWin":
+                        Program.shortcut.win = true;
+                        break;
+                    case "RWin":
+                        Program.shortcut.win = true;
+                        break;
+                    case "Apps":
+                        Program.shortcut.apps = true;
+                        break;
+                }
 
-                if (Program.formShootRunner.RunScript(shortcut)) {
+                Program.log("KeyDOWN" +
+                   " CTRL=" + (Program.shortcut.ctrl ? "1" : "0") +
+                   " ALT=" + (Program.shortcut.alt ? "1" : "0") +
+                   " SHIFT=" + (Program.shortcut.shift ? "1" : "0") +
+                   " LWIN=" + (Program.shortcut.lwin ? "1" : "0") +
+                   " RWIN=" + (Program.shortcut.rwin ? "1" : "0") +
+                   " win=" + (Program.shortcut.win ? "1" : "0") +
+                   " APPS=" + (Program.shortcut.apps ? "1" : "0") +
+                   " key=" + Program.shortcut.key
+                );
+
+
+                if (Program.formShootRunner.RunScript(Program.shortcut))
+                {
                     return (IntPtr)1;
                 }
-                
+
+                return CallNextHookEx(_hookID, nCode, wParam, lParam);
             }
 
             if (nCode >= 0 && wParam == (IntPtr)WM_KEYUP)
             {
+                Program.tick = 0;
+
                 int vkCode = Marshal.ReadInt32(lParam);
                 Keys key = (Keys)vkCode;
 
-                Shortcut shortcut = new Shortcut();
-                shortcut.ctrl = (ModifierKeys & Keys.Control) == Keys.Control;
-                shortcut.alt = (ModifierKeys & Keys.Alt) == Keys.Alt;
-                shortcut.shift = (ModifierKeys & Keys.Shift) == Keys.Shift;
-                shortcut.apps = (ModifierKeys & Keys.Apps) == Keys.Apps;
-                shortcut.lwin = IsLWinPressed();
-                shortcut.rwin = IsRWinPressed();
-                shortcut.win = shortcut.lwin || shortcut.rwin;
-                shortcut.key = key.ToString();
+                bool isShortcut = false;
+                if (Program.formShootRunner.TestRunScript(Program.shortcut))
+                {
+                    isShortcut = true;
+                }
 
-                Program.log("KeyDOWN" +
-                    " CTRL=" + (shortcut.ctrl ? "1" : "0") +
-                    " ALT=" + (shortcut.alt ? "1" : "0") +
-                    " SHIFT=" + (shortcut.shift ? "1" : "0") +
-                    " LWIN=" + (shortcut.lwin ? "1" : "0") +
-                    " RWIN=" + (shortcut.rwin ? "1" : "0") +
-                    " win=" + (shortcut.win ? "1" : "0") +
-                    " APPS=" + (shortcut.apps ? "1" : "0") +
-                    " key=" + shortcut.key
-                 );
+                Program.shortcut.key = key.ToString();
+                switch (Program.shortcut.key)
+                {
+                    case "LControlKey":
+                        Program.shortcut.ctrl = false;
+                        break;
+                    case "RControlKey":
+                        Program.shortcut.ctrl = false;
+                        break;
+                    case "LMenu":
+                        Program.shortcut.alt = false;
+                        break;
+                    case "RMenu":
+                        Program.shortcut.alt = false;
+                        break;
+                    case "LShiftKey":
+                        Program.shortcut.shift = false;
+                        break;
+                    case "RShiftKey":
+                        Program.shortcut.shift = false;
+                        break;
+                    case "LWin":
+                        Program.shortcut.win = false;
+                        break;
+                    case "RWin":
+                        Program.shortcut.win = false;
+                        break;
+                    case "Apps":
+                        Program.shortcut.apps = false;
+                        break;
+                }
+
+                Program.log("KeyUP" +
+                   " CTRL=" + (Program.shortcut.ctrl ? "1" : "0") +
+                   " ALT=" + (Program.shortcut.alt ? "1" : "0") +
+                   " SHIFT=" + (Program.shortcut.shift ? "1" : "0") +
+                   " LWIN=" + (Program.shortcut.lwin ? "1" : "0") +
+                   " RWIN=" + (Program.shortcut.rwin ? "1" : "0") +
+                   " win=" + (Program.shortcut.win ? "1" : "0") +
+                   " APPS=" + (Program.shortcut.apps ? "1" : "0") +
+                   " key=" + Program.shortcut.key
+                );
+
+                // prevent Menu key to show context menu
+                if (Program.shortcut.key == "Apps")
+                {
+                    return (IntPtr)1;
+                }
             }
 
             return CallNextHookEx(_hookID, nCode, wParam, lParam);
@@ -162,7 +233,29 @@ namespace ShootRunner
         {            
             return (GetKeyState(VK_LWIN) & 0x8000) != 0;
         }
-       
+
+        // SHORCUT APPS
+        private static bool IsAppsPressed()
+        {
+            return (GetKeyState(VK_APPS) & 0x8000) != 0;
+        }
+
+        // COMMAND
+        private bool TestRunScript(Shortcut shortcut)
+        {
+
+            foreach (var command in Program.commands)
+            {
+                if (this.ParseShortcut(command.shortcut, shortcut))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+
         // COMMAND
         private bool  RunScript(Shortcut shortcut)
         {
@@ -195,6 +288,7 @@ namespace ShootRunner
             bool ctrl = false;
             bool alt = false;
             bool shift = false;
+            bool apps = false;
             string key = null;
 
             foreach (string value in keys)
@@ -219,7 +313,9 @@ namespace ShootRunner
                     case "RWIN":
                         win = true;
                         break;
-
+                    case "APPS":
+                        apps = true;
+                        break;
                     default:
                         key = value.ToUpper();
                         break;
@@ -230,6 +326,7 @@ namespace ShootRunner
                 ((shortcut.alt && alt) || (!shortcut.alt && !alt)) &&
                 ((shortcut.shift && shift) || (!shortcut.shift && !shift)) &&
                 ((shortcut.win && win) || (!shortcut.win && !win)) &&
+                ((shortcut.apps && apps) || (!shortcut.apps && !apps)) &&
                 shortcut.key.ToUpper() == key)
             {
                 return true;
@@ -378,7 +475,18 @@ namespace ShootRunner
         // TIMER
         private void timer1_Tick(object sender, EventArgs e)
         {
-           
+            Program.tick = Program.tick + 1;
+            if (Program.tick > 10) {
+                Program.shortcut.ctrl = false;
+                Program.shortcut.alt = false;
+                Program.shortcut.shift = false;
+                Program.shortcut.lwin = false;
+                Program.shortcut.rwin = false;
+                Program.shortcut.win = false;                
+                Program.shortcut.apps = false;
+                Program.shortcut.key = "";
+                Program.tick = 0;
+            }
         }
 
         //POPUP

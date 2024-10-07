@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
 using System.Xml.Linq;
+using Microsoft.Win32;
 
 namespace ShootRunner
 {
@@ -29,6 +30,11 @@ namespace ShootRunner
         public static DateTime commandFielPathLastChange;
 
         public static bool autorun = false;
+
+        public static Shortcut shortcut = new Shortcut();
+        public static int tick = 0;
+
+        public static bool pause = false;
 
         public static void log(string message) {
 #if DEBUG
@@ -95,9 +101,48 @@ namespace ShootRunner
             }
         }
         
+        private static Mutex mutex = null;
+
+        public static bool ChecKDuplicateRun(){
+            bool createdNew;
+
+            // Create a mutex to ensure only one instance of the application is running
+            mutex = new Mutex(true, Program.AppName, out createdNew);
+
+            if (!createdNew)
+            {                
+                return true; // Exit the application
+            }
+            return false;
+        }
+
+
+        // EVENT LOCKPC
+        public static void SystemEvents_SessionSwitch(object sender, SessionSwitchEventArgs e)
+        {
+            if (e.Reason == SessionSwitchReason.SessionLock)
+            {
+                Program.pause = true;
+            }
+            else if (e.Reason == SessionSwitchReason.SessionUnlock)
+            {
+                Program.pause = false;
+            }
+        }
+
+
         [STAThread]
         static void Main()
         {
+            if (ChecKDuplicateRun()){
+                MessageBox.Show("Another instance of the application is already running.", "Application Already Running", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            SystemEvents.SessionSwitch += new SessionSwitchEventHandler(SystemEvents_SessionSwitch);
+            SystemEvents.SessionSwitch -= new SessionSwitchEventHandler(SystemEvents_SessionSwitch);
+
+
             Program.log("Start");
             Program.roamingAppDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
             Program.directoryName = "ShootRunner";
