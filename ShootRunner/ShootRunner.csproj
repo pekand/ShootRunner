@@ -70,6 +70,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Command.cs" />
+    <Compile Include="FormPin.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormPin.Designer.cs">
+      <DependentUpon>FormPin.cs</DependentUpon>
+    </Compile>
     <Compile Include="FormShootRunner.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -90,6 +96,9 @@
     <Compile Include="Task.cs" />
     <Compile Include="ToolsWindow.cs" />
     <Compile Include="Window.cs" />
+    <EmbeddedResource Include="FormPin.resx">
+      <DependentUpon>FormPin.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="FormShootRunner.resx">
       <DependentUpon>FormShootRunner.cs</DependentUpon>
     </EmbeddedResource>

@@ -12,6 +12,7 @@ using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using System.IO;
 using Microsoft.Win32;
+using System.Net.NetworkInformation;
 
 namespace ShootRunner
 {
@@ -333,9 +334,28 @@ namespace ShootRunner
             return false;
         }
 
+        // PIN
+        private void CreatPin()
+        {
+            Window window = ToolsWindow.GetCurrentWindow();
+
+            if (window.Handle != IntPtr.Zero) {
+                FormPin pin = new FormPin(window);
+                pin.Show();
+                Program.pins.Add(pin);
+            }
+            
+        }
+
         // COMMAND
         private bool RunCommand(Command command)
         {
+            if (command.action == "CreatePin")
+            {
+                this.CreatPin();
+                return true;
+            }
+            else
             if (command.action == "LockPc") {
                 SystemTools.LockPc();
                 return true;

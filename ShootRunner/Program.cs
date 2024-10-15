@@ -35,6 +35,8 @@ namespace ShootRunner
 
         public static bool pause = false;
 
+        public static List<FormPin> pins = new List<FormPin>();
+
         public static void ClearBigLog()
         {
 
