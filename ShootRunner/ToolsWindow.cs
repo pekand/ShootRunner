@@ -81,7 +81,7 @@ namespace ShootRunner
                 StringBuilder windowText = new StringBuilder(256);
                 GetWindowText(hWnd, windowText, windowText.Capacity);
 
-                Program.log(windowText.ToString());
+                Program.debug(windowText.ToString());
 
                 if (windowText.ToString().ToUpper().Contains(partialName.ToUpper()))
                 {
@@ -92,6 +92,19 @@ namespace ShootRunner
             }, IntPtr.Zero);
 
             return foundWindow;
+        }
+
+        public static Window GetCurrentWindow()
+        {
+            Window window = new Window();
+
+            IntPtr activeWindowHandle = GetForegroundWindow();
+            window.Handle = activeWindowHandle;
+            StringBuilder windowTitle = new StringBuilder(256);
+            GetWindowText(activeWindowHandle, windowTitle, windowTitle.Capacity);            
+            window.Title = windowTitle.ToString();
+            
+            return window;
         }
     }
 }

@@ -27,7 +27,7 @@ namespace ShootRunner
             }
             catch (Exception ex)
             {
-                Program.log("An error occurred: " + ex.Message);
+                Program.debug("An error occurred: " + ex.Message);
             }
         }
 
@@ -39,8 +39,31 @@ namespace ShootRunner
             }
             catch (Exception ex)
             {
-                Program.log("An error occurred: " + ex.Message);
+                Program.debug("An error occurred: " + ex.Message);
             }
+        }
+
+        public static List<Process> FindProcess(string path)
+        {
+            List<Process> list = new List<Process>();
+
+            var processes = Process.GetProcesses();
+
+           foreach ( var process in processes )
+            {
+                try
+                {
+                    if (process.MainModule.FileName.Equals(path, StringComparison.OrdinalIgnoreCase)) { 
+                        list.Add(process);
+                    }
+                }
+                catch (Exception)
+                {
+                    
+                }
+            }
+
+            return list;
         }
     }
 }

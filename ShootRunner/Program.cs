@@ -21,7 +21,6 @@ namespace ShootRunner
         public static FormShootRunner formShootRunner = null;
 
         public static string roamingAppDataPath = "";
-        public static string directoryName = "";
         public static string configPath = "";
         public static string errorLogPath = "";
         public static string configFielPath = "";
@@ -36,11 +35,22 @@ namespace ShootRunner
 
         public static bool pause = false;
 
-        public static void log(string message) {
+        public static void ClearBigLog()
+        {
+
+            FileInfo fileInfo = new FileInfo(errorLogPath);
+            long maxFileSize = 10 * 1024 * 1024;
+
+            if (fileInfo.Exists && fileInfo.Length > maxFileSize)
+            {
+                fileInfo.Delete(); // CLEAR 10MB LOG
+            }
+        }
+
+        public static void debug(string message) {
 #if DEBUG
-            string filePath = "application.log";
             string unixTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
-            using (StreamWriter sw = new StreamWriter(filePath, true))
+            using (StreamWriter sw = new StreamWriter(errorLogPath, true))
             {
                 sw.WriteLine(unixTime + " " + message);
                 Console.WriteLine(unixTime + " " + message);
@@ -50,7 +60,6 @@ namespace ShootRunner
 
         public static void error(string message)
         {
-            string filePath = "application.log";
             string unixTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
             using (StreamWriter sw = new StreamWriter(Program.errorLogPath, true))
             {
@@ -61,7 +70,12 @@ namespace ShootRunner
 
         public static void loadCommands()
         {
-            if (File.Exists(Program.commandFielPath))
+            if (!File.Exists(Program.commandFielPath))
+            {
+                return;
+            }
+
+            try
             {
                 int attemps = 10;
                 bool error = false;
@@ -79,14 +93,17 @@ namespace ShootRunner
                             Command newCommand = new Command();
                             Program.commands.Add(newCommand);
 
+                            newCommand.enabled = commandElement.Element("enabled")?.Value == "1" ? true : false;
                             newCommand.shortcut = commandElement.Element("shortcut")?.Value;
                             newCommand.open = commandElement.Element("open")?.Value;
                             newCommand.command = commandElement.Element("command")?.Value;
                             newCommand.parameters = commandElement.Element("parameters")?.Value;
                             newCommand.window = commandElement.Element("window")?.Value;
+                            newCommand.currentwindow = commandElement.Element("currentwindow")?.Value;
                             newCommand.workdir = commandElement.Element("workdir")?.Value;
                             newCommand.keypress = commandElement.Element("keypress")?.Value;
                             newCommand.action = commandElement.Element("action")?.Value;
+                            newCommand.process = commandElement.Element("process")?.Value;
                         }
                     }
                     catch (Exception ex)
@@ -99,6 +116,11 @@ namespace ShootRunner
                     attemps--;
                 } while (error && attemps > 0);
             }
+            catch (Exception ex)
+            {
+                Program.error(ex.Message);
+            }
+
         }
         
         private static Mutex mutex = null;
@@ -130,50 +152,68 @@ namespace ShootRunner
             }
         }
 
+        public static FormShortcut shortcutForm = null;
 
-        [STAThread]
-        static void Main()
+        public static void ShowShortcutForm() {
+            if (shortcutForm == null)
+            {
+                Program.shortcutForm = new FormShortcut();
+            }
+            Program.shortcutForm.Show();
+        }
+
+        public static void ShowShortcutInShortcutForm(Shortcut shortcut)
         {
-            if (ChecKDuplicateRun()){
-                MessageBox.Show("Another instance of the application is already running.", "Application Already Running", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            if (shortcutForm == null)
+            {
                 return;
             }
 
-            SystemEvents.SessionSwitch += new SessionSwitchEventHandler(SystemEvents_SessionSwitch);
-            SystemEvents.SessionSwitch -= new SessionSwitchEventHandler(SystemEvents_SessionSwitch);
+            Program.shortcutForm.label1.Text = 
+                (shortcut.win ? "WIN+" : "") +
+                (shortcut.ctrl ? "CTRL+" : "") +
+                (shortcut.alt ? "ALT+" : "") +
+                (shortcut.shift ? "SHIFT+" : "") +
+                (shortcut.apps ? "APPS+" : "") +
+                (shortcut.key);
+        }
 
+        public static void CloseShortcutForm()
+        {
+            if (shortcutForm != null)
+            {
+                Program.shortcutForm = null;
+            }            
+        }
 
-            Program.log("Start");
-            Program.roamingAppDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            Program.directoryName = "ShootRunner";
-            Program.configPath = Path.Combine(Program.roamingAppDataPath, Program.directoryName);
-            Program.configFielPath = Path.Combine(Program.configPath, "config.xml");
-            Program.commandFielPath = Path.Combine(Program.configPath, Program.commandFielName);
-            Program.errorLogPath = Path.Combine(Program.configPath, "error.log");
-
-            if (File.Exists(configFielPath)) {
-                XmlDocument xmlDoc = new XmlDocument();
-                xmlDoc.Load(configFielPath);
-                XmlNodeList nodes = xmlDoc.DocumentElement.SelectNodes("/root/autorun");
-                foreach (XmlNode node in nodes)
-                {                    
-                    Program.autorun = node.InnerText == "1";
+        public static void LoadConfig()
+        {
+            if (File.Exists(configFielPath))
+            {
+                try
+                {
+                    XmlDocument xmlDoc = new XmlDocument();
+                    xmlDoc.Load(configFielPath);
+                    XmlNodeList nodes = xmlDoc.DocumentElement.SelectNodes("/root/autorun");
+                    foreach (XmlNode node in nodes)
+                    {
+                        Program.autorun = node.InnerText == "1";
+                    }
+                } catch(Exception ex) {
+                    Program.error(ex.Message);
                 }
             }
+        }
 
-            Program.loadCommands();
+        public static void SaveConfig()
+        {
+            if (!Directory.Exists(configPath))
+            {
+                Directory.CreateDirectory(configPath);
+            }
 
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            formShootRunner = new FormShootRunner();
-            Application.Run(formShootRunner);
-
-            if (true) {
-                if (!Directory.Exists(configPath))
-                {
-                    Directory.CreateDirectory(configPath);
-                }
-
+            try
+            {
                 XmlDocument xmlDoc = new XmlDocument();
                 XmlElement root = xmlDoc.CreateElement("root");
                 xmlDoc.AppendChild(root);
@@ -182,8 +222,50 @@ namespace ShootRunner
                 root.AppendChild(element);
                 xmlDoc.Save(configFielPath);
             }
+            catch (Exception ex)
+            {
+                Program.error(ex.Message);
+            }
+        }
 
-            Program.log("End");
+
+        [STAThread]
+        static void Main()
+        {
+            if (ChecKDuplicateRun()){
+                MessageBox.Show("Another instance of the application is already running.", "Application Already Running", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+            
+            Program.roamingAppDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            Program.configPath = Path.Combine(Program.roamingAppDataPath, Program.AppName);
+            if (!Directory.Exists(configPath))
+            {
+                Directory.CreateDirectory(configPath);
+            }
+            Program.configFielPath = Path.Combine(Program.configPath, "config.xml");
+            Program.commandFielPath = Path.Combine(Program.configPath, Program.commandFielName);
+            Program.errorLogPath = Path.Combine(Program.configPath, "error.log");
+            
+            ClearBigLog();
+
+            Program.debug("Start");
+
+            SystemEvents.SessionSwitch += new SessionSwitchEventHandler(SystemEvents_SessionSwitch);
+            SystemEvents.SessionSwitch -= new SessionSwitchEventHandler(SystemEvents_SessionSwitch);
+
+            LoadConfig();
+
+            Program.loadCommands();
+
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+            formShootRunner = new FormShootRunner();
+            Application.Run(formShootRunner);
+
+            SaveConfig();
+
+            Program.debug("End");
         }
     }
 }

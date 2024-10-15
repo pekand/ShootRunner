@@ -130,7 +130,7 @@ namespace ShootRunner
                         break;
                 }
 
-                Program.log("KeyDOWN" +
+                Program.debug("KeyDOWN" +
                    " CTRL=" + (Program.shortcut.ctrl ? "1" : "0") +
                    " ALT=" + (Program.shortcut.alt ? "1" : "0") +
                    " SHIFT=" + (Program.shortcut.shift ? "1" : "0") +
@@ -141,6 +141,9 @@ namespace ShootRunner
                    " key=" + Program.shortcut.key
                 );
 
+                if (Program.shortcutForm != null) {
+                    Program.ShowShortcutInShortcutForm(Program.shortcut);
+                }
 
                 if (Program.formShootRunner.RunScript(Program.shortcut))
                 {
@@ -156,12 +159,6 @@ namespace ShootRunner
 
                 int vkCode = Marshal.ReadInt32(lParam);
                 Keys key = (Keys)vkCode;
-
-                bool isShortcut = false;
-                if (Program.formShootRunner.TestRunScript(Program.shortcut))
-                {
-                    isShortcut = true;
-                }
 
                 Program.shortcut.key = key.ToString();
                 switch (Program.shortcut.key)
@@ -195,7 +192,7 @@ namespace ShootRunner
                         break;
                 }
 
-                Program.log("KeyUP" +
+                Program.debug("KeyUP" +
                    " CTRL=" + (Program.shortcut.ctrl ? "1" : "0") +
                    " ALT=" + (Program.shortcut.alt ? "1" : "0") +
                    " SHIFT=" + (Program.shortcut.shift ? "1" : "0") +
@@ -255,21 +252,22 @@ namespace ShootRunner
             return false;
         }
 
-
         // COMMAND
         private bool  RunScript(Shortcut shortcut)
         {
-
+            bool foundOne = false;
             foreach (var command in Program.commands)
             {
-                if (this.ParseShortcut(command.shortcut, shortcut))
+                if (command.enabled && this.ParseShortcut(command.shortcut, shortcut))
                 {
-                    this.RunCommand(command);
-                    return true;
+                    bool executed = this.RunCommand(command);
+                    if (executed) {
+                        foundOne = true; 
+                    }
                 }
             }
 
-            return false;
+            return foundOne;
         }
 
         // SHORTCUT
@@ -346,20 +344,43 @@ namespace ShootRunner
                 SystemTools.ShowDesktop();
                 return true;
             }
-            else if (command.keypress != null && command.keypress != "")
+            else if (command.keypress != null && command.keypress != "") // SIMULATE KEYPRESS
             {
-                Keyboard.KeyPress2(command.keypress);
+                if (command.currentwindow != null)
+                {
+                    Window window = ToolsWindow.GetCurrentWindow();
+                    Program.debug(window.Title);
+                    if (window.Title.Contains(command.currentwindow))
+                    {
+                        // Keyboard.SandKeyPressToWindow(command.keypress, window.Handle);
+                        Keyboard.KeyPress2(command.keypress);
+                        return true;
+                    }
+                }
+                else
+                {
+                    if (command.process != null)
+                    {
+                        Keyboard.SandKeyPressToProcess(command.keypress, command.process);
+                        return true;
+                    }
+                    else
+                    {
+                        Keyboard.KeyPress2(command.keypress);
+                        return true;
+                    }
+                }
 
-            } else if (command.window != null && command.window != "")
+            } else if (command.window != null && command.window != "") // BRING WINDOW TO FRONT
             {
                 bool found = ToolsWindow.BringToFront(command.window);
                 if (!found) {
-                    if (command.open != null && command.open != "")
+                    if (command.open != null && command.open != "") // OPEN IF NOT FOUND
                     {
                         Task.OpenFileInSystem(command.open);
                         return true;
                     }
-                    else if (command.command != null && command.command != "")
+                    else if (command.command != null && command.command != "") // OPEN IF NOT FOUND
                     {
                         Task.RunCommand(command.command, command.parameters, command.workdir);
                         return true;
@@ -367,11 +388,11 @@ namespace ShootRunner
                 }
 
                 return found;
-            } else if (command.open != null && command.open != "")
+            } else if (command.open != null && command.open != "") // OPEN URL OR DOCUMENT
             {
                 Task.OpenFileInSystem(command.open);
                 return true;
-            } else if (command.command != null && command.command != "") {
+            } else if (command.command != null && command.command != "") { // RUN PROCESS WITH PARAMETERS
                 Task.RunCommand(command.command, command.parameters, command.workdir);
                 return true;
             } 
@@ -453,7 +474,7 @@ namespace ShootRunner
             catch (Exception ex)
             {
 
-                Program.log("FILE WATCH:" + ex.Message);
+                Program.debug("FILE WATCH:" + ex.Message);
             }
             
 
@@ -489,13 +510,46 @@ namespace ShootRunner
             }
         }
 
-        //POPUP
+        // POPUP OPEN
+        private void contextMenuStrip1_Opening(object sender, CancelEventArgs e)
+        {
+            Program.autorun = this.IsAutoRunSet(Program.AppName, Application.ExecutablePath);
+            autorunToolStripMenuItem.Checked = Program.autorun;
+        }
+
+        //POPUP COMMANDS
+        private void commandsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                Process.Start(new ProcessStartInfo(Program.commandFielPath) { UseShellExecute = true });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("An error occurred: " + ex.Message);
+            }
+        }
+
+        // POPUP ERRORLOG
+        private void errorLogToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                Process.Start(new ProcessStartInfo(Program.errorLogPath) { UseShellExecute = true });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("An error occurred: " + ex.Message);
+            }
+        }
+
+        //POPUP OPTIONS
         private void optionsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             
         }
 
-        //POPUP
+        //POPUP AUTORUN
         private void autorunToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (this.IsAutoRunSet(Program.AppName, Application.ExecutablePath))
@@ -512,42 +566,23 @@ namespace ShootRunner
             autorunToolStripMenuItem.Checked = Program.autorun;
         }
 
-        //POPUP
-        private void commandsToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                Process.Start(new ProcessStartInfo(Program.commandFielPath) { UseShellExecute = true });
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("An error occurred: " + ex.Message);
-            }
-        }
-
-        // POPUP
+        // POPUP EXIT
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Application.Exit();
         }
 
-        private void contextMenuStrip1_Opening(object sender, CancelEventArgs e)
+        // POPUP SHORTCUTFORM
+        private void shortcutFormToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Program.autorun = this.IsAutoRunSet(Program.AppName, Application.ExecutablePath);            
-            autorunToolStripMenuItem.Checked = Program.autorun;
+            Program.ShowShortcutForm();
+
         }
 
-        // POPUP
-        private void errorLogToolStripMenuItem_Click(object sender, EventArgs e)
+        // EVENT CLOSED
+        private void FormShootRunner_FormClosed(object sender, FormClosedEventArgs e)
         {
-            try
-            {
-                Process.Start(new ProcessStartInfo(Program.errorLogPath) { UseShellExecute = true });
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("An error occurred: " + ex.Message);
-            }
+
         }
     }
 }
