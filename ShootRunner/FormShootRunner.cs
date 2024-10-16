@@ -355,6 +355,11 @@ namespace ShootRunner
                 this.CreatPin();
                 return true;
             }
+            else if (command.action == "cascade")
+            {
+                ToolsWindow.CascadeWindows();
+                return true;
+            }
             else
             if (command.action == "LockPc") {
                 SystemTools.LockPc();

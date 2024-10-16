@@ -294,5 +294,53 @@ namespace ShootRunner
             return false;
         }
 
+
+
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern bool IsWindowVisible(IntPtr hWnd);
+
+
+
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
+
+        private const uint SWP_NOZORDER = 0x0004;
+        private const uint SWP_NOSIZE = 0x0001;
+
+
+        public static void CascadeWindows(int offsetX = 100, int offsetY = 100)
+        {
+            List<IntPtr> windowHandles = new List<IntPtr>();
+
+            // EnumWindows callback function to collect window handles
+            EnumWindows((hWnd, lParam) =>
+            {
+                if (IsWindowVisible(hWnd))
+                {
+                    System.Text.StringBuilder windowText = new System.Text.StringBuilder(256);
+                    GetWindowText(hWnd, windowText, windowText.Capacity);
+
+                    if (!string.IsNullOrWhiteSpace(windowText.ToString())) // Filter empty window titles
+                    {
+                        windowHandles.Add(hWnd);
+                    }
+                }
+                return true; // Continue enumeration
+            }, IntPtr.Zero);
+
+            // Cascade the windows
+            int x = 0, y = 0;
+            foreach (IntPtr hWnd in windowHandles)
+            {
+                SetWindowPos(hWnd, IntPtr.Zero, x, y, 600, 600, SWP_NOZORDER);
+                x += offsetX;
+                y += offsetY;
+            }
+        }
+
+
     }
+
+    
+
 }
