@@ -15,5 +15,6 @@ namespace ShootRunner
         public string app = null;
         public Icon icon = null;
         public bool isDesktop = false;
+        public bool isTaskbar = false;
     }
 }

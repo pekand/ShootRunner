@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using System.Windows.Forms;
 using System.IO;
 using Microsoft.Win32;
 using System.Net.NetworkInformation;
@@ -282,8 +281,6 @@ namespace ShootRunner
             string[] keys = commandShortcut.Split('+');
 
             bool win = false;
-            bool lwin = false;
-            bool rwin = false;
             bool ctrl = false;
             bool alt = false;
             bool shift = false;
@@ -346,11 +343,12 @@ namespace ShootRunner
             }
             
         }
+       
 
         // COMMAND
         private bool RunCommand(Command command)
         {
-            if (command.action == "CreatePin")
+            if(command.action == "CreatePin")
             {
                 this.CreatPin();
                 return true;
@@ -415,11 +413,38 @@ namespace ShootRunner
                 return found;
             } else if (command.open != null && command.open != "") // OPEN URL OR DOCUMENT
             {
-                Task.OpenFileInSystem(command.open);
-                return true;
+                if (command.currentwindow != null)
+                {
+                    Window window = ToolsWindow.GetCurrentWindow();
+                    Program.debug(window.Title);
+                    if (window.Title.Contains(command.currentwindow))
+                    {
+                        Task.RunCommand(command.command, command.parameters, command.workdir);
+                        return true;
+                    }
+                }
+                else
+                {
+                    Task.OpenFileInSystem(command.open);
+                    return true;
+                }
             } else if (command.command != null && command.command != "") { // RUN PROCESS WITH PARAMETERS
-                Task.RunCommand(command.command, command.parameters, command.workdir);
-                return true;
+                if (command.currentwindow != null)
+                {
+                    Window window = ToolsWindow.GetCurrentWindow();
+                    Program.debug(window.Title);
+                    if (window.Title.Contains(command.currentwindow))
+                    {
+                        Task.RunCommand(command.command, command.parameters, command.workdir);
+                        return true;
+                    }
+                }
+                else
+                {
+                    Task.RunCommand(command.command, command.parameters, command.workdir);
+                    return true;
+                }
+                
             } 
 
             return false;

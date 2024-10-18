@@ -141,6 +141,7 @@ namespace ShootRunner
                     window.icon = appIcon;
                 }
                 window.isDesktop = ToolsWindow.IsDesktopWindow(window);
+                window.isTaskbar = ToolsWindow.IsTaskbarWindow(window);
             }
             
             return window;
@@ -293,6 +294,15 @@ namespace ShootRunner
 
             return false;
         }
+
+        private static bool IsTaskbarWindow(Window window)
+        {
+            IntPtr foregroundWindow = GetForegroundWindow();
+            StringBuilder className = new StringBuilder(256);
+            GetClassName(window.Handle, className, className.Capacity);
+            return className.ToString() == "Shell_TrayWnd";  
+        }
+
 
 
 

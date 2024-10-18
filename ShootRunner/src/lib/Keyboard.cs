@@ -55,8 +55,6 @@ namespace ShootRunner
             string[] keys = commandShortcut.Split('+');
 
             bool win = false;
-            bool lwin = false;
-            bool rwin = false;
             bool ctrl = false;
             bool alt = false;
             bool shift = false;
@@ -124,8 +122,6 @@ namespace ShootRunner
             string[] keys = shortcut.Split('+');
 
             bool win = false;
-            bool lwin = false;
-            bool rwin = false;
             bool ctrl = false;
             bool alt = false;
             bool shift = false;
@@ -192,8 +188,6 @@ namespace ShootRunner
             string[] keys = shortcut.Split('+');
 
             bool win = false;
-            bool lwin = false;
-            bool rwin = false;
             bool ctrl = false;
             bool alt = false;
             bool shift = false;
@@ -271,8 +265,6 @@ namespace ShootRunner
             string[] keys = shortcut.Split('+');
 
             bool win = false;
-            bool lwin = false;
-            bool rwin = false;
             bool ctrl = false;
             bool alt = false;
             bool shift = false;

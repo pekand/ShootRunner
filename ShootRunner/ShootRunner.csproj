@@ -12,6 +12,8 @@
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -69,40 +71,40 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Command.cs" />
-    <Compile Include="FormPin.cs">
+    <Compile Include="src\models\Command.cs" />
+    <Compile Include="src\forms\FormPin.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FormPin.Designer.cs">
+    <Compile Include="src\forms\FormPin.Designer.cs">
       <DependentUpon>FormPin.cs</DependentUpon>
     </Compile>
-    <Compile Include="FormShootRunner.cs">
+    <Compile Include="src\forms\FormShootRunner.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FormShootRunner.Designer.cs">
+    <Compile Include="src\forms\FormShootRunner.Designer.cs">
       <DependentUpon>FormShootRunner.cs</DependentUpon>
     </Compile>
-    <Compile Include="FormShortcut.cs">
+    <Compile Include="src\forms\FormShortcut.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FormShortcut.Designer.cs">
+    <Compile Include="src\forms\FormShortcut.Designer.cs">
       <DependentUpon>FormShortcut.cs</DependentUpon>
     </Compile>
-    <Compile Include="Keyboard.cs" />
+    <Compile Include="src\lib\Keyboard.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Shortcut.cs" />
-    <Compile Include="SystemTools.cs" />
-    <Compile Include="Task.cs" />
-    <Compile Include="ToolsWindow.cs" />
-    <Compile Include="Window.cs" />
-    <EmbeddedResource Include="FormPin.resx">
+    <Compile Include="src\models\Shortcut.cs" />
+    <Compile Include="src\lib\SystemTools.cs" />
+    <Compile Include="src\lib\Task.cs" />
+    <Compile Include="src\lib\ToolsWindow.cs" />
+    <Compile Include="src\models\Window.cs" />
+    <EmbeddedResource Include="src\forms\FormPin.resx">
       <DependentUpon>FormPin.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="FormShootRunner.resx">
+    <EmbeddedResource Include="src\forms\FormShootRunner.resx">
       <DependentUpon>FormShootRunner.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="FormShortcut.resx">
+    <EmbeddedResource Include="src\forms\FormShortcut.resx">
       <DependentUpon>FormShortcut.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -141,5 +143,6 @@
       <EmbedInteropTypes>False</EmbedInteropTypes>
     </COMReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

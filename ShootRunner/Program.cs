@@ -49,6 +49,16 @@ namespace ShootRunner
             }
         }
 
+        public static bool isDebug()
+        {
+#if DEBUG
+            return true;
+#else
+            return false;
+#endif
+        }
+
+
         public static void debug(string message) {
 #if DEBUG
             string unixTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
@@ -130,12 +140,12 @@ namespace ShootRunner
         public static bool ChecKDuplicateRun(){
             bool createdNew;
 
-            // Create a mutex to ensure only one instance of the application is running
-            mutex = new Mutex(true, Program.AppName, out createdNew);
+            
+            mutex = new Mutex(true, (isDebug() ? "DEBUG.":"")+Program.AppName, out createdNew);
 
             if (!createdNew)
             {                
-                return true; // Exit the application
+                return true;
             }
             return false;
         }
@@ -231,6 +241,7 @@ namespace ShootRunner
         }
 
 
+
         [STAThread]
         static void Main()
         {
@@ -245,10 +256,26 @@ namespace ShootRunner
             {
                 Directory.CreateDirectory(configPath);
             }
-            Program.configFielPath = Path.Combine(Program.configPath, "config.xml");
-            Program.commandFielPath = Path.Combine(Program.configPath, Program.commandFielName);
-            Program.errorLogPath = Path.Combine(Program.configPath, "error.log");
-            
+            Program.configFielPath = Path.Combine(Program.configPath, (isDebug() ? "DEBUG." : "") + "config.xml");
+            Program.commandFielPath = Path.Combine(Program.configPath, (isDebug() ? "DEBUG." : "") + Program.commandFielName);
+            Program.errorLogPath = Path.Combine(Program.configPath, (isDebug() ? "DEBUG." : "") + "error.log");
+
+            if (!File.Exists(Program.commandFielPath) || isDebug()) {
+                try
+                {
+                    File.WriteAllText(commandFielPath, @"<root>
+<commands>
+    <command>
+    <shortcut>WIN+W</shortcut>
+    <enabled>1</enabled>
+    <action>CreateWidget</action>
+    </command>
+</commands>
+</root>");
+                } catch { 
+                }
+            }
+
             ClearBigLog();
 
             Program.debug("Start");
