@@ -34,11 +34,12 @@
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.commandsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.errorLogToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.shortcutFormToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.autorunToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
-            this.shortcutFormToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.newPinToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -53,12 +54,13 @@
             // 
             this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.commandsToolStripMenuItem,
+            this.newPinToolStripMenuItem,
             this.errorLogToolStripMenuItem,
             this.shortcutFormToolStripMenuItem,
             this.optionsToolStripMenuItem,
             this.exitToolStripMenuItem});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(164, 124);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(181, 170);
             this.contextMenuStrip1.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip1_Opening);
             // 
             // commandsToolStripMenuItem
@@ -74,6 +76,13 @@
             this.errorLogToolStripMenuItem.Size = new System.Drawing.Size(180, 24);
             this.errorLogToolStripMenuItem.Text = "Error log";
             this.errorLogToolStripMenuItem.Click += new System.EventHandler(this.errorLogToolStripMenuItem_Click);
+            // 
+            // shortcutFormToolStripMenuItem
+            // 
+            this.shortcutFormToolStripMenuItem.Name = "shortcutFormToolStripMenuItem";
+            this.shortcutFormToolStripMenuItem.Size = new System.Drawing.Size(180, 24);
+            this.shortcutFormToolStripMenuItem.Text = "Shortcut form";
+            this.shortcutFormToolStripMenuItem.Click += new System.EventHandler(this.shortcutFormToolStripMenuItem_Click);
             // 
             // optionsToolStripMenuItem
             // 
@@ -104,12 +113,12 @@
             this.timer1.Interval = 1000;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
-            // shortcutFormToolStripMenuItem
+            // newPinToolStripMenuItem
             // 
-            this.shortcutFormToolStripMenuItem.Name = "shortcutFormToolStripMenuItem";
-            this.shortcutFormToolStripMenuItem.Size = new System.Drawing.Size(180, 24);
-            this.shortcutFormToolStripMenuItem.Text = "Shortcut form";
-            this.shortcutFormToolStripMenuItem.Click += new System.EventHandler(this.shortcutFormToolStripMenuItem_Click);
+            this.newPinToolStripMenuItem.Name = "newPinToolStripMenuItem";
+            this.newPinToolStripMenuItem.Size = new System.Drawing.Size(180, 24);
+            this.newPinToolStripMenuItem.Text = "New pin";
+            this.newPinToolStripMenuItem.Click += new System.EventHandler(this.newPinToolStripMenuItem_Click);
             // 
             // FormShootRunner
             // 
@@ -138,6 +147,7 @@
         private System.Windows.Forms.ToolStripMenuItem commandsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem errorLogToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem shortcutFormToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem newPinToolStripMenuItem;
     }
 }
 

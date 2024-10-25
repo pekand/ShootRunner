@@ -10,11 +10,18 @@ namespace ShootRunner
 {
     public class Window
     {
+        public String Type = ""; // WINDOW, COMMAND 
         public String Title = "";
         public IntPtr Handle = IntPtr.Zero;
         public string app = null;
-        public Icon icon = null;
+        public string command = null;
+        public bool silentCommand = true; 
+        public bool doubleClickCommand = false; // to activate use doble click instead of one click
+        public Bitmap icon = null;
         public bool isDesktop = false;
         public bool isTaskbar = false;
+        public bool locked = false;
+        public bool transparent = false;
+        public bool mosttop = false;
     }
 }

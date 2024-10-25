@@ -71,6 +71,25 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="src\forms\FormCommand.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="src\forms\FormCommand.Designer.cs">
+      <DependentUpon>FormCommand.cs</DependentUpon>
+    </Compile>
+    <Compile Include="src\forms\FormWidget.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="src\forms\FormWidget.Designer.cs">
+      <DependentUpon>FormWidget.cs</DependentUpon>
+    </Compile>
+    <Compile Include="src\lib\Config.cs" />
+    <Compile Include="src\lib\ConfigFile.cs" />
+    <Compile Include="src\lib\ConvertTo.cs" />
+    <Compile Include="src\lib\Job.cs" />
+    <Compile Include="src\lib\Pictures.cs" />
+    <Compile Include="src\lib\ScriptsTools.cs" />
+    <Compile Include="src\lib\TextTools.cs" />
     <Compile Include="src\models\Command.cs" />
     <Compile Include="src\forms\FormPin.cs">
       <SubType>Form</SubType>
@@ -98,6 +117,9 @@
     <Compile Include="src\lib\Task.cs" />
     <Compile Include="src\lib\ToolsWindow.cs" />
     <Compile Include="src\models\Window.cs" />
+    <EmbeddedResource Include="src\forms\FormCommand.resx">
+      <DependentUpon>FormCommand.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="src\forms\FormPin.resx">
       <DependentUpon>FormPin.cs</DependentUpon>
     </EmbeddedResource>
@@ -116,6 +138,9 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="src\forms\FormWidget.resx">
+      <DependentUpon>FormWidget.cs</DependentUpon>
+    </EmbeddedResource>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

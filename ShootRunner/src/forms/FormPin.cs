@@ -14,7 +14,13 @@ namespace ShootRunner
 {
     public partial class FormPin : Form
     {
-        private Window window = null;
+        public int StartLeft = 100;
+        public int StartTop = 100;
+        public int StartWidth = 64;
+        public int StartHeight = 64;
+        
+
+        public Window window = null;
 
         public FormPin(Window window)
         {
@@ -22,22 +28,37 @@ namespace ShootRunner
 
             this.DoubleBuffered = true;
             this.FormBorderStyle = FormBorderStyle.None;
-            this.MinimumSize = new Size(32, 32);
-            this.Size = new Size(64, 64);            
+            this.MinimumSize = new Size(32, 32);            
             this.BackColor = Color.White;
             this.TopMost = true;
 
-            this.Opacity = 0.8;  // 80% opaque, 20% transparent
+            
             this.BackColor = System.Drawing.Color.Black;
             //this.TransparencyKey = System.Drawing.Color.Lime;
 
-
             this.window = window;
             this.ShowInTaskbar = false;
+
         }
 
         private void FormPin_Load(object sender, EventArgs e)
         {
+            this.SetStartPosition();
+            this.makeRoundy();
+
+            if (this.window.transparent)
+            {
+                this.Opacity = 0.8;
+            }
+            else {
+                this.Opacity = 1.0;
+            }
+
+
+            dobleClickToActivateToolStripMenuItem.Checked = this.window.doubleClickCommand;
+        }
+
+        public void Center() {
             Screen currentScreen = Screen.FromPoint(Cursor.Position);
             Rectangle screenBounds = currentScreen.WorkingArea;
             this.StartPosition = FormStartPosition.Manual;
@@ -45,8 +66,14 @@ namespace ShootRunner
                 screenBounds.Left + (screenBounds.Width - this.Width) / 2,
                 screenBounds.Top + (screenBounds.Height - this.Height) / 2
             );
+        }
 
-            this.makeRoundy();
+        public void SetStartPosition()
+        {
+            this.Left = this.StartLeft;
+            this.Top = this.StartTop;
+            this.Width = this.StartWidth;
+            this.Height = this.StartHeight;
         }
 
         public void makeRoundy() {
@@ -71,9 +98,15 @@ namespace ShootRunner
             this.Region = null;
         }
 
+        public void CloseForm() {
+            Program.pins.Remove(this);
+            Program.Update();
+            this.Close();
+        }
+
         private void closeToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            this.Close();
+            this.CloseForm();
         }
 
         // Variables to track mouse movement
@@ -87,7 +120,7 @@ namespace ShootRunner
             {
                 dragging = false;
 
-                if (dragCursorPoint == Cursor.Position) {
+                if (dragCursorPoint == Cursor.Position && !this.window.doubleClickCommand) {
                     this.FormPin_MouseDoubleClick(sender, e);
                 }
             }
@@ -109,6 +142,7 @@ namespace ShootRunner
             {
                 Point diff = Point.Subtract(Cursor.Position, new Size(dragCursorPoint));
                 this.Location = Point.Add(dragFormPoint, new Size(diff));
+                Program.Update();
             }
         }
 
@@ -117,13 +151,53 @@ namespace ShootRunner
             if (this.window.isDesktop)
             {
                 SystemTools.ShowDesktop();
-            } else if (ToolsWindow.IsWindowValid(this.window))
+            }
+            else if (this.window.Type == "COMMAND" && this.window.command != null && this.window.command.Trim() != "")
             {
-                ToolsWindow.BringWindowToFront(this.window);
+                // Task.RunCommand(this.window.command, null, this.window.silentCommand);
+                Task.RunPowerShellCommand(this.window.command, null, this.window.silentCommand);
             }
-            else { 
-                this.Close();
+            else if (this.window.Type == "WINDOW")
+            {
+                if (this.window.Handle != IntPtr.Zero && ToolsWindow.IsWindowValid(this.window)) {
+                    ToolsWindow.BringWindowToFront(this.window);
+                }
+                else if (this.window.app != null && this.window.app.Trim() != "")
+                {
+                    bool foundWindow = false;
+                    List<Window> taskbarWindows = ToolsWindow.GetTaskbarWindows();
+                    foreach (Window win in taskbarWindows)
+                    {
+                        if (this.window.Title == win.Title) {
+                            this.window.Handle = win.Handle;
+                            foundWindow = true;
+                            break;
+                        }
+                    }
+
+                    if (!foundWindow) {
+                        foreach (Window win in taskbarWindows)
+                        {
+                            if (this.window.app == win.app)
+                            {
+                                this.window.Handle = win.Handle;
+                                foundWindow = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (foundWindow) {
+                        ToolsWindow.BringWindowToFront(this.window);
+                    } else {
+                        if (this.window.app != null && this.window.app.Trim() != ""){
+                            Task.RunCommand(this.window.app, null, this.window.silentCommand);
+                        }
+                    }
+                }
             }
+            
+            
         }
 
         // Import native methods for resizing
@@ -160,6 +234,7 @@ namespace ShootRunner
         {
             int newSize = Math.Min(this.Width, this.Height);
             this.Size = new Size(newSize, newSize);
+            Program.Update();
             this.Refresh();
         }
 
@@ -180,7 +255,7 @@ namespace ShootRunner
 
             if (this.window.icon != null)
             {
-                e.Graphics.DrawIcon(this.window.icon,new Rectangle(0,0,this.Width,this.Height));
+                e.Graphics.DrawImage(this.window.icon,new Rectangle(0,0,this.Width,this.Height));
             }
         }
 
@@ -194,6 +269,85 @@ namespace ShootRunner
             this.makeRoundy();
         }
 
-        
+        private void setCommandToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            FormCommand formCommand = new FormCommand(this.window);
+            formCommand.ShowDialog();
+        }
+
+        private void setIconToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (openFileDialog1.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    string selectedFilePath = openFileDialog1.FileName;
+                    using (var image = Image.FromFile(selectedFilePath))
+                    {
+                        this.window.icon = new Bitmap(image);
+                        this.Refresh();
+                    }
+
+                    Program.Update();
+                }
+                catch (Exception ex)
+                {
+                    Program.error("Open image from file error: " + ex.Message);
+                }
+            }
+        }
+
+        private void minimalizeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ToolsWindow.MinimizeWindow(this.window);
+        }
+
+        private void closeToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            ToolsWindow.CloseWindow(this.window);
+        }
+
+        private void dobleClickToActivateToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            this.window.doubleClickCommand = !this.window.doubleClickCommand;
+            dobleClickToActivateToolStripMenuItem.Checked = this.window.doubleClickCommand;
+            Program.Update();
+        }
+
+        private void contextMenuStrip1_Opening(object sender, CancelEventArgs e)
+        {
+            dobleClickToActivateToolStripMenuItem.Checked = this.window.doubleClickCommand;
+            transparentToolStripMenuItem.Checked = this.window.transparent;
+        }
+
+        private void newPinToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Program.AddEmptyPin();
+        }
+
+        private void closeToolStripMenuItem1_Click_1(object sender, EventArgs e)
+        {
+            Application.Exit();
+        }
+
+        private void newWidgetToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Program.AddEmptyWidget();
+        }
+
+        private void transparentToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            this.window.transparent = !this.window.transparent;
+            transparentToolStripMenuItem.Checked = this.window.transparent;
+
+            if (this.window.transparent)
+            {
+                this.Opacity = 0.8;
+            }
+            else
+            {
+                this.Opacity = 1.0;
+            }
+        }
     }
 }

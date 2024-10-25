@@ -66,6 +66,10 @@ namespace ShootRunner
         // LOAD
         private void FormShootRunner_Load(object sender, EventArgs e)
         {
+            if (Program.isDebug()) {
+                this.notifyIconShootRunner.Icon = Pictures.CreateCustomIcon();
+            }
+
             this.WindowState = FormWindowState.Minimized;
             this.ShowInTaskbar = false;
             this.Hide();
@@ -339,6 +343,7 @@ namespace ShootRunner
             if (window.Handle != IntPtr.Zero) {
                 FormPin pin = new FormPin(window);
                 pin.Show();
+                pin.Center();
                 Program.pins.Add(pin);
             }
             
@@ -348,9 +353,19 @@ namespace ShootRunner
         // COMMAND
         private bool RunCommand(Command command)
         {
-            if(command.action == "CreatePin")
+            if (command.action == "Close")
+            {
+                this.Close();
+                return true;
+            }
+            else if(command.action == "CreatePin")
             {
                 this.CreatPin();
+                return true;
+            }
+            else if (command.action == "AddEmptyPin")
+            {
+                Program.AddEmptyPin();
                 return true;
             }
             else if (command.action == "cascade")
@@ -614,6 +629,8 @@ namespace ShootRunner
             }
 
             autorunToolStripMenuItem.Checked = Program.autorun;
+
+            Program.Update();
         }
 
         // POPUP EXIT
@@ -633,6 +650,11 @@ namespace ShootRunner
         private void FormShootRunner_FormClosed(object sender, FormClosedEventArgs e)
         {
 
+        }
+
+        private void newPinToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Program.AddEmptyPin();
         }
     }
 }

@@ -5,10 +5,12 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Timers;
 using System.Windows.Forms;
 using System.Xml;
 using System.Xml.Linq;
 using Microsoft.Win32;
+
 
 namespace ShootRunner
 {
@@ -29,6 +31,7 @@ namespace ShootRunner
         public static DateTime commandFielPathLastChange;
 
         public static bool autorun = false;
+        public static bool autosave = true;
 
         public static Shortcut shortcut = new Shortcut();
         public static int tick = 0;
@@ -36,6 +39,46 @@ namespace ShootRunner
         public static bool pause = false;
 
         public static List<FormPin> pins = new List<FormPin>();
+        public static List<FormWidget> widgets = new List<FormWidget>();
+
+        public static string powershell = null;
+
+        public static bool updated = false;
+        public static DateTime updatedTime = new DateTime();
+
+        public static void Update() {
+            Program.updated = true;
+            Program.updatedTime = DateTime.Now;
+            Program.debug("Update");
+        }
+
+        public static System.Timers.Timer timer;
+
+        public static void StartTimer()
+        {
+            timer = new System.Timers.Timer(1000*60);
+            timer.Elapsed += OnTimedEvent;
+            timer.AutoReset = true;
+            timer.Enabled = true;
+        }
+
+        public static void OnTimedEvent(object sender, EventArgs e)
+        {
+            if (Program.autosave && Program.updated && (DateTime.Now - Program.updatedTime).TotalMinutes >= 2)
+            {
+                Program.updatedTime = DateTime.Now;
+                Program.updated = false;
+                Program.configFile.Save();
+            }
+        }
+
+        public static void FindPowershell() {
+            powershell = ScriptsTools.IsCommandAvailable("pwsh.exe");
+
+            if (powershell == null) {
+                powershell = ScriptsTools.IsCommandAvailable("powershell.exe");
+            }
+        }
 
         public static void ClearBigLog()
         {
@@ -198,45 +241,46 @@ namespace ShootRunner
             }            
         }
 
-        public static void LoadConfig()
+        public static Config config = null;
+        public static ConfigFile configFile = null;
+
+        public static void AddEmptyPin() { 
+            Window window = new Window();
+            window.Type = "COMMAND";
+            window.doubleClickCommand = true;
+            FormPin pin = new FormPin(window);
+            pins.Add(pin);
+            pin.Show();
+            pin.Center();
+
+            Program.Update();
+        }
+
+        public static void OpenPins()
         {
-            if (File.Exists(configFielPath))
+            
+            foreach (var pin in Program.pins)
             {
-                try
-                {
-                    XmlDocument xmlDoc = new XmlDocument();
-                    xmlDoc.Load(configFielPath);
-                    XmlNodeList nodes = xmlDoc.DocumentElement.SelectNodes("/root/autorun");
-                    foreach (XmlNode node in nodes)
-                    {
-                        Program.autorun = node.InnerText == "1";
-                    }
-                } catch(Exception ex) {
-                    Program.error(ex.Message);
-                }
+                pin.Show();
             }
         }
 
-        public static void SaveConfig()
+        public static void AddEmptyWidget()
         {
-            if (!Directory.Exists(configPath))
-            {
-                Directory.CreateDirectory(configPath);
-            }
+            FormWidget widget = new FormWidget();
+            widgets.Add(widget);
+            widget.TopMost = true;
+            widget.Show();
+            widget.Center();
 
-            try
+            Program.Update();
+        }
+
+        public static void OpenWidgets()
+        {
+            foreach (var widget in Program.widgets)
             {
-                XmlDocument xmlDoc = new XmlDocument();
-                XmlElement root = xmlDoc.CreateElement("root");
-                xmlDoc.AppendChild(root);
-                XmlElement element = xmlDoc.CreateElement("autorun");
-                element.InnerText = Program.autorun ? "1" : "0";
-                root.AppendChild(element);
-                xmlDoc.Save(configFielPath);
-            }
-            catch (Exception ex)
-            {
-                Program.error(ex.Message);
+                widget.Show();
             }
         }
 
@@ -249,7 +293,11 @@ namespace ShootRunner
                 MessageBox.Show("Another instance of the application is already running.", "Application Already Running", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
-            
+
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+
+
             Program.roamingAppDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
             Program.configPath = Path.Combine(Program.roamingAppDataPath, Program.AppName);
             if (!Directory.Exists(configPath))
@@ -260,21 +308,28 @@ namespace ShootRunner
             Program.commandFielPath = Path.Combine(Program.configPath, (isDebug() ? "DEBUG." : "") + Program.commandFielName);
             Program.errorLogPath = Path.Combine(Program.configPath, (isDebug() ? "DEBUG." : "") + "error.log");
 
-            if (!File.Exists(Program.commandFielPath) || isDebug()) {
+           /* if (!File.Exists(Program.commandFielPath) || isDebug()) {
                 try
                 {
                     File.WriteAllText(commandFielPath, @"<root>
 <commands>
     <command>
-    <shortcut>WIN+W</shortcut>
+    <shortcut>F7</shortcut>
     <enabled>1</enabled>
-    <action>CreateWidget</action>
+    <action>CreatePin</action>
+    <parameters></parameters>y
+    </command>
+    <command>
+    <shortcut>F8</shortcut>
+    <enabled>1</enabled>
+    <action>Close</action>
+    <parameters></parameters>
     </command>
 </commands>
 </root>");
                 } catch { 
                 }
-            }
+            }*/
 
             ClearBigLog();
 
@@ -283,16 +338,23 @@ namespace ShootRunner
             SystemEvents.SessionSwitch += new SessionSwitchEventHandler(SystemEvents_SessionSwitch);
             SystemEvents.SessionSwitch -= new SessionSwitchEventHandler(SystemEvents_SessionSwitch);
 
-            LoadConfig();
+            Program.config = new Config();            
+            Program.configFile = new ConfigFile(Program.config);
+            Program.configFile.Load();
 
             Program.loadCommands();
 
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
+            Program.FindPowershell();
+
+            Program.OpenPins();
+            Program.OpenWidgets();
+
+            Program.StartTimer();
+
             formShootRunner = new FormShootRunner();
             Application.Run(formShootRunner);
 
-            SaveConfig();
+            Program.configFile.Save();
 
             Program.debug("End");
         }

@@ -132,11 +132,12 @@ namespace ShootRunner
 
             IntPtr activeWindowHandle = ToolsWindow.GetForegroundWindow();
             if (activeWindowHandle != IntPtr.Zero) {
+                window.Type = "WINDOW";
                 window.Handle = activeWindowHandle;
                 window.Title = ToolsWindow.GetWindowTitle(window);
                 window.icon = ToolsWindow.GetWindowIcon(window);
                 window.app = ToolsWindow.GetApplicationPathFromWindow(window);
-                Icon appIcon = ToolsWindow.ExtractIconFromPath(window.app);
+                Bitmap appIcon = ToolsWindow.ExtractIconFromPath(window.app);
                 if (window.icon == null || (appIcon!=null && window.icon != null && appIcon.Width > window.icon.Width)) {
                     window.icon = appIcon;
                 }
@@ -167,7 +168,7 @@ namespace ShootRunner
         private const int ICON_BIG = 1;
         private const int ICON_SMALL2 = 2;
 
-        public static Icon GetWindowIcon(Window window)
+        public static Bitmap GetWindowIcon(Window window)
         {
             IntPtr hIcon = SendMessage(window.Handle, WM_GETICON, ICON_BIG, 0);
 
@@ -185,7 +186,7 @@ namespace ShootRunner
             {
                 Icon icon = Icon.FromHandle(hIcon);
 
-                Icon clonedIcon = (Icon)icon.Clone();
+                Bitmap clonedIcon = ((Icon)icon.Clone()).ToBitmap(); ;
 
                 DestroyIcon(hIcon);
 
@@ -238,7 +239,7 @@ namespace ShootRunner
             return null;
         }
 
-        public static Icon ExtractIconFromPath(string path) {
+        public static Bitmap ExtractIconFromPath(string path) {
             if (!File.Exists(path)) {
                 return null;
             }
@@ -249,7 +250,7 @@ namespace ShootRunner
                 return null;
             }
 
-            Icon clonedIcon = (Icon)icon.Clone();
+            Bitmap clonedIcon = ((Icon)icon.Clone()).ToBitmap();
             return clonedIcon;
         }
 
@@ -304,12 +305,8 @@ namespace ShootRunner
         }
 
 
-
-
         [DllImport("user32.dll", SetLastError = true)]
         private static extern bool IsWindowVisible(IntPtr hWnd);
-
-
 
         [DllImport("user32.dll", SetLastError = true)]
         private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
@@ -348,6 +345,53 @@ namespace ShootRunner
             }
         }
 
+        ///////////////////////////////////////////////////////////////////////////
+
+        public static List<Window> GetTaskbarWindows()
+        {
+            List<Window> windowHandles = new List<Window>();
+
+            EnumWindows((hWnd, lParam) =>
+            {
+                if (IsWindowVisible(hWnd))
+                {
+                    StringBuilder title = new StringBuilder(256);
+                    GetWindowText(hWnd, title, 256);
+                    if (!string.IsNullOrEmpty(title.ToString()))
+                    {
+                        Window window = new Window();
+                        window.Type = "WINDOW";
+                        window.Handle = hWnd;
+                        window.Title = ToolsWindow.GetWindowTitle(window);
+                        window.app = ToolsWindow.GetApplicationPathFromWindow(window);
+                        windowHandles.Add(window);
+                    }
+                }
+                return true;
+            }, IntPtr.Zero);
+
+            return windowHandles;
+        }
+
+        ///////////////////////////////////////////////////////////////////////////
+
+
+        // Constants for ShowWindow
+        private const int SW_MINIMIZE = 6;
+        private const int WM_CLOSE = 0x0010;
+
+        public static void MinimizeWindow(Window window)
+        {
+            if (window.Handle != IntPtr.Zero && ToolsWindow.IsWindowValid(window))
+            {
+                ShowWindow(window.Handle, SW_MINIMIZE);
+            }
+        }
+
+        public static void CloseWindow(Window window)
+        {
+            SendMessage(window.Handle, WM_CLOSE, (int)IntPtr.Zero, (int)IntPtr.Zero);
+        }
 
     }
 
