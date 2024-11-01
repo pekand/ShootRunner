@@ -656,5 +656,16 @@ namespace ShootRunner
         {
             Program.AddEmptyPin();
         }
+
+        private void newWidgetToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Program.widgetManager.AddEmptyWidget();
+        }
+
+        private void FormShootRunner_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            
+
+        }
     }
 }

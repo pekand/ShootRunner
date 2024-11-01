@@ -1,27 +1,80 @@
-﻿using System;
+﻿using Microsoft.Web.WebView2.Core;
+using Microsoft.Win32;
+using ShootRunner.src.forms;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml.Linq;
 
 namespace ShootRunner
 {
+
     public partial class FormWidget : Form
     {
-        public string Type = "";
-        public int StartLeft = 100;
-        public int StartTop = 100;
-        public int StartWidth = 300;
-        public int StartHeight = 300;
-        public bool locked = false;
-        public bool transparent = false;
 
-        
+        public Widget widget = null;
+
+        public FormWidget(Widget widget)
+        {
+            this.widget = widget;
+            widget.widgetForm = this;
+            InitializeComponent();
+            InitializeWebView2();
+        }
+
+        public int initialCaptionHeight = 0;
+
+        private void FormWidget_Load(object sender, EventArgs e)
+        {
+            this.MinimumSize = new Size(64, 64);
+            this.SetStartPosition();
+            this.ShowInTaskbar = false;
+            initialCaptionHeight = 29;
+            this.Deactivate += new EventHandler(this.Form_Deactivate);
+            this.Activated += new EventHandler(this.Form_Activated);
+            this.Opacity = this.widget.transparent < 0.2 ? 0.2 : this.widget.transparent;
+
+            AddTypesToContextMenu();
+
+        }
+        protected override CreateParams CreateParams
+        {
+            get
+            {
+                const int WS_EX_TOOLWINDOW = 0x00000080;
+                CreateParams cp = base.CreateParams;
+                cp.ExStyle |= WS_EX_TOOLWINDOW; // Add the tool window style
+                return cp;
+            }
+        }
+
+        public void AddTypesToContextMenu()
+        {
+
+            foreach (var widgeType in Program.widgetManager.widgeTypes ) {
+                ToolStripMenuItem item = new ToolStripMenuItem(widgeType.name);
+                item.Click += (sender, e) => SelectType(widgeType);
+                typeToolStripMenuItem.DropDownItems.Add(item);
+            }
+        }
+
+        public void SelectType(WidgetType widgetType)
+        {
+            widget.widgetType = widgetType;
+            this.InitializeWebView2();
+        }
 
         public void Center()
         {
@@ -36,40 +89,210 @@ namespace ShootRunner
 
         public void SetStartPosition()
         {
-            this.Left = this.StartLeft;
-            this.Top = this.StartTop;
-            this.Width = this.StartWidth;
-            this.Height = this.StartHeight;
+            this.Left = this.widget.StartLeft;
+            this.Top = this.widget.StartTop;
+            this.Width = this.widget.StartWidth;
+            this.Height = this.widget.StartHeight;
         }
 
-        public FormWidget()
+
+        Microsoft.Web.WebView2.WinForms.WebView2 webView = null;
+        private async void InitializeWebView2()
         {
-            InitializeComponent();
+
+            if (webView != null)
+            {
+                this.Controls.Remove(webView);
+                webView.Dispose();
+            }
+
+            webView = new Microsoft.Web.WebView2.WinForms.WebView2();
+            webView.Dock = DockStyle.Fill;
+            
+            this.Controls.Add(webView);
+
+            await webView.EnsureCoreWebView2Async(null);
+
+            await webView.CoreWebView2.CallDevToolsProtocolMethodAsync(
+                "Runtime.enable", "{}");
+
+            await webView.CoreWebView2.CallDevToolsProtocolMethodAsync(
+                "Log.enable", "{}");
+
+            webView.CoreWebView2.WebMessageReceived += WebView_WebMessageReceived;
+
+            webView.CoreWebView2.ContextMenuRequested += CoreWebView2_ContextMenuRequested;
+
+            string htmlContent = "";
+            if (widget!= null && widget.type != null && widget.widgetType != null) {
+                htmlContent = widget.widgetType.html;
+            }
+
+            string script1 = @"
+
+                (function() {
+                    const originalLog = console.log;
+                    const originalError = console.error;
+
+                    // Override console.log
+                    console.log = function(...args) {
+                        window.chrome.webview.postMessage({type: 'log', message: args.join(' ')});
+                        originalLog.apply(console, args);
+                    };
+
+                    // Override console.error
+                    console.error = function(...args) {
+                        window.chrome.webview.postMessage({type: 'error', message: args.join(' ')});
+                        originalError.apply(console, args);
+                    };
+
+                    window.onerror = function(...args) {
+                        window.chrome.webview.postMessage({type: 'error', message: args.join(' ')});
+                        return true;
+                    };
+
+
+                })();              
+
+            ";
+
+           
+            //await webView.CoreWebView2.ExecuteScriptAsync(script1);
+
+            await webView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(script1);
+
+            string script2 = @"
+
+                function uid(length = 32) {
+                    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+                    let result = '';
+                    const charactersLength = characters.length;
+                    for (let i = 0; i < length; i++) {
+                        const randomIndex = Math.floor(Math.random() * charactersLength);
+                        result += characters.charAt(randomIndex);
+                    }
+                    return result;
+                }
+
+                function setData(k,v){
+                    return send('setData', null, k ,v, null);
+                }
+
+                function getData(k) {
+                    return send('getData', null, k , null, null);
+                }
+
+                function send(t,m,k,v,p){
+                    var message = {
+                        uid: uid(),
+                        parent: p,
+                        type: t, 
+                        message: m,
+                        key: k,
+                        value: v                        
+                    };
+                    window.chrome.webview.postMessage(message);
+                    return message;
+                }
+
+                window.receiveMessage = function(response) {
+                    document.getElementById('response').innerText = data.message;
+                };
+
+                window.chrome.webview.addEventListener('message', event => {
+                    const response = event.data;
+                    if(typeof window.receiveMessage === 'function') { 
+                        window.receiveMessage(response);
+                    }
+                });
+
+            ";
+
+            await webView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(script2);
+
+            webView.NavigateToString(htmlContent);
         }
 
-        private void FormWidget_Load(object sender, EventArgs e)
+        private static readonly string Characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        private static readonly Random Random = new Random();
+
+        public string uid(int length = 32)
+        {
+            StringBuilder result = new StringBuilder(length);
+            int charactersLength = Characters.Length;
+
+            for (int i = 0; i < length; i++)
+            {
+                int randomIndex = Random.Next(charactersLength);
+                result.Append(Characters[randomIndex]);
+            }
+
+            return result.ToString();
+        }
+
+        // Handle console messages from JavaScript
+        private void WebView_WebMessageReceived(object sender, CoreWebView2WebMessageReceivedEventArgs e)
+        {
+            string json = e.WebMessageAsJson;
+            Program.debug($"JS: {json}");
+
+            try
+            {
+                JSMessage request = JsonSerializer.Deserialize<JSMessage>(json);
+
+                if (request.type == "log")
+                {
+                    Program.debug("JS: " + request.message);
+
+                }
+
+                if (request.type == "error")
+                {
+                    Program.debug("JS ERROR: " + request.message);
+
+                }
+
+                if (request.type == "setData" && request.key != "")
+                {
+                    this.widget.data[request.key] = request.value;
+                    Program.Update();
+                }
+
+                if (request.type == "getData") {
+                    JSMessage response = new JSMessage();
+                    response.uid = this.uid();
+                    response.parent = request.uid;
+                    response.key = request.key;
+                    response.value = this.widget.data.ContainsKey(request.key) ? this.widget.data[request.key] : "";
+                    response.message = "";
+                    string responseJson = System.Text.Json.JsonSerializer.Serialize(response);
+                    webView.CoreWebView2.PostWebMessageAsJson(responseJson);
+                }
+            }
+            catch (Exception)
+            {               
+            }   
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
+
+        private void CoreWebView2_ContextMenuRequested(object sender, CoreWebView2ContextMenuRequestedEventArgs e)
+        {
+            e.Handled = true;
+
+            ContextMenuStrip menu = this.contextMenuStrip;
+            menu.Show(Cursor.Position);
+        }
+
+        private void webView21_Click(object sender, EventArgs e)
         {
 
-            if (this.transparent)
-            {
-                this.Opacity = 0.8;
-            }
-            else
-            {
-                this.Opacity = 1.0;
-            }
-
-            this.MinimumSize = new Size(64, 64);
-            this.SetStartPosition();
-            this.ShowInTaskbar = false;
-
-            this.Deactivate += new EventHandler(this.Form_Deactivate);
-            this.Activated += new EventHandler(this.Form_Activated);
         }
 
         public void CloseForm()
         {
-            Program.widgets.Remove(this);
+            Program.widgetManager.RemoveWidget(this);
             Program.Update();
         }
 
@@ -96,20 +319,68 @@ namespace ShootRunner
             AddTitleBar();
         }
 
+        /*Size currentSize;
+        Point currentLocation;
+        int titleBarHeight;
+
+        private void ToggleBorder(FormBorderStyle style)
+        {
+            if (style == FormBorderStyle.None)
+            {
+                currentSize = this.Size;
+                currentLocation = this.Location;
+                titleBarHeight = SystemInformation.CaptionHeight;
+                this.FormBorderStyle = FormBorderStyle.None;
+                this.Top += titleBarHeight;
+                this.Height -= titleBarHeight;
+
+
+            }
+
+            if (style == FormBorderStyle.Sizable)
+            {
+                this.FormBorderStyle = FormBorderStyle.Sizable;
+                this.Size = currentSize;
+                this.Location = currentLocation;
+            }
+
+            
+        }*/
+
         // Method to remove the title bar
         private void RemoveTitleBar()
         {
+            /*initTop = this.Top;
+            initHeight = this.Height;
+            this.FormBorderStyle = FormBorderStyle.None;
+
+            this.Top = initTop + initialCaptionHeight;
+            this.Height = initHeight - initialCaptionHeight;*/
+
+
             int style = GetWindowLong(this.Handle, GWL_STYLE);
             SetWindowLong(this.Handle, GWL_STYLE, style & ~WS_CAPTION);
-            this.Refresh();  // Redraw the window to apply changes
+            this.Refresh();
+
+            //titleBarHeight = SystemInformation.CaptionHeight;
+            //ToggleBorder(FormBorderStyle.None);
+
+
         }
 
         // Method to add the title bar back
         private void AddTitleBar()
         {
+
+            /*this.FormBorderStyle = FormBorderStyle.Sizable;
+            this.Top = initTop;
+            this.Height = initHeight;*/
+
             int style = GetWindowLong(this.Handle, GWL_STYLE);
             SetWindowLong(this.Handle, GWL_STYLE, style | WS_CAPTION);
-            this.Refresh();  // Redraw the window to apply changes
+            this.Refresh();
+
+            //ToggleBorder(FormBorderStyle.Sizable);
         }
 
         // Windows message constants
@@ -119,7 +390,7 @@ namespace ShootRunner
         protected override void WndProc(ref Message m)
         {
             
-            if (this.locked && ( m.Msg == WM_NCLBUTTONDOWN && m.WParam.ToInt32() == HTCAPTION))
+            if (this.widget.locked && ( m.Msg == WM_NCLBUTTONDOWN && m.WParam.ToInt32() == HTCAPTION))
             {
                 return; 
             }
@@ -132,23 +403,15 @@ namespace ShootRunner
         private void contextMenuStrip1_Opening(object sender, CancelEventArgs e)
         {
             mostTopToolStripMenuItem.Checked = this.TopMost;
-            lockedToolStripMenuItem.Checked = this.locked;
-            transparentToolStripMenuItem.Checked = this.transparent;
+            lockedToolStripMenuItem.Checked = this.widget.locked;
         }
 
         private void transparentToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            this.transparent = !this.transparent;
-            transparentToolStripMenuItem.Checked = this.transparent;
-
-            if (this.transparent)
-            {
-                this.Opacity = 0.8;
-            }
-            else
-            {
-                this.Opacity = 1.0;
-            }
+            FormTransparent form = new FormTransparent(this, null);
+            form.trackBar1.Value = (int)(this.Opacity * 100);
+            form.ShowDialog();
+            this.widget.transparent = this.Opacity;
         }
 
         private void removeWidgetToolStripMenuItem_Click(object sender, EventArgs e)
@@ -158,7 +421,7 @@ namespace ShootRunner
 
         private void newWidgetToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Program.AddEmptyWidget();
+            Program.widgetManager.AddEmptyWidget();
         }
 
         private void mostTopToolStripMenuItem_Click(object sender, EventArgs e)
@@ -169,8 +432,8 @@ namespace ShootRunner
 
         private void lockedToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            this.locked = !this.locked;
-            lockedToolStripMenuItem.Checked = this.locked;
+            this.widget.locked = !this.widget.locked;
+            lockedToolStripMenuItem.Checked = this.widget.locked;
         }
 
         private void FormWidget_FormClosed(object sender, FormClosedEventArgs e)
@@ -180,6 +443,73 @@ namespace ShootRunner
 
         private void FormWidget_FormClosing(object sender, FormClosingEventArgs e)
         {
+            // Display a confirmation dialog
+            DialogResult result = MessageBox.Show(
+                "Are you sure you want to close form? Data will be lost.",
+                "Confirm Exit",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question
+            );
+
+            if (result == DialogResult.No)
+            {
+                e.Cancel = true;
+            }
         }
+
+        private void typeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Application.Exit();
+        }
+
+        private void reloadToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (widget ==null || widget.widgetType == null) {
+                return;
+            }
+
+            try
+            {
+                widget.widgetType.html = File.ReadAllText(widget.widgetType.source);
+                InitializeWebView2();
+            }
+            catch (Exception)
+            {
+
+
+            }
+        }
+
+        private void editToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (widget == null || widget.widgetType == null || !File.Exists(widget.widgetType.source))
+            {
+                return;
+            }
+
+            try
+            {
+                string defaultEditor = SystemTools.GetDefaultEditorPath(".txt");
+                if (!string.IsNullOrEmpty(defaultEditor))
+                {
+                    SystemTools.OpenFileWithEditor(defaultEditor, widget.widgetType.source);
+                }
+                else
+                {
+                    Console.WriteLine("Default text editor not found.");
+                }
+            }
+            catch (Exception ex)
+            {
+               Program.error($"Error opening file: {ex.Message}");
+            }
+        }
+
+        
     }
 }

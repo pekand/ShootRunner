@@ -131,20 +131,30 @@ namespace ShootRunner
             Window window = new Window();
 
             IntPtr activeWindowHandle = ToolsWindow.GetForegroundWindow();
-            if (activeWindowHandle != IntPtr.Zero) {
+            window.Handle = activeWindowHandle;
+            SetWindowData(window);
+
+
+            return window;
+        }
+
+        public static Window SetWindowData(Window window)
+        {
+            if (window.Handle != IntPtr.Zero)
+            {
                 window.Type = "WINDOW";
-                window.Handle = activeWindowHandle;
                 window.Title = ToolsWindow.GetWindowTitle(window);
                 window.icon = ToolsWindow.GetWindowIcon(window);
                 window.app = ToolsWindow.GetApplicationPathFromWindow(window);
                 Bitmap appIcon = ToolsWindow.ExtractIconFromPath(window.app);
-                if (window.icon == null || (appIcon!=null && window.icon != null && appIcon.Width > window.icon.Width)) {
+                if (window.icon == null || (appIcon != null && window.icon != null && appIcon.Width > window.icon.Width))
+                {
                     window.icon = appIcon;
                 }
                 window.isDesktop = ToolsWindow.IsDesktopWindow(window);
                 window.isTaskbar = ToolsWindow.IsTaskbarWindow(window);
             }
-            
+
             return window;
         }
 
@@ -353,6 +363,19 @@ namespace ShootRunner
 
             EnumWindows((hWnd, lParam) =>
             {
+                if (!IsWindowVisible(hWnd))
+                    return true;
+
+                if (IsWindowPopup(hWnd))
+                {
+                    return true;
+                }
+
+                if (IsToolWindow(hWnd))
+                {
+                    return true;
+                }
+
                 if (IsWindowVisible(hWnd))
                 {
                     StringBuilder title = new StringBuilder(256);
@@ -391,6 +414,29 @@ namespace ShootRunner
         public static void CloseWindow(Window window)
         {
             SendMessage(window.Handle, WM_CLOSE, (int)IntPtr.Zero, (int)IntPtr.Zero);
+        }
+
+        ///////////////////////////////////////////////////////////////////////////
+
+
+        [DllImport("user32.dll", EntryPoint = "GetWindowLong")]
+        static extern IntPtr GetWindowLongPtr(IntPtr hWnd, int nIndex);
+
+        public static bool IsWindowPopup(IntPtr hHandle)
+        {
+            const long WS_POPUP = 0x80000000L;
+            long style = (long)GetWindowLongPtr(hHandle, -16);
+            bool isPopup = ((style & WS_POPUP) != 0);
+            return isPopup;
+        }
+
+        private const int GWL_EXSTYLE = -20;
+        private const int WS_EX_TOOLWINDOW = 0x00000080;
+
+        public static bool IsToolWindow(IntPtr hWnd)
+        {
+            IntPtr exStyle = GetWindowLongPtr(hWnd, GWL_EXSTYLE);
+            return (exStyle.ToInt64() & WS_EX_TOOLWINDOW) == WS_EX_TOOLWINDOW;
         }
 
     }

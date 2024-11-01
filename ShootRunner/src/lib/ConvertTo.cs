@@ -71,6 +71,24 @@ namespace ShootRunner
             
         }
 
+        public static double StringToDouble(string value, double defaultValue = 0.0)
+        {
+            try
+            {
+                return Double.Parse(value);
+            }
+            catch
+            {
+                return defaultValue;
+            }
+
+        }
+
+        public static string DoubleToString(double value)
+        {
+            return value.ToString();
+        }
+
         public static string IntToString(int value)
         {
             return value.ToString();

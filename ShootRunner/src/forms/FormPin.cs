@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ShootRunner.src.forms;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -45,17 +46,19 @@ namespace ShootRunner
         {
             this.SetStartPosition();
             this.makeRoundy();
-
-            if (this.window.transparent)
-            {
-                this.Opacity = 0.8;
-            }
-            else {
-                this.Opacity = 1.0;
-            }
-
-
+            this.Opacity = this.window.transparent < 0.2 ? 0.2 : this.window.transparent;
             dobleClickToActivateToolStripMenuItem.Checked = this.window.doubleClickCommand;
+        }
+
+        protected override CreateParams CreateParams
+        {
+            get
+            {
+                const int WS_EX_TOOLWINDOW = 0x00000080;
+                CreateParams cp = base.CreateParams;
+                cp.ExStyle |= WS_EX_TOOLWINDOW; // Add the tool window style
+                return cp;
+            }
         }
 
         public void Center() {
@@ -102,11 +105,6 @@ namespace ShootRunner
             Program.pins.Remove(this);
             Program.Update();
             this.Close();
-        }
-
-        private void closeToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            this.CloseForm();
         }
 
         // Variables to track mouse movement
@@ -314,10 +312,35 @@ namespace ShootRunner
             Program.Update();
         }
 
+        List<Window> taskbarWindows = null;
+
         private void contextMenuStrip1_Opening(object sender, CancelEventArgs e)
         {
             dobleClickToActivateToolStripMenuItem.Checked = this.window.doubleClickCommand;
-            transparentToolStripMenuItem.Checked = this.window.transparent;
+            AddWindowsToContextMenu();
+        }
+
+        public void AddWindowsToContextMenu()
+        {
+            this.taskbarWindows = ToolsWindow.GetTaskbarWindows();
+            
+            selectToolStripMenuItem.DropDownItems.Clear();
+            foreach (var window in this.taskbarWindows)
+            {
+                ToolsWindow.SetWindowData(window);
+                ToolStripMenuItem item = new ToolStripMenuItem(window.Title);
+                item.Image = window.icon;
+                item.Click += (sender, e) => SelectType(window);
+                selectToolStripMenuItem.DropDownItems.Add(item);
+            }
+        }
+
+        public void SelectType(Window window)
+        {
+            ToolsWindow.SetWindowData(window);
+            this.window = window;
+            this.Refresh();
+            
         }
 
         private void newPinToolStripMenuItem_Click(object sender, EventArgs e)
@@ -332,22 +355,30 @@ namespace ShootRunner
 
         private void newWidgetToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Program.AddEmptyWidget();
+            Program.widgetManager.AddEmptyWidget();
         }
 
         private void transparentToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            this.window.transparent = !this.window.transparent;
-            transparentToolStripMenuItem.Checked = this.window.transparent;
+            FormTransparent form = new FormTransparent(null, this);
+            form.trackBar1.Value = (int)(this.Opacity * 100);
+            form.ShowDialog();
+            this.window.transparent = this.Opacity;
+        }
 
-            if (this.window.transparent)
-            {
-                this.Opacity = 0.8;
-            }
-            else
-            {
-                this.Opacity = 1.0;
-            }
+        private void selectWindowToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void removeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            this.CloseForm();
+        }
+
+        private void selectToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

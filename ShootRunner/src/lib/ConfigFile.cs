@@ -9,6 +9,7 @@ using System.Reflection;
 using System.IO;
 using System.Drawing;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using System.Collections;
 
 namespace ShootRunner
 {
@@ -83,24 +84,44 @@ namespace ShootRunner
                 item.Add(new XElement("height", pin.Height.ToString()));
                 item.Add(new XElement("mosttop", ConvertTo.BoolToString(pin.window.mosttop)));
                 item.Add(new XElement("locked", ConvertTo.BoolToString(pin.window.locked)));
-                item.Add(new XElement("transparent", ConvertTo.BoolToString(pin.window.locked)));
+                item.Add(new XElement("transparent", ConvertTo.DoubleToString(pin.window.transparent)));
             }
 
             XElement widgets = new XElement("widgets");
             root.Add(widgets);
 
-            foreach (FormWidget w in Program.widgets)
+            foreach (Widget w in Program.widgetManager.widgets)
             {
                 XElement widget = new XElement("widget");
                 widgets.Add(widget);
-                widget.Add(new XElement("type", w.Type));
-                widget.Add(new XElement("left", w.Left.ToString()));
-                widget.Add(new XElement("top", w.Top.ToString()));
-                widget.Add(new XElement("width", w.Width.ToString()));
-                widget.Add(new XElement("height", w.Height.ToString()));
-                widget.Add(new XElement("mosttop", ConvertTo.BoolToString(w.TopMost)));
+                widget.Add(new XElement("type", w.type));
+                if (w.widgetForm != null)
+                {
+                    widget.Add(new XElement("left", w.widgetForm.Left.ToString()));
+                    widget.Add(new XElement("top", w.widgetForm.Top.ToString()));
+                    widget.Add(new XElement("width", w.widgetForm.Width.ToString()));
+                    widget.Add(new XElement("height", w.widgetForm.Height.ToString()));
+                    widget.Add(new XElement("mosttop", ConvertTo.BoolToString(w.widgetForm.TopMost)));
+                   
+                }
+
+                widget.Add(new XElement("type", w.widgetType.name));
                 widget.Add(new XElement("locked", ConvertTo.BoolToString(w.locked)));
-                widget.Add(new XElement("transparent", ConvertTo.BoolToString(w.locked)));
+                widget.Add(new XElement("transparent", ConvertTo.DoubleToString(w.transparent)));
+
+
+                XElement data = new XElement("data");
+                widget.Add(data);
+
+                foreach (KeyValuePair<string, string> entry in w.data)
+                {
+                    string key = entry.Key;
+                    string value = entry.Value;
+                    XElement item = new XElement("item");
+                    data.Add(item);
+                    item.Add(new XAttribute("key", key));
+                    item.Value = value;
+                }
             }
 
             try
@@ -234,7 +255,7 @@ namespace ShootRunner
 
                                         if (el.Name.ToString() == "transparent")
                                         {
-                                            window.transparent = ConvertTo.StringToBool(el.Value);
+                                            window.transparent = ConvertTo.StringToDouble(el.Value);
                                         }
 
                                     }
@@ -250,60 +271,72 @@ namespace ShootRunner
 
                     if (item.Name.ToString() == "widgets")
                     {
-                        foreach (XElement widget in item.Elements())
+                        foreach (XElement widgetEl in item.Elements())
                         {
 
-                            if (widget.Name.ToString() == "widget")
+                            if (widgetEl.Name.ToString() == "widget")
                             {
 
-                                FormWidget widgetForm = new FormWidget();
-                                Program.widgets.Add(widgetForm);
+                                Widget widget = new Widget();
+                                Program.widgetManager.widgets.Add(widget);
 
-                                foreach (XElement el in widget.Elements())
+                                foreach (XElement el in widgetEl.Elements())
                                 {
                                     try
                                     {
 
                                         if (el.Name.ToString() == "type")
                                         {
-                                            widgetForm.Type = el.Value;
+                                            widget.type = el.Value;
                                         }
 
                                         if (el.Name.ToString() == "left")
                                         {
-                                            widgetForm.StartLeft = ConvertTo.StringToInt(el.Value);
+                                            widget.StartLeft = ConvertTo.StringToInt(el.Value);
                                         }
 
                                         if (el.Name.ToString() == "top")
                                         {
-                                            widgetForm.StartTop = ConvertTo.StringToInt(el.Value);
+                                            widget.StartTop = ConvertTo.StringToInt(el.Value);
                                         }
 
                                         if (el.Name.ToString() == "width")
                                         {
-                                            widgetForm.StartWidth = ConvertTo.StringToInt(el.Value);
+                                            widget.StartWidth = ConvertTo.StringToInt(el.Value);
                                         }
 
                                         if (el.Name.ToString() == "height")
                                         {
-                                            widgetForm.StartHeight = ConvertTo.StringToInt(el.Value);
+                                            widget.StartHeight = ConvertTo.StringToInt(el.Value);
                                         }
 
                                         if (el.Name.ToString() == "mosttop")
                                         {
-                                            widgetForm.TopMost = ConvertTo.StringToBool(el.Value);
+                                            widget.mosttop = ConvertTo.StringToBool(el.Value);
                                         }
 
                                         if (el.Name.ToString() == "locked")
                                         {
-                                            widgetForm.locked = ConvertTo.StringToBool(el.Value);
+                                            widget.locked = ConvertTo.StringToBool(el.Value);
                                         }
 
                                         if (el.Name.ToString() == "transparent")
                                         {
-                                            widgetForm.transparent = ConvertTo.StringToBool(el.Value);
+                                            widget.transparent = ConvertTo.StringToDouble(el.Value);
                                         }
 
+                                        if (el.Name.ToString() == "data")
+                                        {
+                                            foreach (XElement el1 in el.Elements())
+                                            {
+                                                if (el1.Name.ToString() == "item")
+                                                {
+                                                    if (el1.Attribute("key") != null) {
+                                                        widget.data.Add(el1.Attribute("key").Value, el1.Value);
+                                                    }
+                                                }
+                                            }
+                                        }
                                     }
                                     catch (Exception ex)
                                     {

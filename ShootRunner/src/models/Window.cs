@@ -21,7 +21,7 @@ namespace ShootRunner
         public bool isDesktop = false;
         public bool isTaskbar = false;
         public bool locked = false;
-        public bool transparent = false;
+        public double transparent = 1.0;
         public bool mosttop = false;
     }
 }

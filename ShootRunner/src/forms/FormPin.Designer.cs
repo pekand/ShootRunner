@@ -31,67 +31,66 @@
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormPin));
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.windowToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.minimalizeToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-            this.closeToolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
+            this.pinToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.removeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.selectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.commandToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.setCommandToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.widgetToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.newWidgetToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.applicationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.newPinToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.closeToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.setIconToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.dobleClickToActivateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.closeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.transparentToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
+            this.newPinToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // contextMenuStrip1
             // 
             this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.windowToolStripMenuItem,
+            this.pinToolStripMenuItem,
             this.commandToolStripMenuItem,
             this.widgetToolStripMenuItem,
             this.applicationToolStripMenuItem,
-            this.optionsToolStripMenuItem,
-            this.closeToolStripMenuItem});
+            this.optionsToolStripMenuItem});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(151, 148);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(147, 124);
             this.contextMenuStrip1.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip1_Opening);
             // 
-            // windowToolStripMenuItem
+            // pinToolStripMenuItem
             // 
-            this.windowToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.minimalizeToolStripMenuItem1,
-            this.closeToolStripMenuItem2});
-            this.windowToolStripMenuItem.Name = "windowToolStripMenuItem";
-            this.windowToolStripMenuItem.Size = new System.Drawing.Size(150, 24);
-            this.windowToolStripMenuItem.Text = "Window";
+            this.pinToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.removeToolStripMenuItem,
+            this.selectToolStripMenuItem,
+            this.newPinToolStripMenuItem});
+            this.pinToolStripMenuItem.Name = "pinToolStripMenuItem";
+            this.pinToolStripMenuItem.Size = new System.Drawing.Size(146, 24);
+            this.pinToolStripMenuItem.Text = "Pin";
             // 
-            // minimalizeToolStripMenuItem1
+            // removeToolStripMenuItem
             // 
-            this.minimalizeToolStripMenuItem1.Name = "minimalizeToolStripMenuItem1";
-            this.minimalizeToolStripMenuItem1.Size = new System.Drawing.Size(143, 24);
-            this.minimalizeToolStripMenuItem1.Text = "Minimalize";
-            this.minimalizeToolStripMenuItem1.Click += new System.EventHandler(this.minimalizeToolStripMenuItem_Click);
+            this.removeToolStripMenuItem.Name = "removeToolStripMenuItem";
+            this.removeToolStripMenuItem.Size = new System.Drawing.Size(180, 24);
+            this.removeToolStripMenuItem.Text = "Remove";
+            this.removeToolStripMenuItem.Click += new System.EventHandler(this.removeToolStripMenuItem_Click);
             // 
-            // closeToolStripMenuItem2
+            // selectToolStripMenuItem
             // 
-            this.closeToolStripMenuItem2.Name = "closeToolStripMenuItem2";
-            this.closeToolStripMenuItem2.Size = new System.Drawing.Size(143, 24);
-            this.closeToolStripMenuItem2.Text = "Close";
-            this.closeToolStripMenuItem2.Click += new System.EventHandler(this.closeToolStripMenuItem1_Click);
+            this.selectToolStripMenuItem.Name = "selectToolStripMenuItem";
+            this.selectToolStripMenuItem.Size = new System.Drawing.Size(180, 24);
+            this.selectToolStripMenuItem.Text = "Select";
+            this.selectToolStripMenuItem.Click += new System.EventHandler(this.selectToolStripMenuItem_Click);
             // 
             // commandToolStripMenuItem
             // 
             this.commandToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.setCommandToolStripMenuItem1});
             this.commandToolStripMenuItem.Name = "commandToolStripMenuItem";
-            this.commandToolStripMenuItem.Size = new System.Drawing.Size(150, 24);
+            this.commandToolStripMenuItem.Size = new System.Drawing.Size(146, 24);
             this.commandToolStripMenuItem.Text = "Command";
             // 
             // setCommandToolStripMenuItem1
@@ -106,36 +105,28 @@
             this.widgetToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.newWidgetToolStripMenuItem});
             this.widgetToolStripMenuItem.Name = "widgetToolStripMenuItem";
-            this.widgetToolStripMenuItem.Size = new System.Drawing.Size(150, 24);
+            this.widgetToolStripMenuItem.Size = new System.Drawing.Size(146, 24);
             this.widgetToolStripMenuItem.Text = "Widget";
             // 
             // newWidgetToolStripMenuItem
             // 
             this.newWidgetToolStripMenuItem.Name = "newWidgetToolStripMenuItem";
-            this.newWidgetToolStripMenuItem.Size = new System.Drawing.Size(180, 24);
+            this.newWidgetToolStripMenuItem.Size = new System.Drawing.Size(150, 24);
             this.newWidgetToolStripMenuItem.Text = "New widget";
             this.newWidgetToolStripMenuItem.Click += new System.EventHandler(this.newWidgetToolStripMenuItem_Click);
             // 
             // applicationToolStripMenuItem
             // 
             this.applicationToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.newPinToolStripMenuItem,
             this.closeToolStripMenuItem1});
             this.applicationToolStripMenuItem.Name = "applicationToolStripMenuItem";
-            this.applicationToolStripMenuItem.Size = new System.Drawing.Size(150, 24);
+            this.applicationToolStripMenuItem.Size = new System.Drawing.Size(146, 24);
             this.applicationToolStripMenuItem.Text = "Application";
-            // 
-            // newPinToolStripMenuItem
-            // 
-            this.newPinToolStripMenuItem.Name = "newPinToolStripMenuItem";
-            this.newPinToolStripMenuItem.Size = new System.Drawing.Size(128, 24);
-            this.newPinToolStripMenuItem.Text = "New pin";
-            this.newPinToolStripMenuItem.Click += new System.EventHandler(this.newPinToolStripMenuItem_Click);
             // 
             // closeToolStripMenuItem1
             // 
             this.closeToolStripMenuItem1.Name = "closeToolStripMenuItem1";
-            this.closeToolStripMenuItem1.Size = new System.Drawing.Size(128, 24);
+            this.closeToolStripMenuItem1.Size = new System.Drawing.Size(180, 24);
             this.closeToolStripMenuItem1.Text = "Exit";
             this.closeToolStripMenuItem1.Click += new System.EventHandler(this.closeToolStripMenuItem1_Click_1);
             // 
@@ -146,7 +137,7 @@
             this.dobleClickToActivateToolStripMenuItem,
             this.transparentToolStripMenuItem});
             this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
-            this.optionsToolStripMenuItem.Size = new System.Drawing.Size(150, 24);
+            this.optionsToolStripMenuItem.Size = new System.Drawing.Size(146, 24);
             this.optionsToolStripMenuItem.Text = "Options";
             // 
             // setIconToolStripMenuItem1
@@ -163,12 +154,12 @@
             this.dobleClickToActivateToolStripMenuItem.Text = "Doble click to activate";
             this.dobleClickToActivateToolStripMenuItem.Click += new System.EventHandler(this.dobleClickToActivateToolStripMenuItem_Click);
             // 
-            // closeToolStripMenuItem
+            // transparentToolStripMenuItem
             // 
-            this.closeToolStripMenuItem.Name = "closeToolStripMenuItem";
-            this.closeToolStripMenuItem.Size = new System.Drawing.Size(150, 24);
-            this.closeToolStripMenuItem.Text = "Remove pin";
-            this.closeToolStripMenuItem.Click += new System.EventHandler(this.closeToolStripMenuItem_Click);
+            this.transparentToolStripMenuItem.Name = "transparentToolStripMenuItem";
+            this.transparentToolStripMenuItem.Size = new System.Drawing.Size(211, 24);
+            this.transparentToolStripMenuItem.Text = "Transparent";
+            this.transparentToolStripMenuItem.Click += new System.EventHandler(this.transparentToolStripMenuItem_Click);
             // 
             // openFileDialog1
             // 
@@ -176,12 +167,12 @@
             this.openFileDialog1.Filter = "Image Files|*.ico;*.bmp;*.jpg;*.jpeg;*.png;";
             this.openFileDialog1.Title = "Select icon";
             // 
-            // transparentToolStripMenuItem
+            // newPinToolStripMenuItem
             // 
-            this.transparentToolStripMenuItem.Name = "transparentToolStripMenuItem";
-            this.transparentToolStripMenuItem.Size = new System.Drawing.Size(211, 24);
-            this.transparentToolStripMenuItem.Text = "Transparent";
-            this.transparentToolStripMenuItem.Click += new System.EventHandler(this.transparentToolStripMenuItem_Click);
+            this.newPinToolStripMenuItem.Name = "newPinToolStripMenuItem";
+            this.newPinToolStripMenuItem.Size = new System.Drawing.Size(180, 24);
+            this.newPinToolStripMenuItem.Text = "New pin";
+            this.newPinToolStripMenuItem.Click += new System.EventHandler(this.newWidgetToolStripMenuItem_Click);
             // 
             // FormPin
             // 
@@ -210,11 +201,7 @@
         #endregion
 
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
-        private System.Windows.Forms.ToolStripMenuItem closeToolStripMenuItem;
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
-        private System.Windows.Forms.ToolStripMenuItem windowToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem minimalizeToolStripMenuItem1;
-        private System.Windows.Forms.ToolStripMenuItem closeToolStripMenuItem2;
         private System.Windows.Forms.ToolStripMenuItem commandToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem setCommandToolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem optionsToolStripMenuItem;
@@ -222,9 +209,12 @@
         private System.Windows.Forms.ToolStripMenuItem dobleClickToActivateToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem applicationToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem closeToolStripMenuItem1;
-        private System.Windows.Forms.ToolStripMenuItem newPinToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem widgetToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem newWidgetToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem transparentToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem pinToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem removeToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem selectToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem newPinToolStripMenuItem;
     }
 }

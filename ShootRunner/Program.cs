@@ -26,6 +26,7 @@ namespace ShootRunner
         public static string configPath = "";
         public static string errorLogPath = "";
         public static string configFielPath = "";
+        public static string widgetsPath = "";
         public static string commandFielPath = "";
         public static string commandFielName = "commands.xml";
         public static DateTime commandFielPathLastChange;
@@ -39,12 +40,15 @@ namespace ShootRunner
         public static bool pause = false;
 
         public static List<FormPin> pins = new List<FormPin>();
-        public static List<FormWidget> widgets = new List<FormWidget>();
+        
 
         public static string powershell = null;
 
         public static bool updated = false;
         public static DateTime updatedTime = new DateTime();
+
+
+        public static WidgetManager widgetManager = new WidgetManager();
 
         public static void Update() {
             Program.updated = true;
@@ -141,25 +145,66 @@ namespace ShootRunner
                     {
                         Program.commands.Clear();
                         Program.commandFielPathLastChange = File.GetLastWriteTime(Program.commandFielPath);
-                        XDocument xdoc = XDocument.Load(Program.commandFielPath);
-                        var commands = xdoc.Descendants("command");
-                        foreach (var commandElement in commands)
-                        {
-                            Command newCommand = new Command();
-                            Program.commands.Add(newCommand);
 
-                            newCommand.enabled = commandElement.Element("enabled")?.Value == "1" ? true : false;
-                            newCommand.shortcut = commandElement.Element("shortcut")?.Value;
-                            newCommand.open = commandElement.Element("open")?.Value;
-                            newCommand.command = commandElement.Element("command")?.Value;
-                            newCommand.parameters = commandElement.Element("parameters")?.Value;
-                            newCommand.window = commandElement.Element("window")?.Value;
-                            newCommand.currentwindow = commandElement.Element("currentwindow")?.Value;
-                            newCommand.workdir = commandElement.Element("workdir")?.Value;
-                            newCommand.keypress = commandElement.Element("keypress")?.Value;
-                            newCommand.action = commandElement.Element("action")?.Value;
-                            newCommand.process = commandElement.Element("process")?.Value;
+
+                        string xml = File.ReadAllText(Program.configFielPath);
+
+                        /*if (Program.isDebug())
+                        {
+                            xml =  @"<root>
+                            <commands>
+                            <command>
+                            <shortcut>F7</shortcut>
+                            <enabled>1</enabled>
+                            <action>CreatePin</action>
+                            <parameters></parameters>y
+                            </command>
+                            <command>
+                            <shortcut>F8</shortcut>
+                            <enabled>1</enabled>
+                            <action>Close</action>
+                            <parameters></parameters>
+                            </command>
+                            </commands>
+                            </root>";
+                        }*/
+
+                        try
+                        {
+                            XmlReaderSettings xws = new XmlReaderSettings
+                            {
+                                CheckCharacters = false
+                            };
+
+                            using (XmlReader xr = XmlReader.Create(new StringReader(xml), xws))
+                            {
+
+                                XElement root = XElement.Load(xr);
+                                var commands = root.Descendants("command");
+                                foreach (var commandElement in commands)
+                                {
+                                    Command newCommand = new Command();
+                                    Program.commands.Add(newCommand);
+
+                                    newCommand.enabled = commandElement.Element("enabled")?.Value == "1" ? true : false;
+                                    newCommand.shortcut = commandElement.Element("shortcut")?.Value;
+                                    newCommand.open = commandElement.Element("open")?.Value;
+                                    newCommand.command = commandElement.Element("command")?.Value;
+                                    newCommand.parameters = commandElement.Element("parameters")?.Value;
+                                    newCommand.window = commandElement.Element("window")?.Value;
+                                    newCommand.currentwindow = commandElement.Element("currentwindow")?.Value;
+                                    newCommand.workdir = commandElement.Element("workdir")?.Value;
+                                    newCommand.keypress = commandElement.Element("keypress")?.Value;
+                                    newCommand.action = commandElement.Element("action")?.Value;
+                                    newCommand.process = commandElement.Element("process")?.Value;
+                                }
+                            }
                         }
+                        catch (Exception ex)
+                        {
+                            Program.error(ex.Message);
+                        }
+ 
                     }
                     catch (Exception ex)
                     {
@@ -245,6 +290,7 @@ namespace ShootRunner
         public static ConfigFile configFile = null;
 
         public static void AddEmptyPin() { 
+
             Window window = new Window();
             window.Type = "COMMAND";
             window.doubleClickCommand = true;
@@ -265,26 +311,7 @@ namespace ShootRunner
             }
         }
 
-        public static void AddEmptyWidget()
-        {
-            FormWidget widget = new FormWidget();
-            widgets.Add(widget);
-            widget.TopMost = true;
-            widget.Show();
-            widget.Center();
-
-            Program.Update();
-        }
-
-        public static void OpenWidgets()
-        {
-            foreach (var widget in Program.widgets)
-            {
-                widget.Show();
-            }
-        }
-
-
+        
 
         [STAThread]
         static void Main()
@@ -308,28 +335,7 @@ namespace ShootRunner
             Program.commandFielPath = Path.Combine(Program.configPath, (isDebug() ? "DEBUG." : "") + Program.commandFielName);
             Program.errorLogPath = Path.Combine(Program.configPath, (isDebug() ? "DEBUG." : "") + "error.log");
 
-           /* if (!File.Exists(Program.commandFielPath) || isDebug()) {
-                try
-                {
-                    File.WriteAllText(commandFielPath, @"<root>
-<commands>
-    <command>
-    <shortcut>F7</shortcut>
-    <enabled>1</enabled>
-    <action>CreatePin</action>
-    <parameters></parameters>y
-    </command>
-    <command>
-    <shortcut>F8</shortcut>
-    <enabled>1</enabled>
-    <action>Close</action>
-    <parameters></parameters>
-    </command>
-</commands>
-</root>");
-                } catch { 
-                }
-            }*/
+            Program.widgetsPath = Path.Combine(Program.configPath, (isDebug() ? "DEBUG." : "") + "widgets");
 
             ClearBigLog();
 
@@ -343,12 +349,9 @@ namespace ShootRunner
             Program.configFile.Load();
 
             Program.loadCommands();
-
             Program.FindPowershell();
-
             Program.OpenPins();
-            Program.OpenWidgets();
-
+            widgetManager.OpenWidgets();
             Program.StartTimer();
 
             formShootRunner = new FormShootRunner();
