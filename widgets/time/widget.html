@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Current Time Display</title>
+    <style>
+        body {
+            background: #618685;
+        }
+        #time {
+            font-size: 2em;
+            font-family: Arial, sans-serif;
+        }
+    </style>
+</head>
+<body>
+
+<div id="time"></div>
+
+<script>
+
+function updateDateTime() {
+        const now = new Date();
+
+        // Extract date components
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+
+        // Extract time components
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+
+        // Get the day of the week
+        const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const dayName = daysOfWeek[now.getDay()];
+
+        // Combine into desired format
+        const formattedDateTime = `${year}-${month}-${day} ${hours}:${minutes}:${seconds} ${dayName}`;
+
+        // Display on the webpage
+       return formattedDateTime;
+    }
+
+    function updateTime() {
+        const timeString = updateDateTime();
+        document.getElementById('time').textContent = timeString;
+    }
+
+    // Update the time immediately upon page load
+    updateTime();
+
+    // Update the time every second (1000 milliseconds)
+    setInterval(updateTime, 10000);
+</script>
+
+</body>
+</html>

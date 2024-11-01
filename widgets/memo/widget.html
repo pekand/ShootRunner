@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Full Window Textarea</title>
+    <style>
+        body {
+            padding: 0px;
+            margin: 0px;
+            background:yellow;
+        }
+        textarea {
+            background:yellow;
+            margin: 5px;
+            padding: 5px;
+            width: 95vw;
+            height: 95vh;
+            border: none;         /* Optional: remove border */
+            font-size: 1.2em;     /* Optional: larger font */            
+            box-sizing: border-box; /* Ensure padding doesn’t affect total size */
+            resize: none;
+             outline: none;
+        }
+    </style>
+</head>
+<body>
+    <textarea id="tarea" placeholder=""></textarea>
+    <script type="text/javascript">
+
+        function resizeTextarea() {
+            const textarea = document.getElementById('tarea');
+            textarea.style.width = (window.innerWidth-20) + 'px';
+            textarea.style.height = (window.innerHeight-20) + 'px';
+        }
+
+        // Initial resize on page load
+        window.addEventListener('load', resizeTextarea);
+
+        // Resize textarea whenever the window is resized
+        window.addEventListener('resize', resizeTextarea);
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            const textarea = document.getElementById('tarea');
+            textarea.addEventListener('input', function() {
+                setData('text', textarea.value);
+            });
+
+            getData('text');
+        });
+
+        window.receiveMessage = function(data) {
+             const textarea = document.getElementById('tarea');
+            textarea.value = data.value
+        };
+    </script>
+</body>
+</html>
