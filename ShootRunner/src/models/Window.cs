@@ -23,5 +23,7 @@ namespace ShootRunner
         public bool locked = false;
         public double transparent = 1.0;
         public bool mosttop = false;
+        public List<WindowProperty> props = null;
+
     }
 }

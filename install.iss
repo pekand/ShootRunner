@@ -17,18 +17,15 @@
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
-AppId={{21831117-41CD-40B4-B1AC-099BC73516C5}
+AppId={{3AAD41F2-BCCE-45E0-BBD9-C8112867471B}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
-;AppVerName={#MyAppName} {#MyAppVersion}
 AppPublisher={#MyAppPublisher}
 AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
 DefaultDirName={pf}\{#MyAppName}
 DisableProgramGroupPage=yes
-; Uncomment the following line to run in non administrative install mode (install for current user only.)
-;PrivilegesRequired=lowest
 OutputBaseFilename=ShootRunner_v{#MyAppVersion}
 SetupIconFile=ShootRunner\ShootRunner.ico
 Compression=lzma
@@ -43,10 +40,40 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "ShootRunner\bin\x64\Release\ShootRunner.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "ShootRunner\bin\x64\Release\runtimes\win-x64\native\WebView2Loader.dll"; DestDir: "{app}\runtimes\win-x64\native\"; Flags: ignoreversion
 Source: "ShootRunner\bin\x64\Release\Interop.Shell32.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "ShootRunner\bin\x64\Release\Microsoft.Bcl.AsyncInterfaces.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "ShootRunner\bin\x64\Release\Microsoft.Bcl.AsyncInterfaces.xml"; DestDir: "{app}"; Flags: ignoreversion
+Source: "ShootRunner\bin\x64\Release\Microsoft.Web.WebView2.Core.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "ShootRunner\bin\x64\Release\Microsoft.Web.WebView2.Core.xml"; DestDir: "{app}"; Flags: ignoreversion
+Source: "ShootRunner\bin\x64\Release\Microsoft.Web.WebView2.WinForms.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "ShootRunner\bin\x64\Release\Microsoft.Web.WebView2.WinForms.xml"; DestDir: "{app}"; Flags: ignoreversion
+Source: "ShootRunner\bin\x64\Release\Microsoft.Web.WebView2.Wpf.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "ShootRunner\bin\x64\Release\Microsoft.Web.WebView2.Wpf.xml"; DestDir: "{app}"; Flags: ignoreversion
+Source: "ShootRunner\bin\x64\Release\ShootRunner.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "ShootRunner\bin\x64\Release\ShootRunner.exe.config"; DestDir: "{app}"; Flags: ignoreversion
-; NOTE: Don't use "Flags: ignoreversion" on any shared system files
+Source: "ShootRunner\bin\x64\Release\ShootRunner.pdb"; DestDir: "{app}"; Flags: ignoreversion
+Source: "ShootRunner\bin\x64\Release\System.Buffers.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "ShootRunner\bin\x64\Release\System.Buffers.xml"; DestDir: "{app}"; Flags: ignoreversion
+Source: "ShootRunner\bin\x64\Release\System.Memory.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "ShootRunner\bin\x64\Release\System.Memory.xml"; DestDir: "{app}"; Flags: ignoreversion
+Source: "ShootRunner\bin\x64\Release\System.Numerics.Vectors.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "ShootRunner\bin\x64\Release\System.Numerics.Vectors.xml"; DestDir: "{app}"; Flags: ignoreversion
+Source: "ShootRunner\bin\x64\Release\System.Runtime.CompilerServices.Unsafe.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "ShootRunner\bin\x64\Release\System.Runtime.CompilerServices.Unsafe.xml"; DestDir: "{app}"; Flags: ignoreversion
+Source: "ShootRunner\bin\x64\Release\System.Text.Encodings.Web.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "ShootRunner\bin\x64\Release\System.Text.Encodings.Web.xml"; DestDir: "{app}"; Flags: ignoreversion
+Source: "ShootRunner\bin\x64\Release\System.Text.Json.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "ShootRunner\bin\x64\Release\System.Text.Json.xml"; DestDir: "{app}"; Flags: ignoreversion
+Source: "ShootRunner\bin\x64\Release\System.Threading.Tasks.Extensions.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "ShootRunner\bin\x64\Release\System.Threading.Tasks.Extensions.xml"; DestDir: "{app}"; Flags: ignoreversion
+Source: "ShootRunner\bin\x64\Release\System.ValueTuple.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "ShootRunner\bin\x64\Release\System.ValueTuple.xml"; DestDir: "{app}"; Flags: ignoreversion
+
+
+Source: "widgets\memo\widget.html"; DestDir: "{userappdata}\widgets\memo\widget.html"; Flags: ignoreversion createallsubdirs recursesubdirs comparetimestamp
+Source: "widgets\time\widget.html"; DestDir: "{userappdata}\widgets\time\widget.html"; Flags: ignoreversion createallsubdirs recursesubdirs comparetimestamp
+
 
 [Icons]
 Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
@@ -55,6 +82,3 @@ Name: "{commondesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
 
-;[Registry]
-;Root: HKLM; Subkey: "Software\pekand"; Flags: uninsdeletekey
-;Root: HKLM; Subkey: "Software\pekand\ShootRunner"; Flags: uninsdeletekey; ValueType: string; ValueName: "version"; ValueData: "{#GetRevision()}"

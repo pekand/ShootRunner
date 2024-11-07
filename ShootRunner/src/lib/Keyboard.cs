@@ -221,7 +221,7 @@ namespace ShootRunner
                 }
             }
 
-            List<Process> list = Task.FindProcess(path);
+            List<Process> list = JobTask.FindProcess(path);
 
             foreach (var process in list)
             {

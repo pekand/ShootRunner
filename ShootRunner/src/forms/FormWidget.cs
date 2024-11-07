@@ -23,8 +23,19 @@ namespace ShootRunner
 
     public partial class FormWidget : Form
     {
-
         public Widget widget = null;
+        public Microsoft.Web.WebView2.WinForms.WebView2 webView = null;
+
+        private const int GWL_STYLE = -16;
+        private const int WS_CAPTION = 0x00C00000;
+        private const int WM_NCLBUTTONDOWN = 0xA1;
+        private const int HTCAPTION = 0x2;
+
+        [DllImport("user32.dll", SetLastError = true)]
+        static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        static extern int GetWindowLong(IntPtr hWnd, int nIndex);
 
         public FormWidget(Widget widget)
         {
@@ -34,21 +45,18 @@ namespace ShootRunner
             InitializeWebView2();
         }
 
-        public int initialCaptionHeight = 0;
-
         private void FormWidget_Load(object sender, EventArgs e)
         {
             this.MinimumSize = new Size(64, 64);
             this.SetStartPosition();
             this.ShowInTaskbar = false;
-            initialCaptionHeight = 29;
             this.Deactivate += new EventHandler(this.Form_Deactivate);
             this.Activated += new EventHandler(this.Form_Activated);
             this.Opacity = this.widget.transparent < 0.2 ? 0.2 : this.widget.transparent;
 
             AddTypesToContextMenu();
-
         }
+
         protected override CreateParams CreateParams
         {
             get
@@ -73,6 +81,7 @@ namespace ShootRunner
         public void SelectType(WidgetType widgetType)
         {
             widget.widgetType = widgetType;
+            widget.type = widgetType.name;
             this.InitializeWebView2();
         }
 
@@ -95,8 +104,8 @@ namespace ShootRunner
             this.Height = this.widget.StartHeight;
         }
 
+        ///////////////////////////////////////////////////////////////////////
 
-        Microsoft.Web.WebView2.WinForms.WebView2 webView = null;
         private async void InitializeWebView2()
         {
 
@@ -106,131 +115,144 @@ namespace ShootRunner
                 webView.Dispose();
             }
 
-            webView = new Microsoft.Web.WebView2.WinForms.WebView2();
-            webView.Dock = DockStyle.Fill;
-            
-            this.Controls.Add(webView);
-
-            await webView.EnsureCoreWebView2Async(null);
-
-            await webView.CoreWebView2.CallDevToolsProtocolMethodAsync(
-                "Runtime.enable", "{}");
-
-            await webView.CoreWebView2.CallDevToolsProtocolMethodAsync(
-                "Log.enable", "{}");
-
-            webView.CoreWebView2.WebMessageReceived += WebView_WebMessageReceived;
-
-            webView.CoreWebView2.ContextMenuRequested += CoreWebView2_ContextMenuRequested;
-
-            string htmlContent = "";
-            if (widget!= null && widget.type != null && widget.widgetType != null) {
-                htmlContent = widget.widgetType.html;
-            }
-
-            string script1 = @"
-
-                (function() {
-                    const originalLog = console.log;
-                    const originalError = console.error;
-
-                    // Override console.log
-                    console.log = function(...args) {
-                        window.chrome.webview.postMessage({type: 'log', message: args.join(' ')});
-                        originalLog.apply(console, args);
-                    };
-
-                    // Override console.error
-                    console.error = function(...args) {
-                        window.chrome.webview.postMessage({type: 'error', message: args.join(' ')});
-                        originalError.apply(console, args);
-                    };
-
-                    window.onerror = function(...args) {
-                        window.chrome.webview.postMessage({type: 'error', message: args.join(' ')});
-                        return true;
-                    };
-
-
-                })();              
-
-            ";
-
-           
-            //await webView.CoreWebView2.ExecuteScriptAsync(script1);
-
-            await webView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(script1);
-
-            string script2 = @"
-
-                function uid(length = 32) {
-                    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-                    let result = '';
-                    const charactersLength = characters.length;
-                    for (let i = 0; i < length; i++) {
-                        const randomIndex = Math.floor(Math.random() * charactersLength);
-                        result += characters.charAt(randomIndex);
-                    }
-                    return result;
-                }
-
-                function setData(k,v){
-                    return send('setData', null, k ,v, null);
-                }
-
-                function getData(k) {
-                    return send('getData', null, k , null, null);
-                }
-
-                function send(t,m,k,v,p){
-                    var message = {
-                        uid: uid(),
-                        parent: p,
-                        type: t, 
-                        message: m,
-                        key: k,
-                        value: v                        
-                    };
-                    window.chrome.webview.postMessage(message);
-                    return message;
-                }
-
-                window.receiveMessage = function(response) {
-                    document.getElementById('response').innerText = data.message;
-                };
-
-                window.chrome.webview.addEventListener('message', event => {
-                    const response = event.data;
-                    if(typeof window.receiveMessage === 'function') { 
-                        window.receiveMessage(response);
-                    }
-                });
-
-            ";
-
-            await webView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(script2);
-
-            webView.NavigateToString(htmlContent);
-        }
-
-        private static readonly string Characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        private static readonly Random Random = new Random();
-
-        public string uid(int length = 32)
-        {
-            StringBuilder result = new StringBuilder(length);
-            int charactersLength = Characters.Length;
-
-            for (int i = 0; i < length; i++)
+            try
             {
-                int randomIndex = Random.Next(charactersLength);
-                result.Append(Characters[randomIndex]);
+                webView = new Microsoft.Web.WebView2.WinForms.WebView2();
+                webView.Dock = DockStyle.Fill;
+            
+                this.Controls.Add(webView);
+
+                
+                var environment = await CoreWebView2Environment.CreateAsync(userDataFolder: Program.webview2Path);
+                await webView.EnsureCoreWebView2Async(environment);
+
+                await webView.CoreWebView2.CallDevToolsProtocolMethodAsync(
+                    "Runtime.enable", "{}");
+
+                await webView.CoreWebView2.CallDevToolsProtocolMethodAsync(
+                    "Log.enable", "{}");
+
+                webView.CoreWebView2.WebMessageReceived += WebView_WebMessageReceived;
+
+                webView.CoreWebView2.ContextMenuRequested += CoreWebView2_ContextMenuRequested;
+
+                string htmlContent = "";
+                if (widget!= null && widget.type != null && widget.widgetType != null) {
+                    htmlContent = widget.widgetType.html;
+                }
+
+                string script1 = @"
+
+                    (function() {
+                        const originalLog = console.log;
+                        const originalError = console.error;
+
+                        // Override console.log
+                        console.log = function(...args) {
+                            window.chrome.webview.postMessage({type: 'log', message: args.join(' ')});
+                            originalLog.apply(console, args);
+                        };
+
+                        // Override console.error
+                        console.error = function(...args) {
+                            window.chrome.webview.postMessage({type: 'error', message: args.join(' ')});
+                            originalError.apply(console, args);
+                        };
+
+                        window.onerror = function(...args) {
+                            window.chrome.webview.postMessage({type: 'error', message: args.join(' ')});
+                            return true;
+                        };
+
+
+                    })();              
+
+                ";
+           
+
+                await webView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(script1);
+
+                string script2 = @"
+
+                    function uid(length = 32) {
+                        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+                        let result = '';
+                        const charactersLength = characters.length;
+                        for (let i = 0; i < length; i++) {
+                            const randomIndex = Math.floor(Math.random() * charactersLength);
+                            result += characters.charAt(randomIndex);
+                        }
+                        return result;
+                    }
+
+                    function setData(k,v){
+                        return send('setData', null, k ,v, null);
+                    }
+
+                    function getData(k) {
+                        return send('getData', null, k , null, null);
+                    }
+
+                    function send(t,m,k,v,p){
+                        var message = {
+                            uid: uid(),
+                            parent: p,
+                            type: t, 
+                            message: m,
+                            key: k,
+                            value: v                        
+                        };
+                        window.chrome.webview.postMessage(message);
+                        return message;
+                    }
+
+                    window.receiveMessage = function(response) {
+                        document.getElementById('response').innerText = data.message;
+                    };
+
+                    window.chrome.webview.addEventListener('message', event => {
+                        const response = event.data;
+                        if(typeof window.receiveMessage === 'function') { 
+                            window.receiveMessage(response);
+                        }
+                    });
+
+                ";
+
+                await webView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(script2);
+
+                webView.NavigationCompleted += WebView_NavigationCompleted;
+
+                webView.NavigateToString(htmlContent);
+
+
+                
+            }
+            catch (Exception ex)
+            {
+
+                Program.error(ex.Message);
             }
 
-            return result.ToString();
         }
 
-        // Handle console messages from JavaScript
+        private async void WebView_NavigationCompleted(object sender, CoreWebView2NavigationCompletedEventArgs e)
+        {
+            try
+            {
+                string titleJson = await webView.CoreWebView2.ExecuteScriptAsync("document.title");
+                string title = System.Text.Json.JsonSerializer.Deserialize<string>(titleJson);
+                this.Text = title == null || title.Trim() == "" ? "Widget" : title;
+            }
+            catch (Exception ex)
+            {
+
+                Program.error(ex.Message);
+            }
+        }
+
+        ///////////////////////////////////////////////////////////////////////
+
         private void WebView_WebMessageReceived(object sender, CoreWebView2WebMessageReceivedEventArgs e)
         {
             string json = e.WebMessageAsJson;
@@ -260,7 +282,7 @@ namespace ShootRunner
 
                 if (request.type == "getData") {
                     JSMessage response = new JSMessage();
-                    response.uid = this.uid();
+                    response.uid = Program.widgetManager.uid();
                     response.parent = request.uid;
                     response.key = request.key;
                     response.value = this.widget.data.ContainsKey(request.key) ? this.widget.data[request.key] : "";
@@ -274,9 +296,6 @@ namespace ShootRunner
             }   
         }
 
-        ///////////////////////////////////////////////////////////////////////
-
-
         private void CoreWebView2_ContextMenuRequested(object sender, CoreWebView2ContextMenuRequestedEventArgs e)
         {
             e.Handled = true;
@@ -285,69 +304,8 @@ namespace ShootRunner
             menu.Show(Cursor.Position);
         }
 
-        private void webView21_Click(object sender, EventArgs e)
-        {
+        ///////////////////////////////////////////////////////////////////////
 
-        }
-
-        public void CloseForm()
-        {
-            Program.widgetManager.RemoveWidget(this);
-            Program.Update();
-        }
-
-        // Import user32.dll to access window style methods
-        [DllImport("user32.dll", SetLastError = true)]
-        static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
-
-        [DllImport("user32.dll", SetLastError = true)]
-        static extern int GetWindowLong(IntPtr hWnd, int nIndex);
-
-        // Constants for window style
-        const int GWL_STYLE = -16;
-        const int WS_CAPTION = 0x00C00000;
-
-        // Event handler when the form loses focus
-        private void Form_Deactivate(object sender, EventArgs e)
-        {
-            RemoveTitleBar();
-        }
-
-        // Event handler when the form gains focus
-        private void Form_Activated(object sender, EventArgs e)
-        {
-            AddTitleBar();
-        }
-
-        /*Size currentSize;
-        Point currentLocation;
-        int titleBarHeight;
-
-        private void ToggleBorder(FormBorderStyle style)
-        {
-            if (style == FormBorderStyle.None)
-            {
-                currentSize = this.Size;
-                currentLocation = this.Location;
-                titleBarHeight = SystemInformation.CaptionHeight;
-                this.FormBorderStyle = FormBorderStyle.None;
-                this.Top += titleBarHeight;
-                this.Height -= titleBarHeight;
-
-
-            }
-
-            if (style == FormBorderStyle.Sizable)
-            {
-                this.FormBorderStyle = FormBorderStyle.Sizable;
-                this.Size = currentSize;
-                this.Location = currentLocation;
-            }
-
-            
-        }*/
-
-        // Method to remove the title bar
         private void RemoveTitleBar()
         {
             /*initTop = this.Top;
@@ -368,7 +326,6 @@ namespace ShootRunner
 
         }
 
-        // Method to add the title bar back
         private void AddTitleBar()
         {
 
@@ -383,10 +340,6 @@ namespace ShootRunner
             //ToggleBorder(FormBorderStyle.Sizable);
         }
 
-        // Windows message constants
-        private const int WM_NCLBUTTONDOWN = 0xA1;
-        private const int HTCAPTION = 0x2;
-
         protected override void WndProc(ref Message m)
         {
             
@@ -399,7 +352,46 @@ namespace ShootRunner
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////////
-        
+
+        private void Form_Deactivate(object sender, EventArgs e)
+        {
+            RemoveTitleBar();
+        }
+
+        private void Form_Activated(object sender, EventArgs e)
+        {
+            AddTitleBar();
+        }
+
+        private void FormWidget_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            CloseForm();
+        }
+
+        private void FormWidget_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            // Display a confirmation dialog
+            DialogResult result = MessageBox.Show(
+                "Are you sure you want to close form? Data will be lost.",
+                "Confirm Exit",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question
+            );
+
+            if (result == DialogResult.No)
+            {
+                e.Cancel = true;
+            }
+        }
+
+        public void CloseForm()
+        {
+            Program.widgetManager.RemoveWidget(this);
+            Program.Update();
+        }
+
+        /////////////////////////////////////////////////////////////////////////////////////////////
+
         private void contextMenuStrip1_Opening(object sender, CancelEventArgs e)
         {
             mostTopToolStripMenuItem.Checked = this.TopMost;
@@ -434,27 +426,6 @@ namespace ShootRunner
         {
             this.widget.locked = !this.widget.locked;
             lockedToolStripMenuItem.Checked = this.widget.locked;
-        }
-
-        private void FormWidget_FormClosed(object sender, FormClosedEventArgs e)
-        {
-            CloseForm();
-        }
-
-        private void FormWidget_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            // Display a confirmation dialog
-            DialogResult result = MessageBox.Show(
-                "Are you sure you want to close form? Data will be lost.",
-                "Confirm Exit",
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question
-            );
-
-            if (result == DialogResult.No)
-            {
-                e.Cancel = true;
-            }
         }
 
         private void typeToolStripMenuItem_Click(object sender, EventArgs e)
@@ -510,6 +481,11 @@ namespace ShootRunner
             }
         }
 
-        
+        private async void timer1_Tick(object sender, EventArgs e)
+        {
+            /*string titleJson = await webView.ExecuteScriptAsync("document.title");
+            string title = System.Text.Json.JsonSerializer.Deserialize<string>(titleJson);
+            this.Text = title == null || title.Trim() == "" ? "Widget" : title;*/
+        }
     }
 }

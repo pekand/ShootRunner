@@ -372,6 +372,10 @@ namespace ShootRunner
             {
                 ToolsWindow.CascadeWindows();
                 return true;
+            } else if (command.action == "taskbar")
+            {
+                Program.widgetManager.ShowTaskbarWidget(null);
+                return true;
             }
             else
             if (command.action == "LockPc") {
@@ -415,12 +419,12 @@ namespace ShootRunner
                 if (!found) {
                     if (command.open != null && command.open != "") // OPEN IF NOT FOUND
                     {
-                        Task.OpenFileInSystem(command.open);
+                        JobTask.OpenFileInSystem(command.open);
                         return true;
                     }
                     else if (command.command != null && command.command != "") // OPEN IF NOT FOUND
                     {
-                        Task.RunCommand(command.command, command.parameters, command.workdir);
+                        JobTask.RunCommand(command.command, command.parameters, command.workdir);
                         return true;
                     }
                 }
@@ -434,13 +438,13 @@ namespace ShootRunner
                     Program.debug(window.Title);
                     if (window.Title.Contains(command.currentwindow))
                     {
-                        Task.RunCommand(command.command, command.parameters, command.workdir);
+                        JobTask.RunCommand(command.command, command.parameters, command.workdir);
                         return true;
                     }
                 }
                 else
                 {
-                    Task.OpenFileInSystem(command.open);
+                    JobTask.OpenFileInSystem(command.open);
                     return true;
                 }
             } else if (command.command != null && command.command != "") { // RUN PROCESS WITH PARAMETERS
@@ -450,13 +454,13 @@ namespace ShootRunner
                     Program.debug(window.Title);
                     if (window.Title.Contains(command.currentwindow))
                     {
-                        Task.RunCommand(command.command, command.parameters, command.workdir);
+                        JobTask.RunCommand(command.command, command.parameters, command.workdir);
                         return true;
                     }
                 }
                 else
                 {
-                    Task.RunCommand(command.command, command.parameters, command.workdir);
+                    JobTask.RunCommand(command.command, command.parameters, command.workdir);
                     return true;
                 }
                 
@@ -666,6 +670,11 @@ namespace ShootRunner
         {
             
 
+        }
+
+        private void taskbarToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Program.widgetManager.ShowTaskbarWidget(null);
         }
     }
 }

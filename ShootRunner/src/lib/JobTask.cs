@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace ShootRunner
 {
-    public class Task
+    public class JobTask
     {
         public static void RunCommand(string command, string parameters, string workdir = "") {
             Process process = new Process();
@@ -213,6 +213,39 @@ namespace ShootRunner
             }
 
             return list;
+        }
+
+        public static  async Task<Window> StartProcessAndGetWindowHandleAsync(string cmd, string workdir = null, bool silent = false)
+        {
+            Window window = new Window();
+
+            /*  IntPtr handle = await StartProcessAndGetWindowHandleAsync("notepad.exe"); */
+
+            var process = new Process();
+            ProcessStartInfo startInfo = new ProcessStartInfo();
+            process.StartInfo = startInfo;
+            startInfo.FileName = cmd;
+
+            if (workdir != null)
+            {
+                startInfo.WorkingDirectory = workdir;
+            }
+
+            if (silent)
+            {
+                startInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                startInfo.CreateNoWindow = true;
+            }
+
+            process.Start();
+
+            await System.Threading.Tasks.Task.Delay(2000);
+
+            await System.Threading.Tasks.Task.Run(() => process.WaitForInputIdle());
+
+            window.Handle = process.MainWindowHandle;
+
+            return window;
         }
     }
 }

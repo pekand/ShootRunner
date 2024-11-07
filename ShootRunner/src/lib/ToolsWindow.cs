@@ -142,17 +142,26 @@ namespace ShootRunner
         {
             if (window.Handle != IntPtr.Zero)
             {
-                window.Type = "WINDOW";
-                window.Title = ToolsWindow.GetWindowTitle(window);
-                window.icon = ToolsWindow.GetWindowIcon(window);
-                window.app = ToolsWindow.GetApplicationPathFromWindow(window);
-                Bitmap appIcon = ToolsWindow.ExtractIconFromPath(window.app);
-                if (window.icon == null || (appIcon != null && window.icon != null && appIcon.Width > window.icon.Width))
+                try
                 {
-                    window.icon = appIcon;
+                    window.Type = "WINDOW";
+                    window.Title = ToolsWindow.GetWindowTitle(window);
+                    window.icon = ToolsWindow.GetWindowIcon(window);
+                    window.app = ToolsWindow.GetApplicationPathFromWindow(window);
+                    window.command = window.app;
+                    Bitmap appIcon = ToolsWindow.ExtractIconFromPath(window.app);
+                    if (window.icon == null || (appIcon != null && window.icon != null && appIcon.Width > window.icon.Width))
+                    {
+                        window.icon = appIcon;
+                    }
+                    window.isDesktop = ToolsWindow.IsDesktopWindow(window);
+                    window.isTaskbar = ToolsWindow.IsTaskbarWindow(window);
                 }
-                window.isDesktop = ToolsWindow.IsDesktopWindow(window);
-                window.isTaskbar = ToolsWindow.IsTaskbarWindow(window);
+                catch (Exception)
+                {
+                    
+                }
+                
             }
 
             return window;
@@ -439,8 +448,11 @@ namespace ShootRunner
             return (exStyle.ToInt64() & WS_EX_TOOLWINDOW) == WS_EX_TOOLWINDOW;
         }
 
+        /*************************************************************************/
+
+
     }
 
-    
+
 
 }

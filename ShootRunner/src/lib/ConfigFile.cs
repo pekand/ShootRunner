@@ -92,6 +92,11 @@ namespace ShootRunner
 
             foreach (Widget w in Program.widgetManager.widgets)
             {
+
+                if (w.type == "taskbar") {
+                    continue;
+                }
+
                 XElement widget = new XElement("widget");
                 widgets.Add(widget);
                 widget.Add(new XElement("type", w.type));
@@ -102,10 +107,8 @@ namespace ShootRunner
                     widget.Add(new XElement("width", w.widgetForm.Width.ToString()));
                     widget.Add(new XElement("height", w.widgetForm.Height.ToString()));
                     widget.Add(new XElement("mosttop", ConvertTo.BoolToString(w.widgetForm.TopMost)));
-                   
                 }
 
-                widget.Add(new XElement("type", w.widgetType.name));
                 widget.Add(new XElement("locked", ConvertTo.BoolToString(w.locked)));
                 widget.Add(new XElement("transparent", ConvertTo.DoubleToString(w.transparent)));
 
@@ -122,6 +125,25 @@ namespace ShootRunner
                     item.Add(new XAttribute("key", key));
                     item.Value = value;
                 }
+            }
+
+            if (Program.widgetManager.formTaskbar != null) {
+                XElement widget = new XElement("widget");
+                widgets.Add(widget);
+                FormTaskbar formTaskbar = Program.widgetManager.formTaskbar;
+                Widget taskbarWidget = formTaskbar.widget;
+
+                widget.Add(new XElement("type", taskbarWidget.type));
+
+                widget.Add(new XElement("left", formTaskbar.Left.ToString()));
+                widget.Add(new XElement("top", formTaskbar.Top.ToString()));
+                widget.Add(new XElement("width", formTaskbar.Width.ToString()));
+                widget.Add(new XElement("height", formTaskbar.Height.ToString()));
+                widget.Add(new XElement("mosttop", ConvertTo.BoolToString(formTaskbar.TopMost)));
+
+
+                widget.Add(new XElement("locked", ConvertTo.BoolToString(taskbarWidget.locked)));
+                widget.Add(new XElement("transparent", ConvertTo.DoubleToString(taskbarWidget.transparent)));
             }
 
             try

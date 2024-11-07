@@ -10,6 +10,7 @@ using System.Windows.Forms;
 using System.Xml;
 using System.Xml.Linq;
 using Microsoft.Win32;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 
 namespace ShootRunner
@@ -27,6 +28,7 @@ namespace ShootRunner
         public static string errorLogPath = "";
         public static string configFielPath = "";
         public static string widgetsPath = "";
+        public static string webview2Path = "";
         public static string commandFielPath = "";
         public static string commandFielName = "commands.xml";
         public static DateTime commandFielPathLastChange;
@@ -105,6 +107,14 @@ namespace ShootRunner
 #endif
         }
 
+        public static string GetDebugPrefix()
+        {
+#if DEBUG
+            return "DEBUG.";
+#else
+            return "";
+#endif            
+        }
 
         public static void debug(string message) {
 #if DEBUG
@@ -117,13 +127,28 @@ namespace ShootRunner
 #endif
         }
 
+        public static void info(string message)
+        {
+
+            string unixTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+            using (StreamWriter sw = new StreamWriter(errorLogPath, true))
+            {
+                sw.WriteLine(unixTime + " " + message);
+#if DEBUG
+                Console.WriteLine(unixTime + " " + message);
+#endif
+            }
+        }
+
         public static void error(string message)
         {
             string unixTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
             using (StreamWriter sw = new StreamWriter(Program.errorLogPath, true))
             {
                 sw.WriteLine(unixTime + " " + message);
+#if DEBUG
                 Console.WriteLine(unixTime + " " + message);
+#endif
             }
         }
 
@@ -147,7 +172,7 @@ namespace ShootRunner
                         Program.commandFielPathLastChange = File.GetLastWriteTime(Program.commandFielPath);
 
 
-                        string xml = File.ReadAllText(Program.configFielPath);
+                        string xml = File.ReadAllText(Program.commandFielPath);
 
                         /*if (Program.isDebug())
                         {
@@ -180,23 +205,34 @@ namespace ShootRunner
                             {
 
                                 XElement root = XElement.Load(xr);
-                                var commands = root.Descendants("command");
-                                foreach (var commandElement in commands)
-                                {
-                                    Command newCommand = new Command();
-                                    Program.commands.Add(newCommand);
 
-                                    newCommand.enabled = commandElement.Element("enabled")?.Value == "1" ? true : false;
-                                    newCommand.shortcut = commandElement.Element("shortcut")?.Value;
-                                    newCommand.open = commandElement.Element("open")?.Value;
-                                    newCommand.command = commandElement.Element("command")?.Value;
-                                    newCommand.parameters = commandElement.Element("parameters")?.Value;
-                                    newCommand.window = commandElement.Element("window")?.Value;
-                                    newCommand.currentwindow = commandElement.Element("currentwindow")?.Value;
-                                    newCommand.workdir = commandElement.Element("workdir")?.Value;
-                                    newCommand.keypress = commandElement.Element("keypress")?.Value;
-                                    newCommand.action = commandElement.Element("action")?.Value;
-                                    newCommand.process = commandElement.Element("process")?.Value;
+                                foreach (XElement item in root.Elements())
+                                {
+                                    string name = item.Name.ToString();
+                                    if (item.Name.ToString() == "commands")
+                                    {
+
+                                        foreach (var commandElement in item.Elements())
+                                        {
+                                            if (commandElement.Name.ToString() == "command")
+                                            {
+                                                Command newCommand = new Command();
+                                                Program.commands.Add(newCommand);
+
+                                                newCommand.enabled = commandElement.Element("enabled")?.Value == "1" ? true : false;
+                                                newCommand.shortcut = commandElement.Element("shortcut")?.Value;
+                                                newCommand.open = commandElement.Element("open")?.Value;
+                                                newCommand.command = commandElement.Element("command")?.Value;
+                                                newCommand.parameters = commandElement.Element("parameters")?.Value;
+                                                newCommand.window = commandElement.Element("window")?.Value;
+                                                newCommand.currentwindow = commandElement.Element("currentwindow")?.Value;
+                                                newCommand.workdir = commandElement.Element("workdir")?.Value;
+                                                newCommand.keypress = commandElement.Element("keypress")?.Value;
+                                                newCommand.action = commandElement.Element("action")?.Value;
+                                                newCommand.process = commandElement.Element("process")?.Value;
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -289,15 +325,24 @@ namespace ShootRunner
         public static Config config = null;
         public static ConfigFile configFile = null;
 
-        public static void AddEmptyPin() { 
-
-            Window window = new Window();
-            window.Type = "COMMAND";
-            window.doubleClickCommand = true;
+        public static void CreatePin(Window window = null)
+        {
             FormPin pin = new FormPin(window);
             pins.Add(pin);
             pin.Show();
             pin.Center();
+
+            Program.Update();
+        }
+
+
+        public static void AddEmptyPin() {
+
+            Window window = new Window();
+            window.Type = "COMMAND";
+            window.doubleClickCommand = true;
+
+            CreatePin(window);
 
             Program.Update();
         }
@@ -311,19 +356,19 @@ namespace ShootRunner
             }
         }
 
-        
+
+
+        public static void OnMessageReceived(string message)
+        {
+            Console.WriteLine("Message Received: " + message);
+        }
+
 
         [STAThread]
-        static void Main()
+        public static void Main()
         {
-            if (ChecKDuplicateRun()){
-                MessageBox.Show("Another instance of the application is already running.", "Application Already Running", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return;
-            }
-
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-
 
             Program.roamingAppDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
             Program.configPath = Path.Combine(Program.roamingAppDataPath, Program.AppName);
@@ -331,35 +376,55 @@ namespace ShootRunner
             {
                 Directory.CreateDirectory(configPath);
             }
-            Program.configFielPath = Path.Combine(Program.configPath, (isDebug() ? "DEBUG." : "") + "config.xml");
-            Program.commandFielPath = Path.Combine(Program.configPath, (isDebug() ? "DEBUG." : "") + Program.commandFielName);
-            Program.errorLogPath = Path.Combine(Program.configPath, (isDebug() ? "DEBUG." : "") + "error.log");
+            Program.configFielPath = Path.Combine(Program.configPath, GetDebugPrefix() + "config.xml");
+            Program.commandFielPath = Path.Combine(Program.configPath, GetDebugPrefix() + Program.commandFielName);
+            Program.errorLogPath = Path.Combine(Program.configPath, GetDebugPrefix() + "error.log");
+            Program.widgetsPath = Path.Combine(Program.configPath, GetDebugPrefix() + "widgets");
+            Program.webview2Path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), Program.AppName, "WebView2UserData");
 
-            Program.widgetsPath = Path.Combine(Program.configPath, (isDebug() ? "DEBUG." : "") + "widgets");
+            try
+            {
 
-            ClearBigLog();
+                ClearBigLog();
 
-            Program.debug("Start");
+                Program.info("Start");
 
-            SystemEvents.SessionSwitch += new SessionSwitchEventHandler(SystemEvents_SessionSwitch);
-            SystemEvents.SessionSwitch -= new SessionSwitchEventHandler(SystemEvents_SessionSwitch);
+                if (ChecKDuplicateRun())
+                {
+                    Program.info("Duplicite run, app end");                
+                    return;
+                }
 
-            Program.config = new Config();            
-            Program.configFile = new ConfigFile(Program.config);
-            Program.configFile.Load();
+                SystemEvents.SessionSwitch += new SessionSwitchEventHandler(SystemEvents_SessionSwitch);
+                SystemEvents.SessionSwitch -= new SessionSwitchEventHandler(SystemEvents_SessionSwitch);
 
-            Program.loadCommands();
-            Program.FindPowershell();
-            Program.OpenPins();
-            widgetManager.OpenWidgets();
-            Program.StartTimer();
+                Program.config = new Config();            
+                Program.configFile = new ConfigFile(Program.config);
+                Program.configFile.Load();
 
-            formShootRunner = new FormShootRunner();
-            Application.Run(formShootRunner);
+                Program.loadCommands();
+                Program.FindPowershell();
+                Program.OpenPins();
+                widgetManager.OpenWidgets();
+                Program.StartTimer();
 
-            Program.configFile.Save();
+                PipeServer.MessageReceived += OnMessageReceived;
+                PipeServer.SetPipeName(GetDebugPrefix() + Program.AppName);
+                if (!PipeServer.StartServerAsync()) {
+                    Program.info("Pipe server exists");
+                }
 
-            Program.debug("End");
+                formShootRunner = new FormShootRunner();
+                Application.Run(formShootRunner);
+
+                Program.configFile.Save();
+
+                Program.info("End");
+            }
+            catch (Exception ex)
+            {
+                Program.error(ex.Message);
+            }
         }
     }
 }

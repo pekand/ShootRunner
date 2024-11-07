@@ -114,6 +114,12 @@
     <Compile Include="src\forms\FormCommand.Designer.cs">
       <DependentUpon>FormCommand.cs</DependentUpon>
     </Compile>
+    <Compile Include="src\forms\FormTaskbar.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="src\forms\FormTaskbar.Designer.cs">
+      <DependentUpon>FormTaskbar.cs</DependentUpon>
+    </Compile>
     <Compile Include="src\forms\FormTransparent.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -131,10 +137,12 @@
     <Compile Include="src\lib\ConvertTo.cs" />
     <Compile Include="src\lib\Job.cs" />
     <Compile Include="src\lib\Pictures.cs" />
+    <Compile Include="src\lib\PipeServer.cs" />
     <Compile Include="src\lib\ScriptsTools.cs" />
     <Compile Include="src\lib\TextTools.cs" />
     <Compile Include="src\lib\WidgetManager.cs" />
     <Compile Include="src\models\JSMessage.cs" />
+    <Compile Include="src\models\PipeMessage.cs" />
     <Compile Include="src\models\Widget.cs" />
     <Compile Include="src\models\WidgetType.cs" />
     <Compile Include="src\models\Command.cs" />
@@ -161,9 +169,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="src\models\Shortcut.cs" />
     <Compile Include="src\lib\SystemTools.cs" />
-    <Compile Include="src\lib\Task.cs" />
+    <Compile Include="src\lib\JobTask.cs" />
     <Compile Include="src\lib\ToolsWindow.cs" />
     <Compile Include="src\models\Window.cs" />
+    <Compile Include="src\models\WindowProperty.cs" />
     <EmbeddedResource Include="src\forms\FormCommand.resx">
       <DependentUpon>FormCommand.cs</DependentUpon>
     </EmbeddedResource>
@@ -185,6 +194,9 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="src\forms\FormTaskbar.resx">
+      <DependentUpon>FormTaskbar.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="src\forms\FormTransparent.resx">
       <DependentUpon>FormTransparent.cs</DependentUpon>
     </EmbeddedResource>
