@@ -40,38 +40,16 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "ShootRunner\bin\x64\Release\runtimes\win-x64\native\WebView2Loader.dll"; DestDir: "{app}\runtimes\win-x64\native\"; Flags: ignoreversion
-Source: "ShootRunner\bin\x64\Release\Interop.Shell32.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "ShootRunner\bin\x64\Release\Microsoft.Bcl.AsyncInterfaces.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "ShootRunner\bin\x64\Release\Microsoft.Bcl.AsyncInterfaces.xml"; DestDir: "{app}"; Flags: ignoreversion
-Source: "ShootRunner\bin\x64\Release\Microsoft.Web.WebView2.Core.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "ShootRunner\bin\x64\Release\Microsoft.Web.WebView2.Core.xml"; DestDir: "{app}"; Flags: ignoreversion
-Source: "ShootRunner\bin\x64\Release\Microsoft.Web.WebView2.WinForms.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "ShootRunner\bin\x64\Release\Microsoft.Web.WebView2.WinForms.xml"; DestDir: "{app}"; Flags: ignoreversion
-Source: "ShootRunner\bin\x64\Release\Microsoft.Web.WebView2.Wpf.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "ShootRunner\bin\x64\Release\Microsoft.Web.WebView2.Wpf.xml"; DestDir: "{app}"; Flags: ignoreversion
-Source: "ShootRunner\bin\x64\Release\ShootRunner.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "ShootRunner\bin\x64\Release\ShootRunner.exe.config"; DestDir: "{app}"; Flags: ignoreversion
-Source: "ShootRunner\bin\x64\Release\System.Buffers.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "ShootRunner\bin\x64\Release\System.Buffers.xml"; DestDir: "{app}"; Flags: ignoreversion
-Source: "ShootRunner\bin\x64\Release\System.Memory.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "ShootRunner\bin\x64\Release\System.Memory.xml"; DestDir: "{app}"; Flags: ignoreversion
-Source: "ShootRunner\bin\x64\Release\System.Numerics.Vectors.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "ShootRunner\bin\x64\Release\System.Numerics.Vectors.xml"; DestDir: "{app}"; Flags: ignoreversion
-Source: "ShootRunner\bin\x64\Release\System.Runtime.CompilerServices.Unsafe.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "ShootRunner\bin\x64\Release\System.Runtime.CompilerServices.Unsafe.xml"; DestDir: "{app}"; Flags: ignoreversion
-Source: "ShootRunner\bin\x64\Release\System.Text.Encodings.Web.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "ShootRunner\bin\x64\Release\System.Text.Encodings.Web.xml"; DestDir: "{app}"; Flags: ignoreversion
-Source: "ShootRunner\bin\x64\Release\System.Text.Json.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "ShootRunner\bin\x64\Release\System.Text.Json.xml"; DestDir: "{app}"; Flags: ignoreversion
-Source: "ShootRunner\bin\x64\Release\System.Threading.Tasks.Extensions.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "ShootRunner\bin\x64\Release\System.Threading.Tasks.Extensions.xml"; DestDir: "{app}"; Flags: ignoreversion
-Source: "ShootRunner\bin\x64\Release\System.ValueTuple.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "ShootRunner\bin\x64\Release\System.ValueTuple.xml"; DestDir: "{app}"; Flags: ignoreversion
 
+Source: "ShootRunner\bin\x64\Release\net8.0-windows\runtimes\win-x64\*"; DestDir: "{app}\runtimes\win-x64"; Flags: ignoreversion createallsubdirs recursesubdirs comparetimestamp
+Source: "ShootRunner\bin\x64\Release\net8.0-windows\runtimes\win\*"; DestDir: "{app}\runtimes\win"; Flags: ignoreversion createallsubdirs recursesubdirs comparetimestamp
+Source: "ShootRunner\bin\x64\Release\net8.0-windows\ref\*"; DestDir: "{app}\ref"; Flags: ignoreversion createallsubdirs recursesubdirs comparetimestamp
+Source: "ShootRunner\bin\x64\Release\net8.0-windows\*.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "ShootRunner\bin\x64\Release\net8.0-windows\*.json"; DestDir: "{app}"; Flags: ignoreversion
+Source: "ShootRunner\bin\x64\Release\net8.0-windows\*.xml"; DestDir: "{app}"; Flags: ignoreversion
+Source: "ShootRunner\bin\x64\Release\net8.0-windows\ShootRunner.exe"; DestDir: "{app}"; Flags: ignoreversion
 
-Source: "widgets\memo\widget.html"; DestDir: "{userappdata}\widgets\memo\widget.html"; Flags: ignoreversion createallsubdirs recursesubdirs comparetimestamp
-Source: "widgets\time\widget.html"; DestDir: "{userappdata}\widgets\time\widget.html"; Flags: ignoreversion createallsubdirs recursesubdirs comparetimestamp
+Source: "widgets\*"; DestDir: "{userappdata}\widgets"; Flags: ignoreversion createallsubdirs recursesubdirs comparetimestamp
 
 
 [Icons]
