@@ -26,6 +26,8 @@ namespace ShootRunner
 
         public static FormShootRunner formShootRunner = null;
 
+        public static string text = "";
+
         public static string roamingAppDataPath = "";
         public static string configPath = "";
         public static string errorLogPath = "";
@@ -52,6 +54,7 @@ namespace ShootRunner
         public static bool updated = false;
         public static DateTime updatedTime = new DateTime();
 
+        public static FormConsole console = null;
 
         public static WidgetManager widgetManager = new WidgetManager();
 
@@ -125,6 +128,7 @@ namespace ShootRunner
             using (StreamWriter sw = new StreamWriter(errorLogPath, true))
             {
                 sw.WriteLine(unixTime + " " + message);
+                Program.write(unixTime + " " + message);
                 Console.WriteLine(unixTime + " " + message);
             }
 #endif
@@ -138,6 +142,7 @@ namespace ShootRunner
             {
                 sw.WriteLine(unixTime + " " + message);
 #if DEBUG
+                Program.write(unixTime + " " + message);
                 Console.WriteLine(unixTime + " " + message);
 #endif
             }
@@ -150,10 +155,38 @@ namespace ShootRunner
             {
                 sw.WriteLine(unixTime + " " + message);
 #if DEBUG
+                Program.write(unixTime + " " + message);
                 Console.WriteLine(unixTime + " " + message);
 #endif
             }
         }
+        
+        
+
+        public static void write(string message)
+        { 
+            text += message+"\r\n";
+
+            if (Program.console != null) { 
+                Program.console.write(message);
+            }
+        }
+
+        public static void ShowConsole()
+        {
+            if (console == null) {
+                console = new FormConsole(Program.text);
+            }
+
+            console.Show();
+        }
+
+        public static void CloseConsole()
+        {
+            Program.console = null;
+        }
+
+
 
         public static void loadCommands()
         {
@@ -367,12 +400,7 @@ namespace ShootRunner
         }
 
 
-        [STAThread]
-        public static void Main()
-        {
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-
+        public static void SetPath() {
             Program.roamingAppDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
             Program.configPath = Path.Combine(Program.roamingAppDataPath, Program.AppName);
             if (!Directory.Exists(configPath))
@@ -384,13 +412,29 @@ namespace ShootRunner
             Program.errorLogPath = Path.Combine(Program.configPath, GetDebugPrefix() + "error.log");
             Program.widgetsPath = Path.Combine(Program.configPath, GetDebugPrefix() + "widgets");
             Program.webview2Path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), Program.AppName, "WebView2UserData");
+        }
+
+        public static bool closingApplication = false;
+        public static void Exit()
+        {
+            closingApplication = true;
+            Program.configFile.Save();
+            Application.Exit();
+        }
+
+
+        [STAThread]
+        public static void Main()
+        {
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+
+            Program.SetPath();
 
             try
             {
 
                 ClearBigLog();
-
-                Program.info("Start");
 
                 if (ChecKDuplicateRun())
                 {
@@ -405,10 +449,12 @@ namespace ShootRunner
                 Program.configFile = new ConfigFile(Program.config);
                 Program.configFile.Load();
 
-                Program.loadCommands();
                 Program.FindPowershell();
+
+                Program.loadCommands();                
                 Program.OpenPins();
                 widgetManager.OpenWidgets();
+
                 Program.StartTimer();
 
                 PipeServer.MessageReceived += OnMessageReceived;
@@ -419,10 +465,6 @@ namespace ShootRunner
 
                 formShootRunner = new FormShootRunner();
                 Application.Run(formShootRunner);
-
-                Program.configFile.Save();
-
-                Program.info("End");
             }
             catch (Exception ex)
             {

@@ -28,167 +28,162 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
+            components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormShootRunner));
-            this.notifyIconShootRunner = new System.Windows.Forms.NotifyIcon(this.components);
-            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.commandsToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-            this.editCommandsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.shortcutFormToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.pinsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.newPinToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.widgetsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.newWidgetToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.applicationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.errorLogToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.autorunToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.timer1 = new System.Windows.Forms.Timer(this.components);
-            this.taskbarToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.contextMenuStrip1.SuspendLayout();
-            this.SuspendLayout();
+            notifyIconShootRunner = new NotifyIcon(components);
+            contextMenuStrip1 = new ContextMenuStrip(components);
+            commandsToolStripMenuItem1 = new ToolStripMenuItem();
+            editCommandsToolStripMenuItem = new ToolStripMenuItem();
+            shortcutFormToolStripMenuItem = new ToolStripMenuItem();
+            pinsToolStripMenuItem = new ToolStripMenuItem();
+            newPinToolStripMenuItem = new ToolStripMenuItem();
+            widgetsToolStripMenuItem = new ToolStripMenuItem();
+            newWidgetToolStripMenuItem = new ToolStripMenuItem();
+            applicationToolStripMenuItem = new ToolStripMenuItem();
+            errorLogToolStripMenuItem = new ToolStripMenuItem();
+            exitToolStripMenuItem = new ToolStripMenuItem();
+            optionsToolStripMenuItem = new ToolStripMenuItem();
+            autorunToolStripMenuItem = new ToolStripMenuItem();
+            taskbarToolStripMenuItem = new ToolStripMenuItem();
+            timer1 = new System.Windows.Forms.Timer(components);
+            consoleToolStripMenuItem = new ToolStripMenuItem();
+            contextMenuStrip1.SuspendLayout();
+            SuspendLayout();
             // 
             // notifyIconShootRunner
             // 
-            this.notifyIconShootRunner.ContextMenuStrip = this.contextMenuStrip1;
-            this.notifyIconShootRunner.Icon = ((System.Drawing.Icon)(resources.GetObject("notifyIconShootRunner.Icon")));
-            this.notifyIconShootRunner.Text = "ShootRunner";
-            this.notifyIconShootRunner.Visible = true;
+            notifyIconShootRunner.ContextMenuStrip = contextMenuStrip1;
+            notifyIconShootRunner.Icon = (Icon)resources.GetObject("notifyIconShootRunner.Icon");
+            notifyIconShootRunner.Text = "ShootRunner";
+            notifyIconShootRunner.Visible = true;
             // 
             // contextMenuStrip1
             // 
-            this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.commandsToolStripMenuItem1,
-            this.pinsToolStripMenuItem,
-            this.widgetsToolStripMenuItem,
-            this.applicationToolStripMenuItem,
-            this.optionsToolStripMenuItem,
-            this.taskbarToolStripMenuItem});
-            this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(181, 170);
-            this.contextMenuStrip1.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip1_Opening);
+            contextMenuStrip1.Items.AddRange(new ToolStripItem[] { commandsToolStripMenuItem1, pinsToolStripMenuItem, widgetsToolStripMenuItem, applicationToolStripMenuItem, optionsToolStripMenuItem, taskbarToolStripMenuItem, consoleToolStripMenuItem });
+            contextMenuStrip1.Name = "contextMenuStrip1";
+            contextMenuStrip1.Size = new Size(181, 194);
+            contextMenuStrip1.Opening += contextMenuStrip1_Opening;
             // 
             // commandsToolStripMenuItem1
             // 
-            this.commandsToolStripMenuItem1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.editCommandsToolStripMenuItem,
-            this.shortcutFormToolStripMenuItem});
-            this.commandsToolStripMenuItem1.Name = "commandsToolStripMenuItem1";
-            this.commandsToolStripMenuItem1.Size = new System.Drawing.Size(180, 24);
-            this.commandsToolStripMenuItem1.Text = "Commands";
+            commandsToolStripMenuItem1.DropDownItems.AddRange(new ToolStripItem[] { editCommandsToolStripMenuItem, shortcutFormToolStripMenuItem });
+            commandsToolStripMenuItem1.Name = "commandsToolStripMenuItem1";
+            commandsToolStripMenuItem1.Size = new Size(180, 24);
+            commandsToolStripMenuItem1.Text = "Commands";
             // 
             // editCommandsToolStripMenuItem
             // 
-            this.editCommandsToolStripMenuItem.Name = "editCommandsToolStripMenuItem";
-            this.editCommandsToolStripMenuItem.Size = new System.Drawing.Size(172, 24);
-            this.editCommandsToolStripMenuItem.Text = "Edit commands";
-            this.editCommandsToolStripMenuItem.Click += new System.EventHandler(this.commandsToolStripMenuItem_Click);
+            editCommandsToolStripMenuItem.Name = "editCommandsToolStripMenuItem";
+            editCommandsToolStripMenuItem.Size = new Size(172, 24);
+            editCommandsToolStripMenuItem.Text = "Edit commands";
+            editCommandsToolStripMenuItem.Click += commandsToolStripMenuItem_Click;
             // 
             // shortcutFormToolStripMenuItem
             // 
-            this.shortcutFormToolStripMenuItem.Name = "shortcutFormToolStripMenuItem";
-            this.shortcutFormToolStripMenuItem.Size = new System.Drawing.Size(172, 24);
-            this.shortcutFormToolStripMenuItem.Text = "Shortcut form";
-            this.shortcutFormToolStripMenuItem.Click += new System.EventHandler(this.shortcutFormToolStripMenuItem_Click);
+            shortcutFormToolStripMenuItem.Name = "shortcutFormToolStripMenuItem";
+            shortcutFormToolStripMenuItem.Size = new Size(172, 24);
+            shortcutFormToolStripMenuItem.Text = "Shortcut form";
+            shortcutFormToolStripMenuItem.Click += shortcutFormToolStripMenuItem_Click;
             // 
             // pinsToolStripMenuItem
             // 
-            this.pinsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.newPinToolStripMenuItem});
-            this.pinsToolStripMenuItem.Name = "pinsToolStripMenuItem";
-            this.pinsToolStripMenuItem.Size = new System.Drawing.Size(180, 24);
-            this.pinsToolStripMenuItem.Text = "Pins";
+            pinsToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { newPinToolStripMenuItem });
+            pinsToolStripMenuItem.Name = "pinsToolStripMenuItem";
+            pinsToolStripMenuItem.Size = new Size(180, 24);
+            pinsToolStripMenuItem.Text = "Pins";
             // 
             // newPinToolStripMenuItem
             // 
-            this.newPinToolStripMenuItem.Name = "newPinToolStripMenuItem";
-            this.newPinToolStripMenuItem.Size = new System.Drawing.Size(128, 24);
-            this.newPinToolStripMenuItem.Text = "New pin";
-            this.newPinToolStripMenuItem.Click += new System.EventHandler(this.newPinToolStripMenuItem_Click);
+            newPinToolStripMenuItem.Name = "newPinToolStripMenuItem";
+            newPinToolStripMenuItem.Size = new Size(128, 24);
+            newPinToolStripMenuItem.Text = "New pin";
+            newPinToolStripMenuItem.Click += newPinToolStripMenuItem_Click;
             // 
             // widgetsToolStripMenuItem
             // 
-            this.widgetsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.newWidgetToolStripMenuItem});
-            this.widgetsToolStripMenuItem.Name = "widgetsToolStripMenuItem";
-            this.widgetsToolStripMenuItem.Size = new System.Drawing.Size(180, 24);
-            this.widgetsToolStripMenuItem.Text = "Widgets";
+            widgetsToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { newWidgetToolStripMenuItem });
+            widgetsToolStripMenuItem.Name = "widgetsToolStripMenuItem";
+            widgetsToolStripMenuItem.Size = new Size(180, 24);
+            widgetsToolStripMenuItem.Text = "Widgets";
             // 
             // newWidgetToolStripMenuItem
             // 
-            this.newWidgetToolStripMenuItem.Name = "newWidgetToolStripMenuItem";
-            this.newWidgetToolStripMenuItem.Size = new System.Drawing.Size(180, 24);
-            this.newWidgetToolStripMenuItem.Text = "New widget";
-            this.newWidgetToolStripMenuItem.Click += new System.EventHandler(this.newWidgetToolStripMenuItem_Click);
+            newWidgetToolStripMenuItem.Name = "newWidgetToolStripMenuItem";
+            newWidgetToolStripMenuItem.Size = new Size(150, 24);
+            newWidgetToolStripMenuItem.Text = "New widget";
+            newWidgetToolStripMenuItem.Click += newWidgetToolStripMenuItem_Click;
             // 
             // applicationToolStripMenuItem
             // 
-            this.applicationToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.errorLogToolStripMenuItem,
-            this.exitToolStripMenuItem});
-            this.applicationToolStripMenuItem.Name = "applicationToolStripMenuItem";
-            this.applicationToolStripMenuItem.Size = new System.Drawing.Size(180, 24);
-            this.applicationToolStripMenuItem.Text = "Application";
+            applicationToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { errorLogToolStripMenuItem, exitToolStripMenuItem });
+            applicationToolStripMenuItem.Name = "applicationToolStripMenuItem";
+            applicationToolStripMenuItem.Size = new Size(180, 24);
+            applicationToolStripMenuItem.Text = "Application";
             // 
             // errorLogToolStripMenuItem
             // 
-            this.errorLogToolStripMenuItem.Name = "errorLogToolStripMenuItem";
-            this.errorLogToolStripMenuItem.Size = new System.Drawing.Size(131, 24);
-            this.errorLogToolStripMenuItem.Text = "Error log";
-            this.errorLogToolStripMenuItem.Click += new System.EventHandler(this.errorLogToolStripMenuItem_Click);
+            errorLogToolStripMenuItem.Name = "errorLogToolStripMenuItem";
+            errorLogToolStripMenuItem.Size = new Size(131, 24);
+            errorLogToolStripMenuItem.Text = "Error log";
+            errorLogToolStripMenuItem.Click += errorLogToolStripMenuItem_Click;
             // 
             // exitToolStripMenuItem
             // 
-            this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(131, 24);
-            this.exitToolStripMenuItem.Text = "Exit";
-            this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
+            exitToolStripMenuItem.Name = "exitToolStripMenuItem";
+            exitToolStripMenuItem.Size = new Size(131, 24);
+            exitToolStripMenuItem.Text = "Exit";
+            exitToolStripMenuItem.Click += exitToolStripMenuItem_Click;
             // 
             // optionsToolStripMenuItem
             // 
-            this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.autorunToolStripMenuItem});
-            this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
-            this.optionsToolStripMenuItem.Size = new System.Drawing.Size(180, 24);
-            this.optionsToolStripMenuItem.Text = "Options";
-            this.optionsToolStripMenuItem.Click += new System.EventHandler(this.optionsToolStripMenuItem_Click);
+            optionsToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { autorunToolStripMenuItem });
+            optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
+            optionsToolStripMenuItem.Size = new Size(180, 24);
+            optionsToolStripMenuItem.Text = "Options";
+            optionsToolStripMenuItem.Click += optionsToolStripMenuItem_Click;
             // 
             // autorunToolStripMenuItem
             // 
-            this.autorunToolStripMenuItem.Name = "autorunToolStripMenuItem";
-            this.autorunToolStripMenuItem.Size = new System.Drawing.Size(129, 24);
-            this.autorunToolStripMenuItem.Text = "Autorun";
-            this.autorunToolStripMenuItem.Click += new System.EventHandler(this.autorunToolStripMenuItem_Click);
-            // 
-            // timer1
-            // 
-            this.timer1.Enabled = true;
-            this.timer1.Interval = 1000;
-            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
+            autorunToolStripMenuItem.Name = "autorunToolStripMenuItem";
+            autorunToolStripMenuItem.Size = new Size(129, 24);
+            autorunToolStripMenuItem.Text = "Autorun";
+            autorunToolStripMenuItem.Click += autorunToolStripMenuItem_Click;
             // 
             // taskbarToolStripMenuItem
             // 
-            this.taskbarToolStripMenuItem.Name = "taskbarToolStripMenuItem";
-            this.taskbarToolStripMenuItem.Size = new System.Drawing.Size(180, 24);
-            this.taskbarToolStripMenuItem.Text = "Taskbar ";
-            this.taskbarToolStripMenuItem.Click += new System.EventHandler(this.taskbarToolStripMenuItem_Click);
+            taskbarToolStripMenuItem.Name = "taskbarToolStripMenuItem";
+            taskbarToolStripMenuItem.Size = new Size(180, 24);
+            taskbarToolStripMenuItem.Text = "Taskbar ";
+            taskbarToolStripMenuItem.Click += taskbarToolStripMenuItem_Click;
+            // 
+            // timer1
+            // 
+            timer1.Enabled = true;
+            timer1.Interval = 1000;
+            timer1.Tick += timer1_Tick;
+            // 
+            // consoleToolStripMenuItem
+            // 
+            consoleToolStripMenuItem.Name = "consoleToolStripMenuItem";
+            consoleToolStripMenuItem.Size = new Size(180, 24);
+            consoleToolStripMenuItem.Text = "Console";
+            consoleToolStripMenuItem.Click += consoleToolStripMenuItem_Click;
             // 
             // FormShootRunner
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Name = "FormShootRunner";
-            this.Text = "Form";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FormShootRunner_FormClosing);
-            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.FormShootRunner_FormClosed);
-            this.Load += new System.EventHandler(this.FormShootRunner_Load);
-            this.InputLanguageChanging += new System.Windows.Forms.InputLanguageChangingEventHandler(this.FormShootRunner_InputLanguageChanging);
-            this.contextMenuStrip1.ResumeLayout(false);
-            this.ResumeLayout(false);
-
+            AutoScaleDimensions = new SizeF(8F, 19F);
+            AutoScaleMode = AutoScaleMode.Font;
+            ClientSize = new Size(1067, 658);
+            Icon = (Icon)resources.GetObject("$this.Icon");
+            Margin = new Padding(4, 4, 4, 4);
+            Name = "FormShootRunner";
+            Text = "Form";
+            FormClosing += FormShootRunner_FormClosing;
+            FormClosed += FormShootRunner_FormClosed;
+            Load += FormShootRunner_Load;
+            InputLanguageChanging += FormShootRunner_InputLanguageChanging;
+            contextMenuStrip1.ResumeLayout(false);
+            ResumeLayout(false);
         }
 
         #endregion
@@ -209,6 +204,7 @@
         private System.Windows.Forms.ToolStripMenuItem errorLogToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem newPinToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem taskbarToolStripMenuItem;
+        private ToolStripMenuItem consoleToolStripMenuItem;
     }
 }
 

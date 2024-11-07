@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Management.Automation;
 using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
@@ -167,37 +168,62 @@ namespace ShootRunner
     Read-Host
 
                                  */
-
-                                Process process = new Process();
-                                ProcessStartInfo startInfo = new ProcessStartInfo();
-
-                                startInfo.FileName = Program.powershell;
-                                string escapedCmd = EscapeString(cmd);
                                 if (silent)
                                 {
-                                    startInfo.Arguments = $"-NoProfile -Command \"{escapedCmd}\"";
+                                    try
+                                    {
+                                        using (PowerShell ps = PowerShell.Create())
+                                        {
+                                            ps.AddScript(cmd);
+
+                                            var results = ps.Invoke();
+
+                                            foreach (var result in results)
+                                            {
+                                                Program.write(result.ToString());
+                                            }
+                                        }
+                                    }
+                                    catch (Exception ex)
+                                    {
+
+                                        Program.error(ex.Message);
+                                    }
+                                    
                                 }
                                 else {
-                                    startInfo.Arguments = $"-NoExit -NoProfile -Command \"{escapedCmd}\"";
-                                }
+                                    Process process = new Process();
+                                    ProcessStartInfo startInfo = new ProcessStartInfo();
 
-                                startInfo.WorkingDirectory = workdir;
-                                startInfo.UseShellExecute = true;
-                                startInfo.RedirectStandardOutput = false;
-                                startInfo.RedirectStandardError = false;
-                                startInfo.CreateNoWindow = false;
-                                if (silent)
-                                {
-                                    startInfo.WindowStyle = ProcessWindowStyle.Hidden;
-                                    startInfo.CreateNoWindow = true;
+                                    startInfo.FileName = Program.powershell;
+                                    string escapedCmd = EscapeString(cmd);
+                                    if (silent)
+                                    {
+                                        startInfo.Arguments = $"-NoProfile -Command \"{escapedCmd}\"";
+                                    }
+                                    else
+                                    {
+                                        startInfo.Arguments = $"-NoExit -NoProfile -Command \"{escapedCmd}\"";
+                                    }
+
+                                    startInfo.WorkingDirectory = workdir;
+                                    startInfo.UseShellExecute = true;
+                                    startInfo.RedirectStandardOutput = false;
+                                    startInfo.RedirectStandardError = false;
+                                    startInfo.CreateNoWindow = false;
+                                    if (silent)
+                                    {
+                                        startInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                                        startInfo.CreateNoWindow = true;
+                                    }
+                                    process.StartInfo = startInfo;
+                                    process.Start();
+                                    /*string output = process.StandardOutput.ReadToEnd();
+                                    string error = process.StandardError.ReadToEnd();
+                                    process.WaitForExit();
+                                    Program.log.Write("output: " + output);
+                                    Program.log.Write("error: " + error);*/
                                 }
-                                process.StartInfo = startInfo;
-                                process.Start();
-                                /*string output = process.StandardOutput.ReadToEnd();
-                                string error = process.StandardError.ReadToEnd();
-                                process.WaitForExit();
-                                Program.log.Write("output: " + output);
-                                Program.log.Write("error: " + error);*/
                             }
                             catch (Exception ex)
                             {

@@ -116,6 +116,10 @@ namespace ShootRunner
                 if (dragCursorPoint == Cursor.Position && !this.window.doubleClickCommand) {
                     this.DoPinAction();
                 }
+
+                if (dragCursorPoint != Cursor.Position) {
+                    Program.Update();
+                }
             }
         }
 
@@ -135,7 +139,6 @@ namespace ShootRunner
             {
                 Point diff = Point.Subtract(Cursor.Position, new Size(dragCursorPoint));
                 this.Location = Point.Add(dragFormPoint, new Size(diff));
-                Program.Update();
             }
         }
 
@@ -305,7 +308,7 @@ namespace ShootRunner
 
         private void closeToolStripMenuItem1_Click_1(object sender, EventArgs e)
         {
-            Application.Exit();
+            Program.Exit();
         }
 
         private void newWidgetToolStripMenuItem_Click(object sender, EventArgs e)

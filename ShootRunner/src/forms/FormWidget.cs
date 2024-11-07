@@ -373,6 +373,11 @@ namespace ShootRunner
 
         private void FormWidget_FormClosing(object sender, FormClosingEventArgs e)
         {
+            if (Program.closingApplication)
+            {
+                return;
+            }
+
             // Display a confirmation dialog
             DialogResult result = MessageBox.Show(
                 "Are you sure you want to close form? Data will be lost.",
@@ -438,7 +443,7 @@ namespace ShootRunner
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Application.Exit();
+            Program.Exit();
         }
 
         private void reloadToolStripMenuItem_Click(object sender, EventArgs e)

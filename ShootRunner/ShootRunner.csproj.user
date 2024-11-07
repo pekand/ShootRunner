@@ -4,6 +4,9 @@
     <Compile Update="src\forms\FormCommand.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Update="src\forms\FormConsole.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Update="src\forms\FormPin.cs">
       <SubType>Form</SubType>
     </Compile>

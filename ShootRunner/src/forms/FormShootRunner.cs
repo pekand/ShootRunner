@@ -20,7 +20,7 @@ namespace ShootRunner
 {
     public partial class FormShootRunner : Form
     {
-        
+
 
         // HOOK
         [DllImport("user32.dll", CharSet = CharSet.Auto, ExactSpelling = true, CallingConvention = CallingConvention.Winapi)]
@@ -69,7 +69,8 @@ namespace ShootRunner
         // LOAD
         private void FormShootRunner_Load(object sender, EventArgs e)
         {
-            if (Program.isDebug()) {
+            if (Program.isDebug())
+            {
                 this.notifyIconShootRunner.Icon = Pictures.CreateCustomIcon();
             }
 
@@ -87,11 +88,12 @@ namespace ShootRunner
                 return SetWindowsHookEx(WH_KEYBOARD_LL, proc, GetModuleHandle(curModule.ModuleName), 0);
             }
         }
-        
+
         // HOOK
         private static IntPtr HookCallback(int nCode, IntPtr wParam, IntPtr lParam)
         {
-            if (Program.pause) {
+            if (Program.pause)
+            {
                 return CallNextHookEx(_hookID, nCode, wParam, lParam);
             }
 
@@ -136,7 +138,7 @@ namespace ShootRunner
                         Program.shortcut.apps = true;
                         break;
                 }
-
+                /*
                 Program.debug("KeyDOWN" +
                    " CTRL=" + (Program.shortcut.ctrl ? "1" : "0") +
                    " ALT=" + (Program.shortcut.alt ? "1" : "0") +
@@ -146,9 +148,10 @@ namespace ShootRunner
                    " win=" + (Program.shortcut.win ? "1" : "0") +
                    " APPS=" + (Program.shortcut.apps ? "1" : "0") +
                    " key=" + Program.shortcut.key
-                );
+                );*/
 
-                if (Program.shortcutForm != null) {
+                if (Program.shortcutForm != null)
+                {
                     Program.ShowShortcutInShortcutForm(Program.shortcut);
                 }
 
@@ -198,7 +201,7 @@ namespace ShootRunner
                         Program.shortcut.apps = false;
                         break;
                 }
-
+                /*
                 Program.debug("KeyUP" +
                    " CTRL=" + (Program.shortcut.ctrl ? "1" : "0") +
                    " ALT=" + (Program.shortcut.alt ? "1" : "0") +
@@ -208,7 +211,7 @@ namespace ShootRunner
                    " win=" + (Program.shortcut.win ? "1" : "0") +
                    " APPS=" + (Program.shortcut.apps ? "1" : "0") +
                    " key=" + Program.shortcut.key
-                );
+                );*/
 
                 // prevent Menu key to show context menu
                 if (Program.shortcut.key == "Apps")
@@ -234,7 +237,7 @@ namespace ShootRunner
 
         // SHORCUT RWIN
         private static bool IsRWinPressed()
-        {            
+        {
             return (GetKeyState(VK_LWIN) & 0x8000) != 0;
         }
 
@@ -260,7 +263,7 @@ namespace ShootRunner
         }
 
         // COMMAND
-        private bool  RunScript(Shortcut shortcut)
+        private bool RunScript(Shortcut shortcut)
         {
             bool foundOne = false;
             foreach (var command in Program.commands)
@@ -268,8 +271,9 @@ namespace ShootRunner
                 if (command.enabled && this.ParseShortcut(command.shortcut, shortcut))
                 {
                     bool executed = this.RunCommand(command);
-                    if (executed) {
-                        foundOne = true; 
+                    if (executed)
+                    {
+                        foundOne = true;
                     }
                 }
             }
@@ -325,7 +329,7 @@ namespace ShootRunner
                 }
             }
 
-            if (((shortcut.ctrl && ctrl)||(!shortcut.ctrl && !ctrl)) &&
+            if (((shortcut.ctrl && ctrl) || (!shortcut.ctrl && !ctrl)) &&
                 ((shortcut.alt && alt) || (!shortcut.alt && !alt)) &&
                 ((shortcut.shift && shift) || (!shortcut.shift && !shift)) &&
                 ((shortcut.win && win) || (!shortcut.win && !win)) &&
@@ -343,25 +347,31 @@ namespace ShootRunner
         {
             Window window = ToolsWindow.GetCurrentWindow();
 
-            if (window.Handle != IntPtr.Zero) {
+            if (window.Handle != IntPtr.Zero)
+            {
                 FormPin pin = new FormPin(window);
                 pin.Show();
                 pin.Center();
                 Program.pins.Add(pin);
             }
-            
+
         }
-       
+
 
         // COMMAND
         private bool RunCommand(Command command)
         {
-            if (command.action == "Close")
+            if (command.action == "console")
+            {
+                Program.ShowConsole();
+                return true;
+            }
+            else if(command.action == "Close")
             {
                 this.Close();
                 return true;
             }
-            else if(command.action == "CreatePin")
+            else if (command.action == "CreatePin")
             {
                 this.CreatPin();
                 return true;
@@ -375,16 +385,19 @@ namespace ShootRunner
             {
                 ToolsWindow.CascadeWindows();
                 return true;
-            } else if (command.action == "taskbar")
+            }
+            else if (command.action == "taskbar")
             {
                 Program.widgetManager.ShowTaskbarWidget(null);
                 return true;
             }
             else
-            if (command.action == "LockPc") {
+            if (command.action == "LockPc")
+            {
                 SystemTools.LockPc();
                 return true;
-            } else if (command.action == "ShowDesktop")
+            }
+            else if (command.action == "ShowDesktop")
             {
                 SystemTools.ShowDesktop();
                 return true;
@@ -416,10 +429,12 @@ namespace ShootRunner
                     }
                 }
 
-            } else if (command.window != null && command.window != "") // BRING WINDOW TO FRONT
+            }
+            else if (command.window != null && command.window != "") // BRING WINDOW TO FRONT
             {
                 bool found = ToolsWindow.BringToFront(command.window);
-                if (!found) {
+                if (!found)
+                {
                     if (command.open != null && command.open != "") // OPEN IF NOT FOUND
                     {
                         JobTask.OpenFileInSystem(command.open);
@@ -433,7 +448,8 @@ namespace ShootRunner
                 }
 
                 return found;
-            } else if (command.open != null && command.open != "") // OPEN URL OR DOCUMENT
+            }
+            else if (command.open != null && command.open != "") // OPEN URL OR DOCUMENT
             {
                 if (command.currentwindow != null)
                 {
@@ -450,7 +466,9 @@ namespace ShootRunner
                     JobTask.OpenFileInSystem(command.open);
                     return true;
                 }
-            } else if (command.command != null && command.command != "") { // RUN PROCESS WITH PARAMETERS
+            }
+            else if (command.command != null && command.command != "")
+            { // RUN PROCESS WITH PARAMETERS
                 if (command.currentwindow != null)
                 {
                     Window window = ToolsWindow.GetCurrentWindow();
@@ -466,8 +484,8 @@ namespace ShootRunner
                     JobTask.RunCommand(command.command, command.parameters, command.workdir);
                     return true;
                 }
-                
-            } 
+
+            }
 
             return false;
         }
@@ -486,7 +504,7 @@ namespace ShootRunner
 
             string value = registryKey.GetValue(appName)?.ToString();
             bool isSet = value == path;
-            
+
             registryKey.Close();
 
             return isSet;
@@ -525,11 +543,13 @@ namespace ShootRunner
         }
 
         // FILE WATCH
-        private void RegisterCommandFileWatch() {
-            if (watcher != null) {
+        private void RegisterCommandFileWatch()
+        {
+            if (watcher != null)
+            {
                 return;
             }
-                        
+
 
             try
             {
@@ -548,7 +568,7 @@ namespace ShootRunner
 
                 Program.debug("FILE WATCH:" + ex.Message);
             }
-            
+
 
         }
 
@@ -569,13 +589,14 @@ namespace ShootRunner
         private void timer1_Tick(object sender, EventArgs e)
         {
             Program.tick = Program.tick + 1;
-            if (Program.tick > 10) {
+            if (Program.tick > 10)
+            {
                 Program.shortcut.ctrl = false;
                 Program.shortcut.alt = false;
                 Program.shortcut.shift = false;
                 Program.shortcut.lwin = false;
                 Program.shortcut.rwin = false;
-                Program.shortcut.win = false;                
+                Program.shortcut.win = false;
                 Program.shortcut.apps = false;
                 Program.shortcut.key = "";
                 Program.tick = 0;
@@ -618,7 +639,7 @@ namespace ShootRunner
         //POPUP OPTIONS
         private void optionsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            
+
         }
 
         //POPUP AUTORUN
@@ -643,7 +664,7 @@ namespace ShootRunner
         // POPUP EXIT
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Application.Exit();
+            Program.Exit();
         }
 
         // POPUP SHORTCUTFORM
@@ -659,6 +680,12 @@ namespace ShootRunner
 
         }
 
+        private void FormShootRunner_FormClosing(object sender, FormClosingEventArgs e)
+        {
+
+
+        }
+
         private void newPinToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Program.AddEmptyPin();
@@ -669,15 +696,16 @@ namespace ShootRunner
             Program.widgetManager.AddEmptyWidget();
         }
 
-        private void FormShootRunner_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            
 
-        }
 
         private void taskbarToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Program.widgetManager.ShowTaskbarWidget(null);
+        }
+
+        private void consoleToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Program.ShowConsole();
         }
     }
 }
