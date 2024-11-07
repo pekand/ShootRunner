@@ -52,7 +52,6 @@ Source: "ShootRunner\bin\x64\Release\Microsoft.Web.WebView2.Wpf.dll"; DestDir: "
 Source: "ShootRunner\bin\x64\Release\Microsoft.Web.WebView2.Wpf.xml"; DestDir: "{app}"; Flags: ignoreversion
 Source: "ShootRunner\bin\x64\Release\ShootRunner.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "ShootRunner\bin\x64\Release\ShootRunner.exe.config"; DestDir: "{app}"; Flags: ignoreversion
-Source: "ShootRunner\bin\x64\Release\ShootRunner.pdb"; DestDir: "{app}"; Flags: ignoreversion
 Source: "ShootRunner\bin\x64\Release\System.Buffers.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "ShootRunner\bin\x64\Release\System.Buffers.xml"; DestDir: "{app}"; Flags: ignoreversion
 Source: "ShootRunner\bin\x64\Release\System.Memory.dll"; DestDir: "{app}"; Flags: ignoreversion

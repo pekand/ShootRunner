@@ -260,7 +260,7 @@ namespace ShootRunner
         private void setCommandToolStripMenuItem_Click(object sender, EventArgs e)
         {
             FormCommand formCommand = new FormCommand(this.window);
-            formCommand.ShowDialog();
+            formCommand.Show();
         }
 
         private void setIconToolStripMenuItem_Click(object sender, EventArgs e)
@@ -314,7 +314,7 @@ namespace ShootRunner
         {
             FormTransparent form = new FormTransparent(null, this);
             form.trackBar1.Value = (int)(this.Opacity * 100);
-            form.ShowDialog();
+            form.Show();
             this.window.transparent = this.Opacity;
         }
 

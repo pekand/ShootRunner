@@ -402,7 +402,7 @@ namespace ShootRunner
         {
             FormTransparent form = new FormTransparent(this, null);
             form.trackBar1.Value = (int)(this.Opacity * 100);
-            form.ShowDialog();
+            form.Show();
             this.widget.transparent = this.Opacity;
         }
 

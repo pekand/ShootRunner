@@ -8,7 +8,6 @@ using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
 
-
 namespace ShootRunner
 {
     public class JobTask
@@ -99,6 +98,36 @@ namespace ShootRunner
             );
         }
 
+        public static string EscapeString(string input)
+        {
+            StringBuilder escaped = new StringBuilder();
+            foreach (char c in input)
+            {
+                switch (c)
+                {
+                    case '\\':
+                        escaped.Append(@"\\");
+                        break;
+                    case '\"':
+                        escaped.Append("\\\"");
+                        break;
+                    case '\'':
+                        escaped.Append("\\'");
+                        break;
+                    case '\n':
+                        escaped.Append(" ; ");
+                        break;
+                    case '\r':
+                        escaped.Append("");
+                        break;
+                    default:
+                        escaped.Append(c);
+                        break;
+                }
+            }
+            return escaped.ToString();
+        }
+
         public static void RunPowerShellCommand(string cmd, string workdir = null, bool silent = false) //b39d265706
         {
             if (Program.powershell == null) {
@@ -136,14 +165,18 @@ namespace ShootRunner
 
                                  */
 
-
                                 Process process = new Process();
                                 ProcessStartInfo startInfo = new ProcessStartInfo();
 
-
-
                                 startInfo.FileName = Program.powershell;
-                                startInfo.Arguments = $"-NoProfile -Command \"{cmd}\"";
+                                string escapedCmd = EscapeString(cmd);
+                                if (silent)
+                                {
+                                    startInfo.Arguments = $"-NoProfile -Command \"{escapedCmd}\"";
+                                }
+                                else {
+                                    startInfo.Arguments = $"-NoExit -NoProfile -Command \"{escapedCmd}\"";
+                                }
 
                                 startInfo.WorkingDirectory = workdir;
                                 startInfo.UseShellExecute = true;
