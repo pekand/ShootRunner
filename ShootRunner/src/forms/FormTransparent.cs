@@ -8,6 +8,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+#nullable disable
+
+
 namespace ShootRunner.src.forms
 {
     public partial class FormTransparent : Form

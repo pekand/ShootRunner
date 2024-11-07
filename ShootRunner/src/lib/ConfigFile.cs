@@ -11,6 +11,9 @@ using System.Drawing;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using System.Collections;
 
+#nullable disable
+
+
 namespace ShootRunner
 {
     public class ConfigFile

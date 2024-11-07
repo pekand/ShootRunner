@@ -13,6 +13,9 @@ using System.IO;
 using Microsoft.Win32;
 using System.Net.NetworkInformation;
 
+#nullable disable
+
+
 namespace ShootRunner
 {
     public partial class FormShootRunner : Form

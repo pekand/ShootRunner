@@ -8,7 +8,9 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.Win32;
-using Shell32;
+
+#nullable disable
+
 
 namespace ShootRunner
 {
@@ -22,10 +24,29 @@ namespace ShootRunner
             LockWorkStation();
         }
 
+        [DllImport("User32.dll")]
+        private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+        [DllImport("User32.dll")]
+        private static extern IntPtr GetShellWindow();
+
+        [DllImport("User32.dll")]
+        private static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
+
+        const int SW_SHOWMINIMIZED = 2;
+        const int SW_RESTORE = 9;
+
         public static void ShowDesktop()
         {
-            Shell32.ShellClass objShel = new Shell32.ShellClass();
-            objShel.ToggleDesktop();
+            // Minimize all windows by finding the desktop window
+            IntPtr shellWindow = GetShellWindow();
+            IntPtr desktop = FindWindow("Progman", null);
+
+            if (desktop != IntPtr.Zero)
+            {
+                ShowWindow(desktop, SW_RESTORE);
+                ShowWindow(desktop, SW_SHOWMINIMIZED);
+            }
         }
 
 

@@ -13,6 +13,9 @@ using Microsoft.Win32;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 
+#nullable disable
+
+
 namespace ShootRunner
 {
     internal static class Program

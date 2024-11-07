@@ -6,6 +6,8 @@ using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 
+#nullable disable
+
 namespace ShootRunner
 {
     public class Window

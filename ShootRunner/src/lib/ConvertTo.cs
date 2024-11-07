@@ -7,6 +7,8 @@ using System.Text;
 using System.Threading.Tasks;
 using static System.Net.Mime.MediaTypeNames;
 
+#nullable disable
+
 namespace ShootRunner
 {
     public static class ConvertTo

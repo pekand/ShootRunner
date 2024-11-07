@@ -12,6 +12,9 @@ using System.Windows.Forms;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.Window;
 
+#nullable disable
+
+
 namespace ShootRunner
 {
     public partial class FormTaskbar : Form

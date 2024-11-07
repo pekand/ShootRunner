@@ -6,6 +6,9 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using static System.Net.Mime.MediaTypeNames;
 
+#nullable disable
+
+
 namespace ShootRunner
 {
     public class TextTools

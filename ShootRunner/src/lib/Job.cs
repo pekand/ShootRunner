@@ -7,6 +7,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.ComponentModel;
 
+#nullable disable
+
+
 namespace ShootRunner
 {
     /// <summary>
