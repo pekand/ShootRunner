@@ -36,17 +36,35 @@ namespace ShootRunner
         const int SW_SHOWMINIMIZED = 2;
         const int SW_RESTORE = 9;
 
-        public static void ShowDesktop()
-        {
-            // Minimize all windows by finding the desktop window
-            IntPtr shellWindow = GetShellWindow();
-            IntPtr desktop = FindWindow("Progman", null);
 
-            if (desktop != IntPtr.Zero)
+
+        [DllImport("user32.dll")]
+        private static extern IntPtr SendMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
+
+        private const int WM_COMMAND = 0x0111;
+        private const int MIN_ALL = 0x1A3;
+        private const int MIN_ALL_UNDO = 0x1A0;
+
+        public static void ShowDesktop(bool undo = false)
+        {
+
+            IntPtr hWnd = FindWindow("Shell_TrayWnd", null);
+            if (hWnd != IntPtr.Zero)
             {
-                ShowWindow(desktop, SW_RESTORE);
-                ShowWindow(desktop, SW_SHOWMINIMIZED);
+                if (undo)
+                {
+
+                    SendMessage(hWnd, WM_COMMAND, (IntPtr)MIN_ALL_UNDO, IntPtr.Zero);
+
+                }
+                else
+                {
+
+                    SendMessage(hWnd, WM_COMMAND, (IntPtr)MIN_ALL, IntPtr.Zero);
+
+                }
             }
+
         }
 
 

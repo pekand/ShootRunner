@@ -58,10 +58,24 @@ namespace ShootRunner
         // FILE WATCH
         private FileSystemWatcher watcher = null;
 
+
+        private const int WM_WTSSESSION_CHANGE = 0x02B1;
+        private const int NOTIFY_FOR_THIS_SESSION = 0;
+
+        [DllImport("Wtsapi32.dll")]
+        private static extern bool WTSRegisterSessionNotification(IntPtr hWnd, [MarshalAs(UnmanagedType.U4)] int dwFlags);
+
+        [DllImport("Wtsapi32.dll")]
+        private static extern bool WTSUnRegisterSessionNotification(IntPtr hWnd);
+
         // CONSTRUCTOR
         public FormShootRunner()
         {
             InitializeComponent();
+            
+            Load += (s, e) => WTSRegisterSessionNotification(this.Handle, NOTIFY_FOR_THIS_SESSION);
+            FormClosing += (s, e) => WTSUnRegisterSessionNotification(this.Handle);
+
             _hookID = SetHook(_proc);
             this.RegisterCommandFileWatch();
         }
@@ -77,6 +91,28 @@ namespace ShootRunner
             this.WindowState = FormWindowState.Minimized;
             this.ShowInTaskbar = false;
             this.Hide();
+        }
+
+        protected override void WndProc(ref Message m)
+        {
+            if (m.Msg == WM_WTSSESSION_CHANGE)
+            {
+                int reason = m.WParam.ToInt32();
+                switch (reason)
+                {
+                    case 0x7: // WTS_SESSION_LOCK
+                        Console.WriteLine("");
+                        Program.pause = true;
+                        Program.info("System locked");
+                        break;
+                    case 0x8: // WTS_SESSION_UNLOCK
+                        Console.WriteLine("System unlocked");
+                        Program.info("System unlocked");
+                        break;
+                }
+            }
+
+            base.WndProc(ref m);
         }
 
         // HOOK

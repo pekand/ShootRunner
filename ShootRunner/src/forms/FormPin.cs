@@ -1,4 +1,5 @@
-﻿using ShootRunner.src.forms;
+﻿using Microsoft.Win32;
+using ShootRunner.src.forms;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -67,6 +68,8 @@ namespace ShootRunner
             dobleClickToActivateToolStripMenuItem.Checked = this.window.doubleClickCommand;
         }
 
+
+
         public void CloseForm()
         {
             Program.pins.Remove(this);
@@ -119,6 +122,19 @@ namespace ShootRunner
 
                 if (dragCursorPoint != Cursor.Position) {
                     Program.Update();
+                }
+            }
+
+            if (e.Button == MouseButtons.Middle)
+            {
+                if (this.window.isDesktop)
+                {
+                    SystemTools.ShowDesktop(true);
+                }
+                else if (this.window.Type == "WINDOW" && this.window.Handle != IntPtr.Zero)
+                {
+                    
+                    ToolsWindow.MinimizeWindow(this.window);                    
                 }
             }
         }

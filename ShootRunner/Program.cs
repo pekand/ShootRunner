@@ -1,4 +1,5 @@
-﻿using System;
+﻿/*#define DEBUG*/
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -35,7 +36,7 @@ namespace ShootRunner
         public static string widgetsPath = "";
         public static string webview2Path = "";
         public static string commandFielPath = "";
-        public static string commandFielName = "commands.xml";
+        public static string commandFielName = "";
         public static DateTime commandFielPathLastChange;
 
         public static bool autorun = false;
@@ -311,19 +312,6 @@ namespace ShootRunner
         }
 
 
-        // EVENT LOCKPC
-        public static void SystemEvents_SessionSwitch(object sender, SessionSwitchEventArgs e)
-        {
-            if (e.Reason == SessionSwitchReason.SessionLock)
-            {
-                Program.pause = true;
-            }
-            else if (e.Reason == SessionSwitchReason.SessionUnlock)
-            {
-                Program.pause = false;
-            }
-        }
-
         public static FormShortcut shortcutForm = null;
 
         public static void ShowShortcutForm() {
@@ -392,8 +380,6 @@ namespace ShootRunner
             }
         }
 
-
-
         public static void OnMessageReceived(string message)
         {
             Console.WriteLine("Message Received: " + message);
@@ -407,8 +393,10 @@ namespace ShootRunner
             {
                 Directory.CreateDirectory(configPath);
             }
+
+            Program.commandFielName = GetDebugPrefix()+"commands.xml";
             Program.configFielPath = Path.Combine(Program.configPath, GetDebugPrefix() + "config.xml");
-            Program.commandFielPath = Path.Combine(Program.configPath, GetDebugPrefix() + Program.commandFielName);
+            Program.commandFielPath = Path.Combine(Program.configPath, Program.commandFielName);
             Program.errorLogPath = Path.Combine(Program.configPath, GetDebugPrefix() + "error.log");
             Program.widgetsPath = Path.Combine(Program.configPath, GetDebugPrefix() + "widgets");
             Program.webview2Path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), Program.AppName, "WebView2UserData");
@@ -442,8 +430,6 @@ namespace ShootRunner
                     return;
                 }
 
-                SystemEvents.SessionSwitch += new SessionSwitchEventHandler(SystemEvents_SessionSwitch);
-                SystemEvents.SessionSwitch -= new SessionSwitchEventHandler(SystemEvents_SessionSwitch);
 
                 Program.config = new Config();            
                 Program.configFile = new ConfigFile(Program.config);
@@ -457,14 +443,16 @@ namespace ShootRunner
 
                 Program.StartTimer();
 
+                /*
                 PipeServer.MessageReceived += OnMessageReceived;
                 PipeServer.SetPipeName(GetDebugPrefix() + Program.AppName);
                 if (!PipeServer.StartServerAsync()) {
                     Program.info("Pipe server exists");
-                }
+                }*/
 
                 formShootRunner = new FormShootRunner();
                 Application.Run(formShootRunner);
+
             }
             catch (Exception ex)
             {

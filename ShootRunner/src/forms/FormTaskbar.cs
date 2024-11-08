@@ -84,17 +84,19 @@ namespace ShootRunner
             this.Top = this.widget.StartTop;
             this.Width = this.widget.StartWidth;
             this.Height = this.widget.StartHeight;
-        }        
+        }
 
-        public void InitList() {
+        public void InitList()
+        {
 
             windows = ToolsWindow.GetTaskbarWindows();
-            
+
             foreach (var win in windows)
             {
                 try
                 {
-                    if (win.Handle == this.Handle) { 
+                    if (win.Handle == this.Handle)
+                    {
                         continue;
                     }
 
@@ -104,15 +106,15 @@ namespace ShootRunner
                         continue;
                     }
 
-                    taskbarWindows.Add(win);                    
+                    taskbarWindows.Add(win);
                 }
                 catch (Exception ex)
                 {
                     Program.error(ex.Message);
 
                 }
-                
-            }             
+
+            }
 
         }
 
@@ -134,13 +136,15 @@ namespace ShootRunner
 
                 foreach (var win in windows)
                 {
-                    if (newWin.Handle == win.Handle) { 
+                    if (newWin.Handle == win.Handle)
+                    {
                         found = true;
                         break;
                     }
                 }
 
-                if (found) {
+                if (found)
+                {
                     continue;
                 }
 
@@ -166,9 +170,9 @@ namespace ShootRunner
 
             List<Window> toremove = new List<Window>();
 
-            
-           foreach (var win in windows)
-           {
+
+            foreach (var win in windows)
+            {
                 bool found = false;
 
                 foreach (var newWin in newWindows)
@@ -210,10 +214,11 @@ namespace ShootRunner
                 {
                     taskbarWindows.Remove(item);
                 }
-  
+
             }
 
-            if (changed) { 
+            if (changed)
+            {
                 this.Refresh();
             }
 
@@ -226,7 +231,7 @@ namespace ShootRunner
 
         private void listView1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            
+
         }
 
         private void listView1_ItemActivate(object sender, EventArgs e)
@@ -364,7 +369,7 @@ namespace ShootRunner
             Program.Exit();
         }
 
-        
+
         private void FormTaskbar_Paint(object sender, PaintEventArgs e)
         {
             Graphics g = e.Graphics;
@@ -384,7 +389,8 @@ namespace ShootRunner
                         e.Graphics.DrawImage(window.icon, new Rectangle(X, Y, W, H));
                         X += W + S;
 
-                        if (X + W > this.Width) {
+                        if (X + W > this.Width)
+                        {
                             X = StartX;
                             Y += H + S;
                         }
@@ -396,7 +402,7 @@ namespace ShootRunner
 
                 Program.error(ex.Message);
             }
-            
+
         }
 
         private void FormTaskbar_Resize(object sender, EventArgs e)
@@ -409,10 +415,11 @@ namespace ShootRunner
 
             if (!this.widget.locked && dragging && e.Button == MouseButtons.Left)
             {
-                dragging = false;                
+                dragging = false;
             }
 
-            if (!dragging && e.Button == MouseButtons.Left) {
+            if (!dragging && e.Button == MouseButtons.Left)
+            {
                 int X = StartX;
                 int Y = StartY;
                 int W = IconWidth;
@@ -470,5 +477,10 @@ namespace ShootRunner
             }
         }
 
+        private void removeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            this.CloseForm();
+            this.Close();
+        }
     }
 }
