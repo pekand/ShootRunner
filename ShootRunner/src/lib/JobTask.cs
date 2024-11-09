@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Management.Automation;
+using System.Management.Automation.Language;
 using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
@@ -143,6 +144,8 @@ namespace ShootRunner
                 new DoWorkEventHandler(
                     delegate (object o, DoWorkEventArgs args)
                     {
+                        var job = (BackgroundJob)args.Argument;
+
                         if (TextTools.IsURL(cmd))
                         {
                             Process.Start(new ProcessStartInfo(cmd) { UseShellExecute = true });
@@ -176,12 +179,25 @@ namespace ShootRunner
                                         {
                                             ps.AddScript(cmd);
 
-                                            var results = ps.Invoke();
-
-                                            foreach (var result in results)
+                                            try
                                             {
+                                                var result = ps.BeginInvoke();
                                                 Program.write(result.ToString());
+                                                while (!result.IsCompleted)
+                                                {
+                                                    if (job.token.IsCancellationRequested)
+                                                    {
+                                                        ps.Stop();
+                                                        job.token.ThrowIfCancellationRequested();
+                                                    }
+                                                }                                                
+
                                             }
+                                            catch (Exception ex)
+                                            {
+                                                Console.WriteLine($"Error: {ex.Message}");
+                                            }
+                                            
                                         }
                                     }
                                     catch (Exception ex)
