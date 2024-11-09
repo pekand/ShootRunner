@@ -49,7 +49,7 @@ Source: "ShootRunner\bin\x64\Release\net8.0-windows\*.json"; DestDir: "{app}"; F
 Source: "ShootRunner\bin\x64\Release\net8.0-windows\*.xml"; DestDir: "{app}"; Flags: ignoreversion
 Source: "ShootRunner\bin\x64\Release\net8.0-windows\ShootRunner.exe"; DestDir: "{app}"; Flags: ignoreversion
 
-Source: "widgets\*"; DestDir: "{userappdata}\widgets"; Flags: ignoreversion createallsubdirs recursesubdirs comparetimestamp
+Source: "widgets\*"; DestDir: "{userappdata}\ShootRunner\widgets"; Flags: ignoreversion createallsubdirs recursesubdirs comparetimestamp
 
 
 [Icons]
