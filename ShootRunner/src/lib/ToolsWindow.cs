@@ -190,6 +190,7 @@ namespace ShootRunner
         private const int ICON_BIG = 1;
         private const int ICON_SMALL2 = 2;
 
+
         public static Bitmap GetWindowIcon(Window window)
         {
             IntPtr hIcon = SendMessage(window.Handle, WM_GETICON, ICON_BIG, 0);
@@ -369,8 +370,12 @@ namespace ShootRunner
 
         ///////////////////////////////////////////////////////////////////////////
 
+        [DllImport("user32.dll")]
+        private static extern IntPtr GetShellWindow();
+
         public static List<Window> GetTaskbarWindows()
         {
+            IntPtr shellWindow = GetShellWindow();
             List<Window> windowHandles = new List<Window>();
 
             EnumWindows((hWnd, lParam) =>
@@ -380,7 +385,12 @@ namespace ShootRunner
 
                 if (IsWindowPopup(hWnd))
                 {
-                    return true;
+                    StringBuilder classNameS = new StringBuilder(256);
+                    GetClassName(hWnd, classNameS, classNameS.Capacity);
+                    string className = classNameS.ToString();
+                    if (className != "ApplicationFrameWindow") {
+                        return true;
+                    }
                 }
 
                 if (IsToolWindow(hWnd))
@@ -388,20 +398,23 @@ namespace ShootRunner
                     return true;
                 }
 
-                if (IsWindowVisible(hWnd))
+                if (hWnd == shellWindow) return true;
+
+                StringBuilder title = new StringBuilder(256);
+                GetWindowText(hWnd, title, 256);
+
+                if (string.IsNullOrEmpty(title.ToString()))
                 {
-                    StringBuilder title = new StringBuilder(256);
-                    GetWindowText(hWnd, title, 256);
-                    if (!string.IsNullOrEmpty(title.ToString()))
-                    {
-                        Window window = new Window();
-                        window.Type = "WINDOW";
-                        window.Handle = hWnd;
-                        window.Title = ToolsWindow.GetWindowTitle(window);
-                        window.app = ToolsWindow.GetApplicationPathFromWindow(window);
-                        windowHandles.Add(window);
-                    }
+                    return true;
                 }
+
+                Window window = new Window();
+                window.Type = "WINDOW";
+                window.Handle = hWnd;
+                window.Title = ToolsWindow.GetWindowTitle(window);
+                window.app = ToolsWindow.GetApplicationPathFromWindow(window);
+                windowHandles.Add(window);
+
                 return true;
             }, IntPtr.Zero);
 

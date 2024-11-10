@@ -154,5 +154,34 @@ namespace ShootRunner
 
             return result.ToString();
         }
+
+        internal void HideAllWidgets()
+        {
+            if (this.widgets != null)
+            {
+                foreach (var widget in widgets)
+                {
+                    if (widget.widgetForm != null)
+                    {
+                        widget.widgetForm.Hide();
+                    }                    
+                }
+            }
+            
+        }
+
+        internal void ShowAllWidgets()
+        {
+            if (this.widgets != null)
+            {
+                foreach (var widget in widgets)
+                {
+                    if (widget.widgetForm != null)
+                    {
+                        widget.widgetForm.Show();
+                    }
+                }
+            }
+        }
     }
 }

@@ -20,6 +20,7 @@ namespace ShootRunner
         public bool silentCommand = true; 
         public bool doubleClickCommand = false; // to activate use doble click instead of one click
         public Bitmap icon = null;
+        public Bitmap customicon = null;
         public bool isDesktop = false;
         public bool isTaskbar = false;
         public bool locked = false;

@@ -72,7 +72,7 @@ namespace ShootRunner
         public FormShootRunner()
         {
             InitializeComponent();
-            
+
             Load += (s, e) => WTSRegisterSessionNotification(this.Handle, NOTIFY_FOR_THIS_SESSION);
             FormClosing += (s, e) => WTSUnRegisterSessionNotification(this.Handle);
 
@@ -113,6 +113,149 @@ namespace ShootRunner
             }
 
             base.WndProc(ref m);
+        }
+
+        // COMMAND
+        private bool RunPinCommand(Command command)
+        {
+            if (command.action == "console") // OPEN CONSOLE
+            {
+                Program.ShowConsole();
+                return true;
+            }
+            else if (command.action == "Close") // CLOSE APPLICATION
+            {
+                Program.Exit();
+                return true;
+            }
+            else if (command.action == "HideAllForms") // HIDE ALL FORMS
+            {
+                Program.HideAllForms();
+                return true;
+            }
+            else if (command.action == "ShowAllForms") // SHOW ALL FORMS
+            {
+                Program.ShowAllForms();
+                return true;
+            }
+            else if (command.action == "ToggleAllForms") // TOGGLE ALL FORMS
+            {
+                Program.ToggleAllForms();
+                return true;
+            }
+            else if (command.action == "CreatePin") // CREATE PIN
+            {
+                this.CreatPin();
+                return true;
+            }
+            else if (command.action == "AddEmptyPin") // CREATE EMPTY PIN
+            {
+                Program.AddEmptyPin();
+                return true;
+            }
+            else if (command.action == "cascade") // WINDOWS TO CASCADE
+            {
+                ToolsWindow.CascadeWindows();
+                return true;
+            }
+            else if (command.action == "taskbar") // SHOW TASKBAR
+            {
+                Program.widgetManager.ShowTaskbarWidget(null);
+                return true;
+            }
+            else
+            if (command.action == "LockPc") // LOCK PC
+            {
+                SystemTools.LockPc();
+                return true;
+            }
+            else if (command.action == "ShowDesktop") // SHOW DESKTOP
+            {
+                SystemTools.ShowDesktop();
+                return true;
+            }
+            else if (command.keypress != null && command.keypress != "") // SIMULATE KEYPRESS
+            {
+                if (command.currentwindow != null) // SEND KEYPRESS TO CURENT WINDOW IF TITLE CONTAIN STRING
+                {
+                    Window window = ToolsWindow.GetCurrentWindow();
+                    if (window.Title.Contains(command.currentwindow))
+                    {
+                        // Keyboard.SandKeyPressToWindow(command.keypress, window.Handle);
+                        Keyboard.KeyPress2(command.keypress);
+                        return true;
+                    }
+                }
+                else if(command.process != null) // SEND KEYPRESS TO ALL RUNNING PROCESSES WITH PATH
+                {
+                    Keyboard.SandKeyPressToProcess(command.keypress, command.process);
+                    return true;
+                }
+                else // JUST KEYPRESS
+                {
+                    Keyboard.KeyPress2(command.keypress);
+                    return true;
+                }
+
+            }
+            else if (command.window != null && command.window != "") // BRING WINDOW TO FRONT
+            {
+                bool found = ToolsWindow.BringToFront(command.window);
+                if (found)
+                {
+                    return true;
+                }
+
+                if (command.open != null && command.open != "") // OPEN APP IF NOT WINDOW FOUND
+                {
+                    JobTask.OpenFileInSystem(command.open);
+                    return true;
+                }
+                else if (command.command != null && command.command != "") // RUN COMMAND IF NOT WINDOW FOUND
+                {
+                    JobTask.RunCommand(command.command, command.parameters, command.workdir);
+                    return true;
+                }
+
+                return false;
+            }
+            else if (command.open != null && command.open != "") // OPEN URL OR DOCUMENT
+            {
+                if (command.currentwindow != null) // OPEN FILE OR URL  ONLY IF CURRENT WINDOW HAS TITLE
+                {
+                    Window window = ToolsWindow.GetCurrentWindow();
+                    if (window.Title.Contains(command.currentwindow))
+                    {
+                        JobTask.OpenFileInSystem(command.open);
+                        return true;
+                    }
+                }
+                else // JUST OPEN FILE
+                {
+                    JobTask.OpenFileInSystem(command.open); 
+                    return true;
+                }
+            }
+            else if (command.command != null && command.command != "") // RUN COMMAND AS PROCESS WITH PARAMETERS
+            { 
+                if (command.currentwindow != null) // RUN COMMAND AS PROCESS WITH PARAMETERS IF CURRENT WINDOW HAS TITLE
+                {
+                    Window window = ToolsWindow.GetCurrentWindow();
+                    if (window.Title.Contains(command.currentwindow))
+                    {
+                        JobTask.RunCommand(command.command, command.parameters, command.workdir);
+                        return true;
+                    }
+                }
+                else // RUN COMMAND AS PROCESS WITH PARAMETERS
+                {
+                    JobTask.RunCommand(command.command, command.parameters, command.workdir);
+                    return true;
+                }
+
+            }
+
+            return false;
         }
 
         // HOOK
@@ -306,7 +449,7 @@ namespace ShootRunner
             {
                 if (command.enabled && this.ParseShortcut(command.shortcut, shortcut))
                 {
-                    bool executed = this.RunCommand(command);
+                    bool executed = this.RunPinCommand(command);
                     if (executed)
                     {
                         foundOne = true;
@@ -391,139 +534,6 @@ namespace ShootRunner
                 Program.pins.Add(pin);
             }
 
-        }
-
-
-        // COMMAND
-        private bool RunCommand(Command command)
-        {
-            if (command.action == "console")
-            {
-                Program.ShowConsole();
-                return true;
-            }
-            else if(command.action == "Close")
-            {
-                this.Close();
-                return true;
-            }
-            else if (command.action == "CreatePin")
-            {
-                this.CreatPin();
-                return true;
-            }
-            else if (command.action == "AddEmptyPin")
-            {
-                Program.AddEmptyPin();
-                return true;
-            }
-            else if (command.action == "cascade")
-            {
-                ToolsWindow.CascadeWindows();
-                return true;
-            }
-            else if (command.action == "taskbar")
-            {
-                Program.widgetManager.ShowTaskbarWidget(null);
-                return true;
-            }
-            else
-            if (command.action == "LockPc")
-            {
-                SystemTools.LockPc();
-                return true;
-            }
-            else if (command.action == "ShowDesktop")
-            {
-                SystemTools.ShowDesktop();
-                return true;
-            }
-            else if (command.keypress != null && command.keypress != "") // SIMULATE KEYPRESS
-            {
-                if (command.currentwindow != null)
-                {
-                    Window window = ToolsWindow.GetCurrentWindow();
-                    Program.debug(window.Title);
-                    if (window.Title.Contains(command.currentwindow))
-                    {
-                        // Keyboard.SandKeyPressToWindow(command.keypress, window.Handle);
-                        Keyboard.KeyPress2(command.keypress);
-                        return true;
-                    }
-                }
-                else
-                {
-                    if (command.process != null)
-                    {
-                        Keyboard.SandKeyPressToProcess(command.keypress, command.process);
-                        return true;
-                    }
-                    else
-                    {
-                        Keyboard.KeyPress2(command.keypress);
-                        return true;
-                    }
-                }
-
-            }
-            else if (command.window != null && command.window != "") // BRING WINDOW TO FRONT
-            {
-                bool found = ToolsWindow.BringToFront(command.window);
-                if (!found)
-                {
-                    if (command.open != null && command.open != "") // OPEN IF NOT FOUND
-                    {
-                        JobTask.OpenFileInSystem(command.open);
-                        return true;
-                    }
-                    else if (command.command != null && command.command != "") // OPEN IF NOT FOUND
-                    {
-                        JobTask.RunCommand(command.command, command.parameters, command.workdir);
-                        return true;
-                    }
-                }
-
-                return found;
-            }
-            else if (command.open != null && command.open != "") // OPEN URL OR DOCUMENT
-            {
-                if (command.currentwindow != null)
-                {
-                    Window window = ToolsWindow.GetCurrentWindow();
-                    Program.debug(window.Title);
-                    if (window.Title.Contains(command.currentwindow))
-                    {
-                        JobTask.RunCommand(command.command, command.parameters, command.workdir);
-                        return true;
-                    }
-                }
-                else
-                {
-                    JobTask.OpenFileInSystem(command.open);
-                    return true;
-                }
-            }
-            else if (command.command != null && command.command != "")
-            { // RUN PROCESS WITH PARAMETERS
-                if (command.currentwindow != null)
-                {
-                    Window window = ToolsWindow.GetCurrentWindow();
-                    Program.debug(window.Title);
-                    if (window.Title.Contains(command.currentwindow))
-                    {
-                        JobTask.RunCommand(command.command, command.parameters, command.workdir);
-                        return true;
-                    }
-                }
-                else
-                {
-                    JobTask.RunCommand(command.command, command.parameters, command.workdir);
-                    return true;
-                }
-
-            }
-
-            return false;
         }
 
         //AUTORUN
@@ -732,8 +742,6 @@ namespace ShootRunner
             Program.widgetManager.AddEmptyWidget();
         }
 
-
-
         private void taskbarToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Program.widgetManager.ShowTaskbarWidget(null);
@@ -742,6 +750,20 @@ namespace ShootRunner
         private void consoleToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Program.ShowConsole();
+        }
+
+        private void hideAllToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Program.HideAllForms();
+            showAllToolStripMenuItem.Visible = true;
+            hideAllToolStripMenuItem.Visible = false;
+        }
+
+        private void showAllToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Program.ShowAllForms();
+            showAllToolStripMenuItem.Visible = false;
+            hideAllToolStripMenuItem.Visible = true;
         }
     }
 }

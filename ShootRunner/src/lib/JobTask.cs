@@ -17,7 +17,7 @@ namespace ShootRunner
 {
     public class JobTask
     {
-        public static void RunCommand(string command, string parameters, string workdir = "") {
+        /*public static void RunCommand(string command, string parameters, string workdir = "") {
             Process process = new Process();
             process.StartInfo.FileName = command;
             process.StartInfo.Arguments = parameters;
@@ -37,22 +37,22 @@ namespace ShootRunner
             {
                 Program.debug("An error occurred: " + ex.Message);
             }
-        }
+        }*/
 
-        public static void RunCommand(string cmd, string workdir = null, bool silent = false) //b39d265706
+        public static void RunCommand(string cmd, string parameters, string workdir = null, bool silent = false) //b39d265706
         {
             Job.DoJob(
                 new DoWorkEventHandler(
                     delegate (object o, DoWorkEventArgs args)
                     {
-                        if (TextTools.IsURL(cmd)) {
+                        if (TextTools.IsURL(cmd) && parameters == null) {
                             Process.Start(new ProcessStartInfo(cmd) { UseShellExecute = true });
                         }
-                        else if (Directory.Exists(cmd))
+                        else if (Directory.Exists(cmd) && parameters == null)
                         {
                             System.Diagnostics.Process.Start("explorer.exe", cmd);
                         }
-                        else if(File.Exists(cmd))
+                        else if(File.Exists(cmd) && parameters == null)
                         {
                             System.Diagnostics.Process.Start(cmd);
                         }
@@ -70,9 +70,8 @@ namespace ShootRunner
                                 }
 
 
-                                startInfo.FileName = "cmd.exe";
-                                startInfo.Arguments = "/C " + cmd;
-
+                                startInfo.FileName = cmd;
+                                startInfo.Arguments = parameters;
                                 startInfo.WorkingDirectory = workdir;
                                 startInfo.UseShellExecute = true;
                                 startInfo.RedirectStandardOutput = false;
@@ -80,11 +79,6 @@ namespace ShootRunner
                                 startInfo.CreateNoWindow = false;
                                 process.StartInfo = startInfo;
                                 process.Start();
-                                /*string output = process.StandardOutput.ReadToEnd();
-                                string error = process.StandardError.ReadToEnd();
-                                process.WaitForExit();
-                                Program.log.Write("output: " + output);
-                                Program.log.Write("error: " + error);*/
                             }
                             catch (Exception ex)
                             {
@@ -162,15 +156,6 @@ namespace ShootRunner
                         {
                             try
                             {
-                                /*
-
-    Get-Process
-    Write-Host 'Second Command Executed'
-    Get-Service
-    Write-Host "Script paused. Press Enter to continue..."
-    Read-Host
-
-                                 */
                                 if (silent)
                                 {
                                     try
@@ -234,11 +219,6 @@ namespace ShootRunner
                                     }
                                     process.StartInfo = startInfo;
                                     process.Start();
-                                    /*string output = process.StandardOutput.ReadToEnd();
-                                    string error = process.StandardError.ReadToEnd();
-                                    process.WaitForExit();
-                                    Program.log.Write("output: " + output);
-                                    Program.log.Write("error: " + error);*/
                                 }
                             }
                             catch (Exception ex)
@@ -293,16 +273,15 @@ namespace ShootRunner
             return list;
         }
 
-        public static  async Task<Window> StartProcessAndGetWindowHandleAsync(string cmd, string workdir = null, bool silent = false)
+        public static  async Task<Window> StartProcessAndGetWindowHandleAsync(string cmd, string parameters, string workdir = null, bool silent = false)
         {
             Window window = new Window();
-
-            /*  IntPtr handle = await StartProcessAndGetWindowHandleAsync("notepad.exe"); */
 
             var process = new Process();
             ProcessStartInfo startInfo = new ProcessStartInfo();
             process.StartInfo = startInfo;
             startInfo.FileName = cmd;
+            startInfo.Arguments = parameters;
 
             if (workdir != null)
             {

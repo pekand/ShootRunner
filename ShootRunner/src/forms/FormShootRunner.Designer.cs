@@ -45,8 +45,10 @@
             optionsToolStripMenuItem = new ToolStripMenuItem();
             autorunToolStripMenuItem = new ToolStripMenuItem();
             taskbarToolStripMenuItem = new ToolStripMenuItem();
-            timer1 = new System.Windows.Forms.Timer(components);
             consoleToolStripMenuItem = new ToolStripMenuItem();
+            hideAllToolStripMenuItem = new ToolStripMenuItem();
+            showAllToolStripMenuItem = new ToolStripMenuItem();
+            timer1 = new System.Windows.Forms.Timer(components);
             contextMenuStrip1.SuspendLayout();
             SuspendLayout();
             // 
@@ -59,9 +61,9 @@
             // 
             // contextMenuStrip1
             // 
-            contextMenuStrip1.Items.AddRange(new ToolStripItem[] { commandsToolStripMenuItem1, pinsToolStripMenuItem, widgetsToolStripMenuItem, applicationToolStripMenuItem, optionsToolStripMenuItem, taskbarToolStripMenuItem, consoleToolStripMenuItem });
+            contextMenuStrip1.Items.AddRange(new ToolStripItem[] { commandsToolStripMenuItem1, pinsToolStripMenuItem, widgetsToolStripMenuItem, applicationToolStripMenuItem, optionsToolStripMenuItem, taskbarToolStripMenuItem, consoleToolStripMenuItem, hideAllToolStripMenuItem, showAllToolStripMenuItem });
             contextMenuStrip1.Name = "contextMenuStrip1";
-            contextMenuStrip1.Size = new Size(181, 194);
+            contextMenuStrip1.Size = new Size(181, 242);
             contextMenuStrip1.Opening += contextMenuStrip1_Opening;
             // 
             // commandsToolStripMenuItem1
@@ -156,12 +158,6 @@
             taskbarToolStripMenuItem.Text = "Taskbar ";
             taskbarToolStripMenuItem.Click += taskbarToolStripMenuItem_Click;
             // 
-            // timer1
-            // 
-            timer1.Enabled = true;
-            timer1.Interval = 1000;
-            timer1.Tick += timer1_Tick;
-            // 
             // consoleToolStripMenuItem
             // 
             consoleToolStripMenuItem.Name = "consoleToolStripMenuItem";
@@ -169,13 +165,34 @@
             consoleToolStripMenuItem.Text = "Console";
             consoleToolStripMenuItem.Click += consoleToolStripMenuItem_Click;
             // 
+            // hideAllToolStripMenuItem
+            // 
+            hideAllToolStripMenuItem.Name = "hideAllToolStripMenuItem";
+            hideAllToolStripMenuItem.Size = new Size(180, 24);
+            hideAllToolStripMenuItem.Text = "Hide all";
+            hideAllToolStripMenuItem.Click += hideAllToolStripMenuItem_Click;
+            // 
+            // showAllToolStripMenuItem
+            // 
+            showAllToolStripMenuItem.Name = "showAllToolStripMenuItem";
+            showAllToolStripMenuItem.Size = new Size(180, 24);
+            showAllToolStripMenuItem.Text = "Show all";
+            showAllToolStripMenuItem.Visible = false;
+            showAllToolStripMenuItem.Click += showAllToolStripMenuItem_Click;
+            // 
+            // timer1
+            // 
+            timer1.Enabled = true;
+            timer1.Interval = 1000;
+            timer1.Tick += timer1_Tick;
+            // 
             // FormShootRunner
             // 
             AutoScaleDimensions = new SizeF(8F, 19F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1067, 658);
             Icon = (Icon)resources.GetObject("$this.Icon");
-            Margin = new Padding(4, 4, 4, 4);
+            Margin = new Padding(4);
             Name = "FormShootRunner";
             Text = "Form";
             FormClosing += FormShootRunner_FormClosing;
@@ -205,6 +222,8 @@
         private System.Windows.Forms.ToolStripMenuItem newPinToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem taskbarToolStripMenuItem;
         private ToolStripMenuItem consoleToolStripMenuItem;
+        private ToolStripMenuItem hideAllToolStripMenuItem;
+        private ToolStripMenuItem showAllToolStripMenuItem;
     }
 }
 

@@ -36,6 +36,7 @@ namespace ShootRunner
 
         public static Bitmap StringToBitmap(string base64String)
         {
+
             if (base64String.Trim() == "")
             {
                 return null;
@@ -49,10 +50,13 @@ namespace ShootRunner
                     return new Bitmap(ms);
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                return null;
+                Program.error(ex.Message);
+
             }
+
+            return null;
         }
 
         public static string BoolToString(bool value, bool defaultValue = false)

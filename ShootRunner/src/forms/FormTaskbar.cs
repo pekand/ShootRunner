@@ -418,43 +418,67 @@ namespace ShootRunner
                 dragging = false;
             }
 
-            if (!dragging && e.Button == MouseButtons.Left)
+
+            Window onWindow = null;
+
+            int X = StartX;
+            int Y = StartY;
+            int W = IconWidth;
+            int H = IconHeight;
+            int S = Space;
+
+            this.selectedWindow = null;
+
+            try
             {
-                int X = StartX;
-                int Y = StartY;
-                int W = IconWidth;
-                int H = IconHeight;
-                int S = Space;
-
-                try
+                foreach (Window window in taskbarWindows)
                 {
-                    foreach (Window window in taskbarWindows)
+                    if (window.icon != null)
                     {
-                        if (window.icon != null)
+                        if (X <= e.X && e.X <= (X + W) && Y <= e.Y && e.Y <= (Y + H))
                         {
-                            if (X <= e.X && e.X <= (X + W) && Y <= e.Y && e.Y <= (Y + H))
-                            {
-                                this.selectedWindow = window;
-                                ToolsWindow.BringWindowToFront(selectedWindow);
-                                return;
-                            }
+                            onWindow = window;
 
-                            X += W + S;
+                            break;
+                        }
 
-                            if (X + W > this.Width)
-                            {
-                                X = StartX;
-                                Y += H + S;
-                            }
+                        X += W + S;
+
+                        if (X + W > this.Width)
+                        {
+                            X = StartX;
+                            Y += H + S;
                         }
                     }
                 }
-                catch (Exception ex)
+            }
+            catch (Exception ex)
+            {
+
+                Program.error(ex.Message);
+            }
+
+            if (onWindow != null)
+            {
+                this.selectedWindow = onWindow;
+
+                if (e.Button == MouseButtons.Left)
+                {
+                    ToolsWindow.BringWindowToFront(selectedWindow);
+                }
+
+                if (e.Button == MouseButtons.Middle)
+                {
+                    ToolsWindow.MinimizeWindow(onWindow);
+                }
+
+                if (e.Button == MouseButtons.Right)
                 {
 
-                    Program.error(ex.Message);
                 }
             }
+
+
         }
 
         private void FormTaskbar_MouseDown(object sender, MouseEventArgs e)
@@ -481,6 +505,27 @@ namespace ShootRunner
         {
             this.CloseForm();
             this.Close();
+        }
+
+        private void windowToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void minimalizeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (this.selectedWindow != null)
+            {
+                ToolsWindow.MinimizeWindow(this.selectedWindow);
+            }
+        }
+
+        private void closeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (this.selectedWindow != null)
+            {
+                ToolsWindow.CloseWindow(this.selectedWindow);
+            }
         }
     }
 }
