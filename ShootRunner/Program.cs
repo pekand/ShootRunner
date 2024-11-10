@@ -20,14 +20,7 @@ namespace ShootRunner
 {
     internal static class Program
     {
-        public static string AppName = "ShootRunner";
-
-        public static List<Command> commands = new List<Command>();
-
-        public static FormShootRunner formShootRunner = null;
-
-        public static string text = "";
-
+        public static string AppName = "ShootRunner";       
         public static string roamingAppDataPath = "";
         public static string configPath = "";
         public static string errorLogPath = "";
@@ -36,27 +29,34 @@ namespace ShootRunner
         public static string webview2Path = "";
         public static string commandFielPath = "";
         public static string commandFielName = "";
-        public static DateTime commandFielPathLastChange;
-
-        public static bool autorun = false;
-        public static bool autosave = true;
-
-        public static Shortcut shortcut = new Shortcut();
-        public static int tick = 0;
-
-        public static bool pause = false;
-
-        public static List<FormPin> pins = new List<FormPin>();
-        
-
         public static string powershell = null;
 
+        private static Mutex mutex = null;
+
+        public static Config config = null;
+        public static ConfigFile configFile = null;
+
+        public static DateTime commandFielPathLastChange;
+
+        public static FormShootRunner formShootRunner = null;
+        public static List<Command> commands = new List<Command>();        
+        public static List<FormPin> pins = new List<FormPin>();
+        public static WidgetManager widgetManager = new WidgetManager();
+        public static FormConsole console = null;
+        public static FormShortcut shortcutForm = null;
+
+        public static string text = "";
+        
+        public static bool autorun = false;
+        public static bool autosave = true;
+        public static Shortcut shortcut = new Shortcut();
+        public static int tick = 0;
+        public static bool pause = false;
         public static bool updated = false;
         public static DateTime updatedTime = new DateTime();
-
-        public static FormConsole console = null;
-
-        public static WidgetManager widgetManager = new WidgetManager();
+        public static System.Timers.Timer timer;
+       
+        public static bool closingApplication = false;
 
         public static void Update() {
             Program.updated = true;
@@ -64,7 +64,6 @@ namespace ShootRunner
             Program.debug("Update");
         }
 
-        public static System.Timers.Timer timer;
 
         public static void StartTimer()
         {
@@ -179,6 +178,7 @@ namespace ShootRunner
             }
 
             console.Show();
+            console.BringToFront();
         }
 
         public static void CloseConsole()
@@ -192,6 +192,25 @@ namespace ShootRunner
         {
             if (!File.Exists(Program.commandFielPath))
             {
+                try
+                {
+                    string filePath = Program.commandFielPath;
+                    string content = CommandsFileContent.GetContent();
+
+                    string directoryPath = Path.GetDirectoryName(filePath);
+                    if (!Directory.Exists(directoryPath))
+                    {
+                        Directory.CreateDirectory(directoryPath);
+                    }
+
+                    File.WriteAllText(filePath, content);
+                }
+                catch (Exception ex)
+                {
+
+                    Program.error(ex.Message);
+                }
+
                 return;
             }
 
@@ -295,7 +314,6 @@ namespace ShootRunner
 
         }
         
-        private static Mutex mutex = null;
 
         public static bool ChecKDuplicateRun(){
             bool createdNew;
@@ -310,8 +328,6 @@ namespace ShootRunner
             return false;
         }
 
-
-        public static FormShortcut shortcutForm = null;
 
         public static void ShowShortcutForm() {
             if (shortcutForm == null)
@@ -345,8 +361,6 @@ namespace ShootRunner
             }            
         }
 
-        public static Config config = null;
-        public static ConfigFile configFile = null;
 
         public static void CreatePin(Window window = null)
         {
@@ -401,12 +415,85 @@ namespace ShootRunner
             Program.webview2Path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), Program.AppName, "WebView2UserData");
         }
 
-        public static bool closingApplication = false;
+
         public static void Exit()
         {
             closingApplication = true;
             Program.configFile.Save();
             Application.Exit();
+        }
+
+        public static void HideAllForms()
+        {
+            if (formShootRunner != null) formShootRunner.Hide();
+            if (console != null) console.Hide();
+            if (shortcutForm != null) shortcutForm.Hide();
+
+            foreach (var pin in pins) { 
+                pin.Hide();
+            }
+
+
+            widgetManager.HideAllWidgets();
+
+        }
+
+        public static void ShowAllForms()
+        {
+            if (formShootRunner != null) formShootRunner.Show();
+            if (console != null) console.Show();
+            if (shortcutForm != null) shortcutForm.Show();
+
+            foreach (var pin in pins)
+            {
+                pin.Show();
+            }
+
+            widgetManager.ShowAllWidgets();
+
+        }
+
+        public static void ToggleAllForms()
+        {
+            bool allHiden = false;
+
+            if (formShootRunner.Visible) {
+                allHiden = false;
+            }
+
+            if (console.Visible)
+            {
+                allHiden = false;
+            }
+
+            if (shortcutForm.Visible)
+            {
+                allHiden = false;
+            }
+
+            foreach (var pin in pins)
+            {
+                if (pin.Visible)
+                {
+                    allHiden = false;
+                }
+            }
+
+            foreach (var widget in widgetManager.widgets)
+            {
+                if (widget.widgetForm.Visible)
+                {
+                    allHiden = false;
+                }
+            }
+
+            if (allHiden)
+            {
+                HideAllForms();
+            }
+            else {
+                ShowAllForms();
+            }
         }
 
 
@@ -458,5 +545,7 @@ namespace ShootRunner
                 Program.error(ex.Message);
             }
         }
+
+        
     }
 }

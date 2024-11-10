@@ -32,13 +32,16 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormTaskbar));
             timer1 = new System.Windows.Forms.Timer(components);
             contextMenuStrip1 = new ContextMenuStrip(components);
+            windowToolStripMenuItem = new ToolStripMenuItem();
+            minimalizeToolStripMenuItem = new ToolStripMenuItem();
+            closeToolStripMenuItem = new ToolStripMenuItem();
+            taskbarToolStripMenuItem = new ToolStripMenuItem();
+            removeToolStripMenuItem = new ToolStripMenuItem();
             applicationToolStripMenuItem = new ToolStripMenuItem();
             exitToolStripMenuItem = new ToolStripMenuItem();
             optionsToolStripMenuItem = new ToolStripMenuItem();
             mostTopToolStripMenuItem = new ToolStripMenuItem();
             lockToolStripMenuItem = new ToolStripMenuItem();
-            taskbarToolStripMenuItem = new ToolStripMenuItem();
-            removeToolStripMenuItem = new ToolStripMenuItem();
             contextMenuStrip1.SuspendLayout();
             SuspendLayout();
             // 
@@ -49,22 +52,58 @@
             // 
             // contextMenuStrip1
             // 
-            contextMenuStrip1.Items.AddRange(new ToolStripItem[] { taskbarToolStripMenuItem, applicationToolStripMenuItem, optionsToolStripMenuItem });
+            contextMenuStrip1.Items.AddRange(new ToolStripItem[] { windowToolStripMenuItem, taskbarToolStripMenuItem, applicationToolStripMenuItem, optionsToolStripMenuItem });
             contextMenuStrip1.Name = "contextMenuStrip1";
-            contextMenuStrip1.Size = new Size(181, 98);
+            contextMenuStrip1.Size = new Size(147, 100);
             contextMenuStrip1.Opening += contextMenuStrip1_Opening;
+            // 
+            // windowToolStripMenuItem
+            // 
+            windowToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { minimalizeToolStripMenuItem, closeToolStripMenuItem });
+            windowToolStripMenuItem.Name = "windowToolStripMenuItem";
+            windowToolStripMenuItem.Size = new Size(146, 24);
+            windowToolStripMenuItem.Text = "Window";
+            windowToolStripMenuItem.Click += windowToolStripMenuItem_Click;
+            // 
+            // minimalizeToolStripMenuItem
+            // 
+            minimalizeToolStripMenuItem.Name = "minimalizeToolStripMenuItem";
+            minimalizeToolStripMenuItem.Size = new Size(180, 24);
+            minimalizeToolStripMenuItem.Text = "Minimalize";
+            minimalizeToolStripMenuItem.Click += minimalizeToolStripMenuItem_Click;
+            // 
+            // closeToolStripMenuItem
+            // 
+            closeToolStripMenuItem.Name = "closeToolStripMenuItem";
+            closeToolStripMenuItem.Size = new Size(180, 24);
+            closeToolStripMenuItem.Text = "Close";
+            closeToolStripMenuItem.Click += closeToolStripMenuItem_Click;
+            // 
+            // taskbarToolStripMenuItem
+            // 
+            taskbarToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { removeToolStripMenuItem });
+            taskbarToolStripMenuItem.Name = "taskbarToolStripMenuItem";
+            taskbarToolStripMenuItem.Size = new Size(146, 24);
+            taskbarToolStripMenuItem.Text = "Taskbar";
+            // 
+            // removeToolStripMenuItem
+            // 
+            removeToolStripMenuItem.Name = "removeToolStripMenuItem";
+            removeToolStripMenuItem.Size = new Size(127, 24);
+            removeToolStripMenuItem.Text = "Remove";
+            removeToolStripMenuItem.Click += removeToolStripMenuItem_Click;
             // 
             // applicationToolStripMenuItem
             // 
             applicationToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { exitToolStripMenuItem });
             applicationToolStripMenuItem.Name = "applicationToolStripMenuItem";
-            applicationToolStripMenuItem.Size = new Size(180, 24);
+            applicationToolStripMenuItem.Size = new Size(146, 24);
             applicationToolStripMenuItem.Text = "Application";
             // 
             // exitToolStripMenuItem
             // 
             exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            exitToolStripMenuItem.Size = new Size(180, 24);
+            exitToolStripMenuItem.Size = new Size(99, 24);
             exitToolStripMenuItem.Text = "Exit";
             exitToolStripMenuItem.Click += exitToolStripMenuItem_Click;
             // 
@@ -72,7 +111,7 @@
             // 
             optionsToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { mostTopToolStripMenuItem, lockToolStripMenuItem });
             optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
-            optionsToolStripMenuItem.Size = new Size(180, 24);
+            optionsToolStripMenuItem.Size = new Size(146, 24);
             optionsToolStripMenuItem.Text = "Options";
             // 
             // mostTopToolStripMenuItem
@@ -88,20 +127,6 @@
             lockToolStripMenuItem.Size = new Size(135, 24);
             lockToolStripMenuItem.Text = "Locked";
             lockToolStripMenuItem.Click += lockToolStripMenuItem_Click;
-            // 
-            // taskbarToolStripMenuItem
-            // 
-            taskbarToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { removeToolStripMenuItem });
-            taskbarToolStripMenuItem.Name = "taskbarToolStripMenuItem";
-            taskbarToolStripMenuItem.Size = new Size(180, 24);
-            taskbarToolStripMenuItem.Text = "Taskbar";
-            // 
-            // removeToolStripMenuItem
-            // 
-            removeToolStripMenuItem.Name = "removeToolStripMenuItem";
-            removeToolStripMenuItem.Size = new Size(180, 24);
-            removeToolStripMenuItem.Text = "Remove";
-            removeToolStripMenuItem.Click += removeToolStripMenuItem_Click;
             // 
             // FormTaskbar
             // 
@@ -138,5 +163,8 @@
         private System.Windows.Forms.ToolStripMenuItem lockToolStripMenuItem;
         private ToolStripMenuItem taskbarToolStripMenuItem;
         private ToolStripMenuItem removeToolStripMenuItem;
+        private ToolStripMenuItem windowToolStripMenuItem;
+        private ToolStripMenuItem minimalizeToolStripMenuItem;
+        private ToolStripMenuItem closeToolStripMenuItem;
     }
 }

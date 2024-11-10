@@ -68,8 +68,6 @@ namespace ShootRunner
             dobleClickToActivateToolStripMenuItem.Checked = this.window.doubleClickCommand;
         }
 
-
-
         public void CloseForm()
         {
             Program.pins.Remove(this);
@@ -105,6 +103,75 @@ namespace ShootRunner
                 CreateParams cp = base.CreateParams;
                 cp.ExStyle |= WS_EX_TOOLWINDOW; // Add the tool window style
                 return cp;
+            }
+        }
+
+        public async void DoPinAction()
+        {
+            if (this.window.isDesktop)
+            {
+                SystemTools.ShowDesktop();
+            }
+            else if (this.window.Type == "COMMAND" && this.window.command != null && this.window.command.Trim() != "")
+            {
+                JobTask.RunPowerShellCommand(this.window.command, null, this.window.silentCommand);
+            }
+            else if (this.window.Type == "WINDOW")
+            {
+                if (this.window.Handle != IntPtr.Zero && ToolsWindow.IsWindowValid(this.window))
+                {
+                    ToolsWindow.BringWindowToFront(this.window);
+                }
+                else if (this.window.app != null && this.window.app.Trim() != "")
+                {
+                    this.window.Handle = IntPtr.Zero;
+
+                    bool foundWindow = false;
+                    List<Window> taskbarWindows = ToolsWindow.GetTaskbarWindows();
+                    foreach (Window win in taskbarWindows)
+                    {
+                        if (this.window.Title == win.Title)
+                        {
+                            this.window.Handle = win.Handle;
+                            foundWindow = true;
+                            break;
+                        }
+                    }
+
+                    if (!foundWindow)
+                    {
+                        foreach (Window win in taskbarWindows)
+                        {
+                            if (this.window.app == win.app)
+                            {
+                                this.window.Handle = win.Handle;
+                                foundWindow = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (foundWindow)
+                    {
+                        ToolsWindow.BringWindowToFront(this.window);
+                    }
+                    else
+                    {
+                        if (this.window.app != null && this.window.app.Trim() != "")
+                        {
+                            Window window = await JobTask.StartProcessAndGetWindowHandleAsync(this.window.app, null, null, this.window.silentCommand);
+
+                            if (window.Handle != IntPtr.Zero)
+                            {
+                                ToolsWindow.SetWindowData(window);
+                                Program.CreatePin(window);
+
+                            }
+
+                            JobTask.RunCommand(this.window.app, null, null, this.window.silentCommand);
+                        }
+                    }
+                }
             }
         }
 
@@ -158,64 +225,6 @@ namespace ShootRunner
             }
         }
 
-        public void DoPinAction() {
-            if (this.window.isDesktop)
-            {
-                SystemTools.ShowDesktop();
-            }
-            else if (this.window.Type == "COMMAND" && this.window.command != null && this.window.command.Trim() != "")
-            {
-                // Task.RunCommand(this.window.command, null, this.window.silentCommand);
-                JobTask.RunPowerShellCommand(this.window.command, null, this.window.silentCommand);
-            }
-            else if (this.window.Type == "WINDOW")
-            {
-                if (this.window.Handle != IntPtr.Zero && ToolsWindow.IsWindowValid(this.window))
-                {
-                    ToolsWindow.BringWindowToFront(this.window);
-                }
-                else if (this.window.app != null && this.window.app.Trim() != "")
-                {
-                    bool foundWindow = false;
-                    List<Window> taskbarWindows = ToolsWindow.GetTaskbarWindows();
-                    foreach (Window win in taskbarWindows)
-                    {
-                        if (this.window.Title == win.Title)
-                        {
-                            this.window.Handle = win.Handle;
-                            foundWindow = true;
-                            break;
-                        }
-                    }
-
-                    if (!foundWindow)
-                    {
-                        foreach (Window win in taskbarWindows)
-                        {
-                            if (this.window.app == win.app)
-                            {
-                                this.window.Handle = win.Handle;
-                                foundWindow = true;
-                                break;
-                            }
-                        }
-                    }
-
-                    if (foundWindow)
-                    {
-                        ToolsWindow.BringWindowToFront(this.window);
-                    }
-                    else
-                    {
-                        if (this.window.app != null && this.window.app.Trim() != "")
-                        {
-                            JobTask.RunCommand(this.window.app, null, this.window.silentCommand);
-                        }
-                    }
-                }
-            }
-        }
-
         private void FormPin_MouseDoubleClick(object sender, MouseEventArgs e)
         {
             try
@@ -255,7 +264,10 @@ namespace ShootRunner
 
             }
 
-            if (this.window.icon != null)
+            if (this.window.customicon != null)
+            {
+                e.Graphics.DrawImage(this.window.customicon, new Rectangle(0, 0, this.Width, this.Height));
+            } else if (this.window.icon != null)
             {
                 e.Graphics.DrawImage(this.window.icon,new Rectangle(0,0,this.Width,this.Height));
             }
@@ -294,7 +306,7 @@ namespace ShootRunner
                     string selectedFilePath = openFileDialog1.FileName;
                     using (var image = Image.FromFile(selectedFilePath))
                     {
-                        this.window.icon = new Bitmap(image);
+                        this.window.customicon = new Bitmap(image);
                         this.Refresh();
                     }
 
@@ -374,7 +386,7 @@ namespace ShootRunner
             {
                 if (this.window.app != null && this.window.app.Trim() != "")
                 {
-                    Window window = await JobTask.StartProcessAndGetWindowHandleAsync(this.window.app, null, this.window.silentCommand);
+                    Window window = await JobTask.StartProcessAndGetWindowHandleAsync(this.window.app, null, null, this.window.silentCommand);
 
                     if (window.Handle != IntPtr.Zero)
                     {

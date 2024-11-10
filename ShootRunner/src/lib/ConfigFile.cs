@@ -79,6 +79,9 @@ namespace ShootRunner
                 item.Add(new XElement("silentcommand", ConvertTo.BoolToString(pin.window.silentCommand)));
                 item.Add(new XElement("doubleclickcommand", ConvertTo.BoolToString(pin.window.doubleClickCommand)));
                 item.Add(new XElement("icon", ConvertTo.BitmapToString(pin.window.icon)));
+                if (pin.window.customicon != null) {
+                    item.Add(new XElement("customicon", ConvertTo.BitmapToString(pin.window.customicon)));
+                }
                 item.Add(new XElement("isDesktop", ConvertTo.BoolToString(pin.window.isDesktop)));
                 item.Add(new XElement("isTaskbar", ConvertTo.BoolToString(pin.window.isTaskbar)));
                 item.Add(new XElement("left", pin.Left.ToString()));
@@ -236,6 +239,11 @@ namespace ShootRunner
                                         if (el.Name.ToString() == "icon")
                                         {
                                             window.icon = ConvertTo.StringToBitmap(el.Value);
+                                        }
+
+                                        if (el.Name.ToString() == "customicon")
+                                        {
+                                            window.customicon = ConvertTo.StringToBitmap(el.Value);
                                         }
 
                                         if (el.Name.ToString() == "isDesktop")
