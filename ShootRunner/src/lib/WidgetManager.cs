@@ -106,8 +106,7 @@ namespace ShootRunner
                 this.formTaskbar = new FormTaskbar(widget);
             }
 
-            this.formTaskbar.Show();
-            this.formTaskbar.SetStartPosition();
+            this.formTaskbar.Show();            
             Program.Update();
         }
 

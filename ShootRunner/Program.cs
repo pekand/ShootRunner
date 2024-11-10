@@ -210,7 +210,10 @@ namespace ShootRunner
 
                     Program.error(ex.Message);
                 }
+            }
 
+            if (!File.Exists(Program.commandFielPath))
+            {
                 return;
             }
 

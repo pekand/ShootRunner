@@ -528,6 +528,7 @@ namespace ShootRunner
 
             if (window.Handle != IntPtr.Zero)
             {
+                ToolsWindow.SetWindowData(window);
                 FormPin pin = new FormPin(window);
                 pin.Show();
                 pin.Center();

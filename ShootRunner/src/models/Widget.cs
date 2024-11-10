@@ -22,5 +22,10 @@ namespace ShootRunner
         public double transparent = 1.0;
         public bool mosttop = false;
         public Dictionary<string, string> data = new Dictionary<string, string>();
+
+        // TASKBAR
+        public bool useScreenshots = true;
+        public bool useBigIcons = false;
+        public Color backgroundColor = Color.Black;
     }
 }
