@@ -112,5 +112,23 @@ namespace ShootRunner
             }
         }
 
+        public static string ColorToString(Color value)
+        {
+            
+
+            return ColorTranslator.ToHtml(value);
+        }
+
+        public static Color StringToColor(string value, Color defaultValue)
+        {
+            try
+            {
+                return ColorTranslator.FromHtml(value);
+            }
+            catch
+            {
+                return defaultValue;
+            }
+        }
     }
 }

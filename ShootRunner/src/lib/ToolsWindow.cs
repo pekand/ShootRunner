@@ -131,17 +131,21 @@ namespace ShootRunner
 
         public static Window GetCurrentWindow()
         {
-            Window window = new Window();
-
             IntPtr activeWindowHandle = ToolsWindow.GetForegroundWindow();
-            window.Handle = activeWindowHandle;
-            SetWindowData(window);
 
+            if (activeWindowHandle == IntPtr.Zero)
+            {
+                return null;
+            }
+
+            Window window = new Window();
+            window.Handle = activeWindowHandle;
+            //SetWindowData(window);
 
             return window;
         }
 
-        public static Window SetWindowData(Window window)
+        public static Window SetWindowData(Window window, bool makeScreenshot = false)
         {
             if (window.Handle != IntPtr.Zero)
             {
@@ -159,10 +163,14 @@ namespace ShootRunner
                     }
                     window.isDesktop = ToolsWindow.IsDesktopWindow(window);
                     window.isTaskbar = ToolsWindow.IsTaskbarWindow(window);
+                    if (makeScreenshot)
+                    {
+                        window.screenshot = WindowScreenshot.CaptureWindow(window, 256, 256);
+                    }
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    
+                    Program.error(ex.Message);
                 }
                 
             }

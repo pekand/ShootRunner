@@ -108,15 +108,19 @@ namespace ShootRunner
                 widget.Add(new XElement("type", w.type));
                 if (w.widgetForm != null)
                 {
-                    widget.Add(new XElement("left", w.widgetForm.Left.ToString()));
-                    widget.Add(new XElement("top", w.widgetForm.Top.ToString()));
-                    widget.Add(new XElement("width", w.widgetForm.Width.ToString()));
-                    widget.Add(new XElement("height", w.widgetForm.Height.ToString()));
+                    widget.Add(new XElement("left", w.StartLeft.ToString()));
+                    widget.Add(new XElement("top", w.StartTop.ToString()));
+                    widget.Add(new XElement("width", w.StartWidth.ToString()));
+                    widget.Add(new XElement("height", w.StartHeight.ToString()));
                     widget.Add(new XElement("mosttop", ConvertTo.BoolToString(w.widgetForm.TopMost)));
                 }
 
                 widget.Add(new XElement("locked", ConvertTo.BoolToString(w.locked)));
                 widget.Add(new XElement("transparent", ConvertTo.DoubleToString(w.transparent)));
+
+                widget.Add(new XElement("backgroundColor", ConvertTo.ColorToString(w.backgroundColor)));
+                widget.Add(new XElement("useBigIcons", ConvertTo.BoolToString(w.useBigIcons)));
+                widget.Add(new XElement("useScreenshots", ConvertTo.BoolToString(w.useScreenshots)));
 
 
                 XElement data = new XElement("data");
@@ -141,15 +145,19 @@ namespace ShootRunner
 
                 widget.Add(new XElement("type", taskbarWidget.type));
 
-                widget.Add(new XElement("left", formTaskbar.Left.ToString()));
-                widget.Add(new XElement("top", formTaskbar.Top.ToString()));
-                widget.Add(new XElement("width", formTaskbar.Width.ToString()));
-                widget.Add(new XElement("height", formTaskbar.Height.ToString()));
+                widget.Add(new XElement("left", taskbarWidget.StartLeft.ToString()));
+                widget.Add(new XElement("top", taskbarWidget.StartTop.ToString()));
+                widget.Add(new XElement("width", taskbarWidget.StartWidth.ToString()));
+                widget.Add(new XElement("height", taskbarWidget.StartHeight.ToString()));
                 widget.Add(new XElement("mosttop", ConvertTo.BoolToString(formTaskbar.TopMost)));
 
 
                 widget.Add(new XElement("locked", ConvertTo.BoolToString(taskbarWidget.locked)));
                 widget.Add(new XElement("transparent", ConvertTo.DoubleToString(taskbarWidget.transparent)));
+
+                widget.Add(new XElement("backgroundColor", ConvertTo.ColorToString(taskbarWidget.backgroundColor)));
+                widget.Add(new XElement("useBigIcons", ConvertTo.BoolToString(taskbarWidget.useBigIcons)));
+                widget.Add(new XElement("useScreenshots", ConvertTo.BoolToString(taskbarWidget.useScreenshots)));
             }
 
             try
@@ -356,6 +364,21 @@ namespace ShootRunner
                                         if (el.Name.ToString() == "transparent")
                                         {
                                             widget.transparent = ConvertTo.StringToDouble(el.Value);
+                                        }
+
+                                        if (el.Name.ToString() == "backgroundColor")
+                                        {
+                                            widget.backgroundColor = ConvertTo.StringToColor(el.Value, Color.Black);
+                                        }
+
+                                        if (el.Name.ToString() == "useBigIcons")
+                                        {
+                                            widget.useBigIcons = ConvertTo.StringToBool(el.Value, false);
+                                        }
+
+                                        if (el.Name.ToString() == "useScreenshots")
+                                        {
+                                            widget.useScreenshots = ConvertTo.StringToBool(el.Value, false);
                                         }
 
                                         if (el.Name.ToString() == "data")

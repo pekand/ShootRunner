@@ -74,7 +74,8 @@ namespace ShootRunner
         public void AddTypesToContextMenu()
         {
 
-            foreach (var widgeType in Program.widgetManager.widgeTypes ) {
+            foreach (var widgeType in Program.widgetManager.widgeTypes)
+            {
                 ToolStripMenuItem item = new ToolStripMenuItem(widgeType.name);
                 item.Click += (sender, e) => SelectType(widgeType);
                 typeToolStripMenuItem.DropDownItems.Add(item);
@@ -101,10 +102,14 @@ namespace ShootRunner
 
         public void SetStartPosition()
         {
+            this.Resize -= FormWidget_Resize;
+            this.Move -= FormWidget_Move;
             this.Left = this.widget.StartLeft;
             this.Top = this.widget.StartTop;
             this.Width = this.widget.StartWidth;
             this.Height = this.widget.StartHeight;
+            this.Resize += FormWidget_Resize;
+            this.Move += FormWidget_Move;
         }
 
         ///////////////////////////////////////////////////////////////////////
@@ -122,10 +127,10 @@ namespace ShootRunner
             {
                 webView = new Microsoft.Web.WebView2.WinForms.WebView2();
                 webView.Dock = DockStyle.Fill;
-            
+
                 this.Controls.Add(webView);
 
-                
+
                 var environment = await CoreWebView2Environment.CreateAsync(userDataFolder: Program.webview2Path);
                 await webView.EnsureCoreWebView2Async(environment);
 
@@ -140,7 +145,8 @@ namespace ShootRunner
                 webView.CoreWebView2.ContextMenuRequested += CoreWebView2_ContextMenuRequested;
 
                 string htmlContent = "";
-                if (widget!= null && widget.type != null && widget.widgetType != null) {
+                if (widget != null && widget.type != null && widget.widgetType != null)
+                {
                     htmlContent = widget.widgetType.html;
                 }
 
@@ -171,7 +177,7 @@ namespace ShootRunner
                     })();              
 
                 ";
-           
+
 
                 await webView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(script1);
 
@@ -229,7 +235,7 @@ namespace ShootRunner
                 webView.NavigateToString(htmlContent);
 
 
-                
+
             }
             catch (Exception ex)
             {
@@ -283,7 +289,8 @@ namespace ShootRunner
                     Program.Update();
                 }
 
-                if (request.type == "getData") {
+                if (request.type == "getData")
+                {
                     JSMessage response = new JSMessage();
                     response.uid = Program.widgetManager.uid();
                     response.parent = request.uid;
@@ -295,8 +302,8 @@ namespace ShootRunner
                 }
             }
             catch (Exception)
-            {               
-            }   
+            {
+            }
         }
 
         private void CoreWebView2_ContextMenuRequested(object sender, CoreWebView2ContextMenuRequestedEventArgs e)
@@ -345,10 +352,10 @@ namespace ShootRunner
 
         protected override void WndProc(ref Message m)
         {
-            
-            if (this.widget.locked && ( m.Msg == WM_NCLBUTTONDOWN && m.WParam.ToInt32() == HTCAPTION))
+
+            if (this.widget.locked && (m.Msg == WM_NCLBUTTONDOWN && m.WParam.ToInt32() == HTCAPTION))
             {
-                return; 
+                return;
             }
 
             base.WndProc(ref m);
@@ -448,7 +455,8 @@ namespace ShootRunner
 
         private void reloadToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (widget ==null || widget.widgetType == null) {
+            if (widget == null || widget.widgetType == null)
+            {
                 return;
             }
 
@@ -485,7 +493,7 @@ namespace ShootRunner
             }
             catch (Exception ex)
             {
-               Program.error($"Error opening file: {ex.Message}");
+                Program.error($"Error opening file: {ex.Message}");
             }
         }
 
@@ -494,6 +502,26 @@ namespace ShootRunner
             /*string titleJson = await webView.ExecuteScriptAsync("document.title");
             string title = System.Text.Json.JsonSerializer.Deserialize<string>(titleJson);
             this.Text = title == null || title.Trim() == "" ? "Widget" : title;*/
+        }
+
+        private void FormWidget_Resize(object sender, EventArgs e)
+        {
+            this.widget.StartLeft = this.Left;
+            this.widget.StartTop = this.Top;
+            this.widget.StartWidth = this.Width;
+            this.widget.StartHeight = this.Height;
+            Program.Update();
+            this.Refresh();
+        }
+
+        private void FormWidget_Move(object sender, EventArgs e)
+        {
+            this.widget.StartLeft = this.Left;
+            this.widget.StartTop = this.Top;
+            this.widget.StartWidth = this.Width;
+            this.widget.StartHeight = this.Height;
+            Program.Update();
+            this.Refresh();
         }
     }
 }

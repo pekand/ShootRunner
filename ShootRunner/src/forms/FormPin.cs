@@ -23,7 +23,7 @@ namespace ShootRunner
         public int StartTop = 100;
         public int StartWidth = 64;
         public int StartHeight = 64;
-        
+
         public Window window = null;
 
         List<Window> taskbarWindows = null;
@@ -49,7 +49,7 @@ namespace ShootRunner
 
             this.DoubleBuffered = true;
             this.FormBorderStyle = FormBorderStyle.None;
-            this.MinimumSize = new Size(32, 32);            
+            this.MinimumSize = new Size(32, 32);
             this.BackColor = Color.White;
             this.TopMost = true;
 
@@ -183,11 +183,13 @@ namespace ShootRunner
             {
                 dragging = false;
 
-                if (dragCursorPoint == Cursor.Position && !this.window.doubleClickCommand) {
+                if (dragCursorPoint == Cursor.Position && !this.window.doubleClickCommand)
+                {
                     this.DoPinAction();
                 }
 
-                if (dragCursorPoint != Cursor.Position) {
+                if (dragCursorPoint != Cursor.Position)
+                {
                     Program.Update();
                 }
             }
@@ -200,8 +202,8 @@ namespace ShootRunner
                 }
                 else if (this.window.Type == "WINDOW" && this.window.Handle != IntPtr.Zero)
                 {
-                    
-                    ToolsWindow.MinimizeWindow(this.window);                    
+
+                    ToolsWindow.MinimizeWindow(this.window);
                 }
             }
         }
@@ -232,7 +234,7 @@ namespace ShootRunner
                 if (this.window.doubleClickCommand)
                 {
                     this.DoPinAction();
-                }            
+                }
             }
             catch (Exception ex)
             {
@@ -253,7 +255,7 @@ namespace ShootRunner
         {
             Graphics g = e.Graphics;
 
-            Color startColor = Color.FromArgb(255,50,50,50);
+            Color startColor = Color.FromArgb(255, 50, 50, 50);
             Color endColor = Color.FromArgb(255, 30, 30, 30);
 
             Rectangle rect = new Rectangle(0, 0, this.Width, this.Height);
@@ -267,9 +269,10 @@ namespace ShootRunner
             if (this.window.customicon != null)
             {
                 e.Graphics.DrawImage(this.window.customicon, new Rectangle(0, 0, this.Width, this.Height));
-            } else if (this.window.icon != null)
+            }
+            else if (this.window.icon != null)
             {
-                e.Graphics.DrawImage(this.window.icon,new Rectangle(0,0,this.Width,this.Height));
+                e.Graphics.DrawImage(this.window.icon, new Rectangle(0, 0, this.Width, this.Height));
             }
         }
 
@@ -283,7 +286,7 @@ namespace ShootRunner
             this.makeRoundy();
         }
 
-         /*********************************************************************************/
+        /*********************************************************************************/
 
         private void contextMenuStrip1_Opening(object sender, CancelEventArgs e)
         {
@@ -369,7 +372,7 @@ namespace ShootRunner
 
         private void dobleClickToActivateToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            
+
             this.window.doubleClickCommand = !this.window.doubleClickCommand;
             dobleClickToActivateToolStripMenuItem.Checked = this.window.doubleClickCommand;
             Program.Update();
@@ -411,7 +414,12 @@ namespace ShootRunner
             {
                 Program.error(ex.Message);
             }
-            
+
+        }
+
+        private void taskbarToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Program.widgetManager.ShowTaskbarWidget(null);
         }
 
         /*********************************************************************************/
@@ -479,6 +487,7 @@ namespace ShootRunner
             this.Refresh();
 
         }
+
 
 
 

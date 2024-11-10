@@ -42,12 +42,16 @@
             optionsToolStripMenuItem = new ToolStripMenuItem();
             mostTopToolStripMenuItem = new ToolStripMenuItem();
             lockToolStripMenuItem = new ToolStripMenuItem();
+            useScreenshotsToolStripMenuItem = new ToolStripMenuItem();
+            useBigIconsToolStripMenuItem = new ToolStripMenuItem();
+            backgroundColorToolStripMenuItem = new ToolStripMenuItem();
             contextMenuStrip1.SuspendLayout();
             SuspendLayout();
             // 
             // timer1
             // 
             timer1.Enabled = true;
+            timer1.Interval = 500;
             timer1.Tick += timer1_Tick;
             // 
             // contextMenuStrip1
@@ -68,14 +72,14 @@
             // minimalizeToolStripMenuItem
             // 
             minimalizeToolStripMenuItem.Name = "minimalizeToolStripMenuItem";
-            minimalizeToolStripMenuItem.Size = new Size(180, 24);
+            minimalizeToolStripMenuItem.Size = new Size(143, 24);
             minimalizeToolStripMenuItem.Text = "Minimalize";
             minimalizeToolStripMenuItem.Click += minimalizeToolStripMenuItem_Click;
             // 
             // closeToolStripMenuItem
             // 
             closeToolStripMenuItem.Name = "closeToolStripMenuItem";
-            closeToolStripMenuItem.Size = new Size(180, 24);
+            closeToolStripMenuItem.Size = new Size(143, 24);
             closeToolStripMenuItem.Text = "Close";
             closeToolStripMenuItem.Click += closeToolStripMenuItem_Click;
             // 
@@ -109,7 +113,7 @@
             // 
             // optionsToolStripMenuItem
             // 
-            optionsToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { mostTopToolStripMenuItem, lockToolStripMenuItem });
+            optionsToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { mostTopToolStripMenuItem, lockToolStripMenuItem, useScreenshotsToolStripMenuItem, useBigIconsToolStripMenuItem, backgroundColorToolStripMenuItem });
             optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
             optionsToolStripMenuItem.Size = new Size(146, 24);
             optionsToolStripMenuItem.Text = "Options";
@@ -117,23 +121,50 @@
             // mostTopToolStripMenuItem
             // 
             mostTopToolStripMenuItem.Name = "mostTopToolStripMenuItem";
-            mostTopToolStripMenuItem.Size = new Size(135, 24);
+            mostTopToolStripMenuItem.Size = new Size(185, 24);
             mostTopToolStripMenuItem.Text = "Most top";
             mostTopToolStripMenuItem.Click += mostTopToolStripMenuItem_Click;
             // 
             // lockToolStripMenuItem
             // 
             lockToolStripMenuItem.Name = "lockToolStripMenuItem";
-            lockToolStripMenuItem.Size = new Size(135, 24);
+            lockToolStripMenuItem.Size = new Size(185, 24);
             lockToolStripMenuItem.Text = "Locked";
             lockToolStripMenuItem.Click += lockToolStripMenuItem_Click;
+            // 
+            // useScreenshotsToolStripMenuItem
+            // 
+            useScreenshotsToolStripMenuItem.Name = "useScreenshotsToolStripMenuItem";
+            useScreenshotsToolStripMenuItem.Size = new Size(185, 24);
+            useScreenshotsToolStripMenuItem.Text = "Use screenshots";
+            useScreenshotsToolStripMenuItem.Click += useScreenshotsToolStripMenuItem_Click;
+            // 
+            // useBigIconsToolStripMenuItem
+            // 
+            useBigIconsToolStripMenuItem.Name = "useBigIconsToolStripMenuItem";
+            useBigIconsToolStripMenuItem.Size = new Size(185, 24);
+            useBigIconsToolStripMenuItem.Text = "Use big icons";
+            useBigIconsToolStripMenuItem.Click += useBigIconsToolStripMenuItem_Click;
+            // 
+            // backgroundColorToolStripMenuItem
+            // 
+            backgroundColorToolStripMenuItem.Name = "backgroundColorToolStripMenuItem";
+            backgroundColorToolStripMenuItem.Size = new Size(185, 24);
+            backgroundColorToolStripMenuItem.Text = "Background color";
+            backgroundColorToolStripMenuItem.Click += backgroundColorToolStripMenuItem_Click;
             // 
             // FormTaskbar
             // 
             AutoScaleDimensions = new SizeF(8F, 19F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1155, 140);
+            BackColor = Color.Black;
+            FormBorderStyle = FormBorderStyle.None;
+            MinimumSize = new Size(50, 50);
+            ClientSize = new Size(50, 50);
+            Left = 0;
+            Top = 0;
             ContextMenuStrip = contextMenuStrip1;
+            ForeColor = Color.White;
             Icon = (Icon)resources.GetObject("$this.Icon");
             Margin = new Padding(4);
             Name = "FormTaskbar";
@@ -148,7 +179,6 @@
             MouseDown += FormTaskbar_MouseDown;
             MouseMove += FormTaskbar_MouseMove;
             MouseUp += FormTaskbar_MouseUp;
-            Resize += FormTaskbar_Resize;
             contextMenuStrip1.ResumeLayout(false);
             ResumeLayout(false);
         }
@@ -166,5 +196,8 @@
         private ToolStripMenuItem windowToolStripMenuItem;
         private ToolStripMenuItem minimalizeToolStripMenuItem;
         private ToolStripMenuItem closeToolStripMenuItem;
+        private ToolStripMenuItem useScreenshotsToolStripMenuItem;
+        private ToolStripMenuItem useBigIconsToolStripMenuItem;
+        private ToolStripMenuItem backgroundColorToolStripMenuItem;
     }
 }
