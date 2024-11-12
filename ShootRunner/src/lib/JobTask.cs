@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using System.Management.Automation;
-using System.Management.Automation.Language;
-using System.Security.Policy;
 using System.Text;
-using System.Threading.Tasks;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 #nullable disable
 
@@ -180,7 +174,7 @@ namespace ShootRunner
                                             }
                                             catch (Exception ex)
                                             {
-                                                Console.WriteLine($"Error: {ex.Message}");
+                                                Program.error(ex.Message);
                                             }
                                             
                                         }
@@ -273,36 +267,100 @@ namespace ShootRunner
             return list;
         }
 
-        public static  async Task<Window> StartProcessAndGetWindowHandleAsync(string cmd, string parameters, string workdir = null, bool silent = false)
+        public static  async Task<Window> StartProcessAndGetWindowHandleAsync(string cmd, string parameters, string workdir = null, bool silent = false, bool guesWindow = false)
         {
-            Window window = new Window();
-
-            var process = new Process();
-            ProcessStartInfo startInfo = new ProcessStartInfo();
-            process.StartInfo = startInfo;
-            startInfo.FileName = cmd;
-            startInfo.Arguments = parameters;
-
-            if (workdir != null)
+           
+            try
             {
-                startInfo.WorkingDirectory = workdir;
+                List<IntPtr> taskbarWindows1 = null;                
+                if (guesWindow) {
+                    taskbarWindows1 = ToolsWindow.GetTaskbarWindows();
+                }
+
+                var process = new Process();
+                ProcessStartInfo startInfo = new ProcessStartInfo();
+                process.StartInfo = startInfo;
+                startInfo.FileName = cmd;
+                startInfo.Arguments = parameters;
+
+                if (workdir != null)
+                {
+                    startInfo.WorkingDirectory = workdir;
+                }
+
+                if (silent)
+                {
+                    startInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                    startInfo.CreateNoWindow = true;
+                }
+
+                process.Start();
+
+                if (!process.HasExited) {
+                    await System.Threading.Tasks.Task.Run(() => process.WaitForInputIdle());
+                }
+
+                //  check if process have main window
+                if (process.MainWindowHandle != IntPtr.Zero)
+                {
+                    Window window = new Window();
+                    window.Handle = process.MainWindowHandle;
+                    return window;
+                }
+
+                // get all process windows and try find wisible window
+                List<Window> processWindows = ToolsWindow.FindWindowByProcessId(process.Id);
+                if (processWindows.Count == 1)
+                {
+                    Window window = new Window();
+                    window.Handle = processWindows[0].Handle;
+                    return window;
+
+                }
+
+                if (guesWindow) // compare taskbar windows and check for change
+                {
+                    List<IntPtr> taskbarWindows2 = ToolsWindow.GetTaskbarWindows();
+                    List<IntPtr> foundWindows = new List<IntPtr>();
+                    foreach (IntPtr win2 in taskbarWindows2)
+                    {
+                        bool found = false;
+                        foreach (IntPtr win1 in taskbarWindows1)
+                        {
+                            if (win1 == win2)
+                            {
+                                found = true;
+                                break;
+                            }
+                        }
+
+                        if (!found)
+                        {
+                            foundWindows.Add(win2);
+                        }
+                    }
+
+                    foreach (IntPtr win3 in foundWindows)
+                    {
+                        string path = ToolsWindow.GetApplicationPathFromWindow(win3);
+                        if (path == cmd)
+                        {
+                            Window window = new Window();
+                            window.Handle = win3;
+                            return window;
+                        }
+                    }                        
+                }
+
+                
+            }
+            catch (Exception ex)
+            {
+
+                Program.error(ex.Message);
             }
 
-            if (silent)
-            {
-                startInfo.WindowStyle = ProcessWindowStyle.Hidden;
-                startInfo.CreateNoWindow = true;
-            }
-
-            process.Start();
-
-            await System.Threading.Tasks.Task.Delay(2000);
-
-            await System.Threading.Tasks.Task.Run(() => process.WaitForInputIdle());
-
-            window.Handle = process.MainWindowHandle;
-
-            return window;
+            return null;
         }
     }
 }

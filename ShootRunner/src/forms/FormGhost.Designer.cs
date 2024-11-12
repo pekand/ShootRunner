@@ -1,4 +1,4 @@
-﻿namespace ShootRunner.src.forms
+﻿namespace ShootRunner
 {
     partial class FormGhost
     {
@@ -36,7 +36,6 @@
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(193, 153);
             Name = "FormGhost";
-            Text = "Ghost";
             Load += FormGhost_Load;
             ResumeLayout(false);
         }

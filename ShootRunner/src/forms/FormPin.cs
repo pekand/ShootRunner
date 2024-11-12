@@ -1,16 +1,7 @@
-﻿using Microsoft.Win32;
-using ShootRunner.src.forms;
-using System;
-using System.Collections.Generic;
+﻿using Microsoft.CodeAnalysis.Operations;
 using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.Drawing.Drawing2D;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 
 #nullable disable
 
@@ -26,22 +17,12 @@ namespace ShootRunner
 
         public Window window = null;
 
-        List<Window> taskbarWindows = null;
+        List<IntPtr> taskbarWindows = null;
 
         // Variables to track mouse movement
         private bool dragging = false;
         private Point dragCursorPoint;
         private Point dragFormPoint;
-
-        // Import native methods for resizing
-        [DllImport("user32.dll", CharSet = CharSet.Auto)]
-        public static extern int SendMessage(IntPtr hWnd, int msg, int wParam, int lParam);
-        [DllImport("user32.dll", CharSet = CharSet.Auto)]
-        public static extern bool ReleaseCapture();
-
-        // Constants for resizing
-        private const int WM_NCHITTEST = 0x84;
-        private const int HTBOTTOMRIGHT = 17;
 
         public FormPin(Window window)
         {
@@ -78,7 +59,7 @@ namespace ShootRunner
         protected override void WndProc(ref Message m)
         {
 
-            if (m.Msg == WM_NCHITTEST)
+            if (m.Msg == ToolsWindow.WM_NCHITTEST)
             {
                 // Get mouse position relative to the form
                 Point pos = PointToClient(Cursor.Position);
@@ -88,7 +69,7 @@ namespace ShootRunner
                 if (pos.X >= size.Width - 10 && pos.Y >= size.Height - 10)
                 {
                     this.makeSquery();
-                    m.Result = (IntPtr)HTBOTTOMRIGHT;
+                    m.Result = (IntPtr)ToolsWindow.HTBOTTOMRIGHT;
                     return;
                 }
             }
@@ -110,7 +91,7 @@ namespace ShootRunner
         {
             if (this.window.isDesktop)
             {
-                SystemTools.ShowDesktop();
+                ToolsWindow.ShowDesktop();
             }
             else if (this.window.Type == "COMMAND" && this.window.command != null && this.window.command.Trim() != "")
             {
@@ -127,12 +108,12 @@ namespace ShootRunner
                     this.window.Handle = IntPtr.Zero;
 
                     bool foundWindow = false;
-                    List<Window> taskbarWindows = ToolsWindow.GetTaskbarWindows();
-                    foreach (Window win in taskbarWindows)
+                    List<IntPtr> taskbarWindows = ToolsWindow.GetTaskbarWindows();
+                    foreach (IntPtr Handle in taskbarWindows)
                     {
-                        if (this.window.Title == win.Title)
+                        if (this.window.Title == ToolsWindow.GetWindowTitle(Handle))
                         {
-                            this.window.Handle = win.Handle;
+                            this.window.Handle = Handle;
                             foundWindow = true;
                             break;
                         }
@@ -140,11 +121,11 @@ namespace ShootRunner
 
                     if (!foundWindow)
                     {
-                        foreach (Window win in taskbarWindows)
+                        foreach (IntPtr Handle in taskbarWindows)
                         {
-                            if (this.window.app == win.app)
+                            if (this.window.app != null && this.window.app == ToolsWindow.GetApplicationPathFromWindow(Handle))
                             {
-                                this.window.Handle = win.Handle;
+                                this.window.Handle = Handle;
                                 foundWindow = true;
                                 break;
                             }
@@ -159,16 +140,12 @@ namespace ShootRunner
                     {
                         if (this.window.app != null && this.window.app.Trim() != "")
                         {
-                            Window window = await JobTask.StartProcessAndGetWindowHandleAsync(this.window.app, null, null, this.window.silentCommand);
+                            Window window = await JobTask.StartProcessAndGetWindowHandleAsync(this.window.app, null, null, false, true);
 
-                            if (window.Handle != IntPtr.Zero)
+                            if (window != null && window.Handle != IntPtr.Zero)
                             {
-                                ToolsWindow.SetWindowData(window);
-                                Program.CreatePin(window);
-
-                            }
-
-                            JobTask.RunCommand(this.window.app, null, null, this.window.silentCommand);
+                                this.window.Handle = window.Handle;
+                            }                     
                         }
                     }
                 }
@@ -198,7 +175,7 @@ namespace ShootRunner
             {
                 if (this.window.isDesktop)
                 {
-                    SystemTools.ShowDesktop(true);
+                    ToolsWindow.ShowDesktop(true);
                 }
                 else if (this.window.Type == "WINDOW" && this.window.Handle != IntPtr.Zero)
                 {
@@ -309,6 +286,9 @@ namespace ShootRunner
                     string selectedFilePath = openFileDialog1.FileName;
                     using (var image = Image.FromFile(selectedFilePath))
                     {
+                        if (this.window.customicon != null) {
+                            this.window.customicon.Dispose();
+                        }
                         this.window.customicon = new Bitmap(image);
                         this.Refresh();
                     }
@@ -470,8 +450,10 @@ namespace ShootRunner
             this.taskbarWindows = ToolsWindow.GetTaskbarWindows();
 
             selectToolStripMenuItem.DropDownItems.Clear();
-            foreach (var window in this.taskbarWindows)
+            foreach (IntPtr Handle in this.taskbarWindows)
             {
+                Window window = new Window();
+                window.Handle = Handle;
                 ToolsWindow.SetWindowData(window);
                 ToolStripMenuItem item = new ToolStripMenuItem(window.Title);
                 item.Image = window.icon;
@@ -487,9 +469,6 @@ namespace ShootRunner
             this.Refresh();
 
         }
-
-
-
 
         /*********************************************************************************/
 

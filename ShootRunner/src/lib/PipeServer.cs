@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO.Pipes;
-using System.Linq;
+﻿using System.IO.Pipes;
 using System.Text;
-using System.Threading.Tasks;
 
 #nullable disable
 
@@ -40,7 +36,7 @@ namespace ShootRunner
 
                 Task.Run(async () =>
                 {
-                    StartServer();
+                    await StartServer();
                 });
 
                 return true;
@@ -118,7 +114,7 @@ namespace ShootRunner
 
             Task.Run(async () =>
             {
-                PipeServer.SendMessage(message);
+                await PipeServer.SendMessage(message);
 
             });
         }

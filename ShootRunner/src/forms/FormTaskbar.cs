@@ -1,17 +1,6 @@
-﻿using ShootRunner.src.forms;
-using System;
-using System.Collections.Generic;
+﻿using Humanizer;
 using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.Window;
 
 #nullable disable
 
@@ -21,7 +10,6 @@ namespace ShootRunner
     public partial class FormTaskbar : Form
     {
         public Widget widget = null;
-        public List<Window> windows = new List<Window>();
         public List<Window> taskbarWindows = new List<Window>();
         Window selectedWindow = null;
 
@@ -35,6 +23,14 @@ namespace ShootRunner
         public int IconHeight = 64;
         public int Space = 20;
 
+        public bool draggingItem = false;
+        public Window draggingWindow = null;
+        public int mouseDownPos = 0;
+        public int mouseDownX = 0;
+        public int mouseDownY = 0;
+        public int mouseDownWindow = 0;
+        private FormGhost ghostForm;
+
         Window lastWindow = null;
 
         public FormTaskbar(Widget widget)
@@ -46,6 +42,7 @@ namespace ShootRunner
 
         private void FormTaskbar_Load(object sender, EventArgs e)
         {
+            Visible = false;
             this.TopMost = this.widget.mosttop;
             this.Opacity = this.widget.transparent < 0.2 ? 0.2 : this.widget.transparent;
             this.ShowInTaskbar = false;
@@ -56,6 +53,7 @@ namespace ShootRunner
             InitList();
 
             this.SetStartPosition();
+            Visible = true;
         }
 
         public void SwitchIconType()
@@ -92,9 +90,8 @@ namespace ShootRunner
         {
             get
             {
-                const int WS_EX_TOOLWINDOW = 0x00000080;
                 CreateParams cp = base.CreateParams;
-                cp.ExStyle |= WS_EX_TOOLWINDOW; // Add the tool window style
+                cp.ExStyle |= ToolsWindow.WS_EX_TOOLWINDOW; // Add the tool window style
                 return cp;
             }
         }
@@ -125,25 +122,21 @@ namespace ShootRunner
 
         public void InitList()
         {
+            List<IntPtr> windows = ToolsWindow.GetTaskbarWindows();
 
-            windows = ToolsWindow.GetTaskbarWindows();
-
-            foreach (var win in windows)
+            foreach (var Handle in windows)
             {
                 try
                 {
-                    if (win.Handle == this.Handle)
+                    if (Handle == this.Handle)
                     {
                         continue;
                     }
 
-                    ToolsWindow.SetWindowData(win, true);
-                    if (win.icon == null)
-                    {
-                        continue;
-                    }
-
-                    taskbarWindows.Add(win);
+                    Window window = new Window();
+                    window.Handle = Handle;
+                    ToolsWindow.SetWindowData(window, this.widget.useScreenshots);
+                    taskbarWindows.Add(window);
                 }
                 catch (Exception ex)
                 {
@@ -157,146 +150,172 @@ namespace ShootRunner
 
         public void UpdateList()
         {
-            bool changed = false;
-
-            List<Window> newWindows = ToolsWindow.GetTaskbarWindows();
-
-            foreach (var newWin in newWindows)
+            try
             {
+                bool changed = false;
 
-                if (newWin.Handle == this.Handle)
+                List<IntPtr> newWindows = ToolsWindow.GetTaskbarWindows();
+
+                foreach (var newWin in newWindows)
                 {
-                    continue;
-                }
+                    bool found = false;
 
-                bool found = false;
-
-                foreach (var win in windows)
-                {
-                    if (newWin.Handle == win.Handle)
+                    foreach (var win in taskbarWindows)
                     {
-                        found = true;
-                        break;
+                        if (newWin == win.Handle)
+                        {
+                            found = true;
+                            break;
+                        }
                     }
-                }
 
-                if (found)
-                {
-                    continue;
-                }
-
-                try
-                {
-                    ToolsWindow.SetWindowData(newWin);
-                    if (newWin.icon == null)
+                    if (found)
                     {
                         continue;
                     }
 
-                    taskbarWindows.Add(newWin);
-                    windows.Add(newWin);
+                    try
+                    {
+                        /*
+                        string path = ToolsWindow.GetApplicationPathFromWindow(Handle);
+                        if (path != null) {                            
+                            if (Path.GetFileName(path) == "TextInputHost.exe")
+                            {
+                                excludedWindows.Add(Handle);
+                                continue;
+                            }
+                        }
+                        */
+                        Window window = new Window();
+                        window.Handle = newWin;
+                        ToolsWindow.SetWindowData(window, this.widget.useScreenshots);
+                        taskbarWindows.Add(window);
+                        changed = true;
+                    }
+                    catch (Exception ex)
+                    {
+                        Program.error(ex.Message);
+
+                    }
+
+                }
+
+                List<Window> toremove = new List<Window>();
+
+                foreach (var win in taskbarWindows)
+                {
+                    bool found = false;
+
+                    foreach (var newWin in newWindows)
+                    {
+                        if (newWin == win.Handle)
+                        {
+                            found = true;
+                            break;
+                        }
+                    }
+
+                    if (found)
+                    {
+                        continue;
+                    }
+
+                    toremove.Add(win);
+                }
+
+                foreach (var win in toremove)
+                {
+                    if (win.icon != null) win.icon.Dispose();
+                    if (win.customicon != null) win.customicon.Dispose();
+                    if (win.screenshot != null) win.screenshot.Dispose();
+                    taskbarWindows.Remove(win);
                     changed = true;
+                }
+
+               
+
+                try
+                {
+                    if (widget.useScreenshots)
+                    {
+                        Window currentWindowHandle = ToolsWindow.GetCurrentWindow();
+                        Window currentWindow = null;
+
+                        if (currentWindowHandle != null) {
+                            foreach (var win in taskbarWindows)
+                            {
+                                if (win.Handle == currentWindowHandle.Handle)
+                                {
+                                    currentWindow = win;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (currentWindow != null)
+                        {
+                            if (lastWindow == null)
+                            {
+                                lastWindow = currentWindow;
+                            }
+
+                            if (currentWindow.Handle != lastWindow.Handle)
+                            {
+                                if (!lastWindow.isCurentWindowScreensot)
+                                {
+                                    if (!ToolsWindow.IsMinimalized(lastWindow))
+                                    {
+                                        using (Bitmap screenshot = WindowScreenshot.CaptureWindow(lastWindow, 256, 256))
+                                        {
+                                            if (screenshot != null)
+                                            {
+                                                if (lastWindow.screenshot != null)
+                                                {
+                                                    lastWindow.screenshot.Dispose();
+                                                }
+                                                lastWindow.screenshot = (Bitmap)screenshot.Clone();
+                                                changed = true;
+                                            }
+                                        }
+                                    }
+                                }
+
+
+                                using (Bitmap screenshotCurrentWindow = WindowScreenshot.CaptureWindow3(currentWindow, 256, 256))
+                                {
+                                    if (screenshotCurrentWindow != null)
+                                    {                                        
+                                        currentWindow.isCurentWindowScreensot = true;
+                                        if (currentWindow.screenshot != null)
+                                        {
+                                            currentWindow.screenshot.Dispose();
+                                        }
+                                        currentWindow.screenshot = (Bitmap)screenshotCurrentWindow.Clone();
+                                        changed = true;
+                                    }
+                                }
+
+                                lastWindow = currentWindow;
+                            }
+                        }
+                    }
                 }
                 catch (Exception ex)
                 {
+
                     Program.error(ex.Message);
-
                 }
 
-            }
 
-            List<Window> toremove = new List<Window>();
-
-
-            foreach (var win in windows)
-            {
-                bool found = false;
-
-                foreach (var newWin in newWindows)
+                if (changed)
                 {
-                    if (newWin.Handle == win.Handle)
-                    {
-                        found = true;
-                        break;
-                    }
-                }
-
-                if (found)
-                {
-                    continue;
-                }
-
-                toremove.Add(win);
-                changed = true;
-            }
-
-            foreach (var win in toremove)
-            {
-                windows.Remove(win);
-
-                List<Window> listToremove = new List<Window>();
-
-                bool found = false;
-
-                foreach (Window item in taskbarWindows)
-                {
-                    if (item == win)
-                    {
-                        listToremove.Add(item);
-                        break;
-                    }
-                }
-
-                foreach (Window item in listToremove)
-                {
-                    taskbarWindows.Remove(item);
-                }
-
-            }
-
-            Window currentWindow = ToolsWindow.GetCurrentWindow();
-
-            if (widget.useScreenshots)
-            {
-                if (lastWindow == null && currentWindow != null)
-                {
-                    foreach (var win in taskbarWindows)
-                    {
-                        if (win.Handle == currentWindow.Handle)
-                        {
-                            lastWindow = win;
-                            break;
-                        }
-                    }
-                }
-
-                if (currentWindow != null && lastWindow != null && currentWindow.Handle != lastWindow.Handle)
-                {
-                    foreach (var win in taskbarWindows)
-                    {
-                        if (win.Handle == currentWindow.Handle)
-                        {
-                            if (!ToolsWindow.IsMinimalized(lastWindow))
-                            {
-                                Bitmap screenshot = WindowScreenshot.CaptureWindow(lastWindow, 256, 256);
-                                if (screenshot != null)
-                                {
-                                    lastWindow.screenshot = screenshot;
-                                    changed = true;
-                                }
-                            }
-                            lastWindow = win;
-                            break;
-                        }
-                    }
-
+                    this.Refresh();
                 }
             }
-
-
-            if (changed)
+            catch (Exception ex)
             {
-                this.Refresh();
+
+                Program.error(ex.Message);
             }
 
         }
@@ -306,74 +325,9 @@ namespace ShootRunner
             UpdateList();
         }
 
-        private void listView1_SelectedIndexChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void listView1_ItemActivate(object sender, EventArgs e)
-        {
-            /*if (listView1.SelectedItems.Count > 0)
-            {                
-                ListViewItem selectedItem = listView1.SelectedItems[0];
-                Window window = (Window)selectedItem.Tag;
-                ToolsWindow.BringWindowToFront(window);
-            
-            }*/
-        }
-
-        private const int GWL_STYLE = -16;
-        private const int WS_CAPTION = 0x00C00000;
-        private const int WM_NCLBUTTONDOWN = 0xA1;
-        private const int HTCAPTION = 0x2;
-
-        [DllImport("user32.dll", SetLastError = true)]
-        static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
-
-        [DllImport("user32.dll", SetLastError = true)]
-        static extern int GetWindowLong(IntPtr hWnd, int nIndex);
-
-        private void RemoveTitleBar()
-        {
-            /*initTop = this.Top;
-            initHeight = this.Height;
-            this.FormBorderStyle = FormBorderStyle.None;
-
-            this.Top = initTop + initialCaptionHeight;
-            this.Height = initHeight - initialCaptionHeight;*/
-
-
-            int style = GetWindowLong(this.Handle, GWL_STYLE);
-            SetWindowLong(this.Handle, GWL_STYLE, style & ~WS_CAPTION);
-            this.Refresh();
-
-            //titleBarHeight = SystemInformation.CaptionHeight;
-            //ToggleBorder(FormBorderStyle.None);
-
-
-        }
-
-        private void AddTitleBar()
-        {
-
-            /*this.FormBorderStyle = FormBorderStyle.Sizable;
-            this.Top = initTop;
-            this.Height = initHeight;*/
-
-            int style = GetWindowLong(this.Handle, GWL_STYLE);
-            SetWindowLong(this.Handle, GWL_STYLE, style | WS_CAPTION);
-            this.Refresh();
-
-            //ToggleBorder(FormBorderStyle.Sizable);
-        }
-
-        // Constants for resizing
-        private const int WM_NCHITTEST = 0x84;
-
-        private const int HTBOTTOMRIGHT = 17;
         protected override void WndProc(ref Message m)
         {
-            if (!this.widget.locked && m.Msg == WM_NCHITTEST)
+            if (!this.widget.locked && m.Msg == ToolsWindow.WM_NCHITTEST)
             {
                 // Get mouse position relative to the form
                 Point pos = PointToClient(Cursor.Position);
@@ -382,12 +336,12 @@ namespace ShootRunner
                 // If mouse is near the bottom-right corner, trigger resize
                 if (pos.X >= size.Width - 10 && pos.Y >= size.Height - 10)
                 {
-                    m.Result = (IntPtr)HTBOTTOMRIGHT;
+                    m.Result = (IntPtr)ToolsWindow.HTBOTTOMRIGHT;
                     return;
                 }
             }
 
-            if (this.widget.locked && (m.Msg == WM_NCLBUTTONDOWN && m.WParam.ToInt32() == HTCAPTION))
+            if (this.widget.locked && (m.Msg == ToolsWindow.WM_NCLBUTTONDOWN && m.WParam.ToInt32() == ToolsWindow.HTCAPTION))
             {
                 return;
             }
@@ -397,6 +351,22 @@ namespace ShootRunner
 
         public void CloseForm()
         {
+            foreach (Window win in this.taskbarWindows) {
+                if (win.icon != null) { 
+                    win.icon.Dispose();
+                }
+
+                if (win.customicon != null)
+                {
+                    win.customicon.Dispose();
+                }
+
+                if (win.screenshot != null)
+                {
+                    win.screenshot.Dispose();
+                }
+            }
+
             Program.widgetManager.RemoveTaskbarWidget(this);
             Program.Update();
         }
@@ -450,7 +420,25 @@ namespace ShootRunner
 
         }
 
+        private void FormTaskbar_Resize(object sender, EventArgs e)
+        {
+            this.widget.StartLeft = this.Left;
+            this.widget.StartTop = this.Top;
+            this.widget.StartWidth = this.Width;
+            this.widget.StartHeight = this.Height;
+            Program.Update();
+            this.Refresh();
+        }
 
+        private void FormTaskbar_Move(object sender, EventArgs e)
+        {
+            this.widget.StartLeft = this.Left;
+            this.widget.StartTop = this.Top;
+            this.widget.StartWidth = this.Width;
+            this.widget.StartHeight = this.Height;
+            Program.Update();
+            this.Refresh();
+        }
 
         private void Form_Deactivate(object sender, EventArgs e)
         {
@@ -466,7 +454,6 @@ namespace ShootRunner
         {
             CloseForm();
         }
-
 
         public Window GetWindowOnposition(int eX, int eY)
         {
@@ -566,14 +553,6 @@ namespace ShootRunner
 
             return spaceOnPosition;
         }
-
-        public bool draggingItem = false;
-        public Window draggingWindow = null;
-        public int mouseDownPos = 0;
-        public int mouseDownX = 0;
-        public int mouseDownY = 0;
-        public int mouseDownWindow = 0;
-        private FormGhost ghostForm;
 
         private void FormTaskbar_MouseDown(object sender, MouseEventArgs e)
         {
@@ -701,6 +680,7 @@ namespace ShootRunner
             }
         }
 
+
         /////////////////////////////////////////////////////////////////////////////////////////////
 
         private void contextMenuStrip1_Opening(object sender, CancelEventArgs e)
@@ -762,6 +742,12 @@ namespace ShootRunner
             widget.useScreenshots = !widget.useScreenshots;
             useScreenshotsToolStripMenuItem.Checked = widget.useScreenshots;
             SwitchIconType();
+
+            if (widget.useScreenshots)
+            {
+                this.taskbarWindows.Clear();
+                this.InitList();
+            }
             this.Refresh();
         }
 
@@ -786,24 +772,10 @@ namespace ShootRunner
                 }
             }
         }
-        private void FormTaskbar_Resize(object sender, EventArgs e)
-        {
-            this.widget.StartLeft = this.Left;
-            this.widget.StartTop = this.Top;
-            this.widget.StartWidth = this.Width;
-            this.widget.StartHeight = this.Height;
-            Program.Update();
-            this.Refresh();
-        }
 
-        private void FormTaskbar_Move(object sender, EventArgs e)
+        private void showDesktopToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            this.widget.StartLeft = this.Left;
-            this.widget.StartTop = this.Top;
-            this.widget.StartWidth = this.Width;
-            this.widget.StartHeight = this.Height;
-            Program.Update();
-            this.Refresh();
+            ToolsWindow.ShowDesktop();
         }
     }
 }

@@ -1,13 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+﻿using System.Runtime.InteropServices;
 
 namespace ShootRunner
 {
@@ -28,8 +19,6 @@ namespace ShootRunner
 
         private void FormConsole_Load(object sender, EventArgs e)
         {
-            Program.info("Console open");
-            Program.info("Console open2");
             textBox1.Focus();
         }
 
@@ -37,12 +26,6 @@ namespace ShootRunner
         {
             Program.CloseConsole();            
         }
-
-        private void textBox2_TextChanged(object sender, EventArgs e)
-        {
-
-        }
-
         public void ProcessCommand(string message) {
             message = message.Trim();
 

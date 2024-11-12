@@ -1,17 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Microsoft.Win32;
 using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using System.IO;
-using Microsoft.Win32;
-using System.Net.NetworkInformation;
 
 #nullable disable
 
@@ -101,12 +91,10 @@ namespace ShootRunner
                 switch (reason)
                 {
                     case 0x7: // WTS_SESSION_LOCK
-                        Console.WriteLine("");
                         Program.pause = true;
                         Program.info("System locked");
                         break;
-                    case 0x8: // WTS_SESSION_UNLOCK
-                        Console.WriteLine("System unlocked");
+                    case 0x8: // WTS_SESSION_UNLOCK;
                         Program.info("System unlocked");
                         break;
                 }
@@ -171,7 +159,7 @@ namespace ShootRunner
             }
             else if (command.action == "ShowDesktop") // SHOW DESKTOP
             {
-                SystemTools.ShowDesktop();
+                ToolsWindow.ShowDesktop();
                 return true;
             }
             else if (command.keypress != null && command.keypress != "") // SIMULATE KEYPRESS
@@ -186,7 +174,7 @@ namespace ShootRunner
                         return true;
                     }
                 }
-                else if(command.process != null) // SEND KEYPRESS TO ALL RUNNING PROCESSES WITH PATH
+                else if (command.process != null) // SEND KEYPRESS TO ALL RUNNING PROCESSES WITH PATH
                 {
                     Keyboard.SandKeyPressToProcess(command.keypress, command.process);
                     return true;
@@ -232,12 +220,12 @@ namespace ShootRunner
                 }
                 else // JUST OPEN FILE
                 {
-                    JobTask.OpenFileInSystem(command.open); 
+                    JobTask.OpenFileInSystem(command.open);
                     return true;
                 }
             }
             else if (command.command != null && command.command != "") // RUN COMMAND AS PROCESS WITH PARAMETERS
-            { 
+            {
                 if (command.currentwindow != null) // RUN COMMAND AS PROCESS WITH PARAMETERS IF CURRENT WINDOW HAS TITLE
                 {
                     Window window = ToolsWindow.GetCurrentWindow();
@@ -765,6 +753,11 @@ namespace ShootRunner
             Program.ShowAllForms();
             showAllToolStripMenuItem.Visible = false;
             hideAllToolStripMenuItem.Visible = true;
+        }
+
+        private void createWidgetToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Program.widgetManager.CreateWidget();
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace ShootRunner.src.forms
+﻿namespace ShootRunner
 {
     partial class FormTransparent
     {

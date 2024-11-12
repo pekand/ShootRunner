@@ -1,19 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
+﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using System.Threading;
 
 #nullable disable
 
 
 namespace ShootRunner
 {
-    
+
 
     public class Keyboard
     {
