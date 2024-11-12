@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+﻿using ShootRunner.src.forms;
 using System.Text;
-using System.Threading.Tasks;
 
 #nullable disable
 
@@ -18,6 +14,7 @@ namespace ShootRunner
         public List<Widget> widgets = new List<Widget>();
         public List<FormWidget> widgetForms = new List<FormWidget>();
         public List<WidgetType> widgeTypes = new List<WidgetType>();
+        public FormWidgetCreate formWidgetCreate = null;
 
         public void LoadWidgetTypes()
         {
@@ -137,24 +134,8 @@ namespace ShootRunner
             }
         }
 
-        private readonly string Characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        private readonly Random Random = new Random();
-
-        public string uid(int length = 32)
-        {
-            StringBuilder result = new StringBuilder(length);
-            int charactersLength = Characters.Length;
-
-            for (int i = 0; i < length; i++)
-            {
-                int randomIndex = Random.Next(charactersLength);
-                result.Append(Characters[randomIndex]);
-            }
-
-            return result.ToString();
-        }
-
-        internal void HideAllWidgets()
+        
+        public void HideAllWidgets()
         {
             if (this.widgets != null)
             {
@@ -169,7 +150,7 @@ namespace ShootRunner
             
         }
 
-        internal void ShowAllWidgets()
+        public void ShowAllWidgets()
         {
             if (this.widgets != null)
             {
@@ -181,6 +162,16 @@ namespace ShootRunner
                     }
                 }
             }
+        }
+
+        public  void CreateWidget()
+        {
+
+            if (this.formWidgetCreate == null) {
+              this.formWidgetCreate = new FormWidgetCreate();
+            }
+
+            this.formWidgetCreate.Show();
         }
     }
 }

@@ -20,7 +20,8 @@ namespace ShootRunner
 {
     internal static class Program
     {
-        public static string AppName = "ShootRunner";       
+        public static string AppName = "ShootRunner";
+        private static int processId;
         public static string roamingAppDataPath = "";
         public static string configPath = "";
         public static string errorLogPath = "";
@@ -57,13 +58,12 @@ namespace ShootRunner
         public static System.Timers.Timer timer;
        
         public static bool closingApplication = false;
+        
 
         public static void Update() {
             Program.updated = true;
             Program.updatedTime = DateTime.Now;
-            Program.debug("Update");
         }
-
 
         public static void StartTimer()
         {
@@ -126,9 +126,10 @@ namespace ShootRunner
             string unixTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
             using (StreamWriter sw = new StreamWriter(errorLogPath, true))
             {
-                sw.WriteLine(unixTime + " " + message);
-                Program.write(unixTime + " " + message);
-                Console.WriteLine(unixTime + " " + message);
+                string line = unixTime + " DEBUG: " + message;
+                sw.WriteLine(line); // file
+                Program.write(line); // console form
+                Console.WriteLine(line); // standard output
             }
 #endif
         }
@@ -139,10 +140,11 @@ namespace ShootRunner
             string unixTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
             using (StreamWriter sw = new StreamWriter(errorLogPath, true))
             {
-                sw.WriteLine(unixTime + " " + message);
+                string line = unixTime + " INFO: " + message;
+                sw.WriteLine(line);
+                Program.write(line);
 #if DEBUG
-                Program.write(unixTime + " " + message);
-                Console.WriteLine(unixTime + " " + message);
+                Console.WriteLine(line);
 #endif
             }
         }
@@ -152,10 +154,11 @@ namespace ShootRunner
             string unixTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
             using (StreamWriter sw = new StreamWriter(Program.errorLogPath, true))
             {
-                sw.WriteLine(unixTime + " " + message);
+                string line = unixTime + " ERROR: " + message;
+                sw.WriteLine(line);
+                Program.write(line);
 #if DEBUG
-                Program.write(unixTime + " " + message);
-                Console.WriteLine(unixTime + " " + message);
+                Console.WriteLine(line);
 #endif
             }
         }
@@ -185,8 +188,6 @@ namespace ShootRunner
         {
             Program.console = null;
         }
-
-
 
         public static void loadCommands()
         {
@@ -398,7 +399,7 @@ namespace ShootRunner
 
         public static void OnMessageReceived(string message)
         {
-            Console.WriteLine("Message Received: " + message);
+           Program.info("Message Received: " + message);
         }
 
 
@@ -503,6 +504,9 @@ namespace ShootRunner
         [STAThread]
         public static void Main()
         {
+
+            Program.processId = Process.GetCurrentProcess().Id;
+
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 

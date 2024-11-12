@@ -1,14 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-
-#nullable disable
+﻿#nullable disable
 
 
 namespace ShootRunner
@@ -24,11 +14,12 @@ namespace ShootRunner
 
         private void button1_Click(object sender, EventArgs e)
         {
-            
+
             window.command = textBox1.Text;
             if (window.command.Trim() != "")
             {
-                if (window.Type == "WINDOW") {
+                if (window.Type == "WINDOW")
+                {
                     window.doubleClickCommand = true;
                 }
 
@@ -43,9 +34,14 @@ namespace ShootRunner
         {
             textBox1.Text = TextTools.NormalizeLineEndings(window.command);
             textBox1.SelectionStart = textBox1.Text.Length;
-            textBox1.SelectionLength = 0;            
+            textBox1.SelectionLength = 0;
             this.ActiveControl = null;
             checkBox1.Checked = this.window.silentCommand;
+        }
+
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }

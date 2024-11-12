@@ -1,22 +1,7 @@
 ﻿using Microsoft.Web.WebView2.Core;
-using Microsoft.Win32;
-using ShootRunner.src.forms;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
-using System.Diagnostics;
-using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Text.Json;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using System.Xml.Linq;
 
 #nullable disable
 
@@ -28,17 +13,6 @@ namespace ShootRunner
     {
         public Widget widget = null;
         public Microsoft.Web.WebView2.WinForms.WebView2 webView = null;
-
-        private const int GWL_STYLE = -16;
-        private const int WS_CAPTION = 0x00C00000;
-        private const int WM_NCLBUTTONDOWN = 0xA1;
-        private const int HTCAPTION = 0x2;
-
-        [DllImport("user32.dll", SetLastError = true)]
-        static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
-
-        [DllImport("user32.dll", SetLastError = true)]
-        static extern int GetWindowLong(IntPtr hWnd, int nIndex);
 
         public FormWidget(Widget widget)
         {
@@ -64,9 +38,8 @@ namespace ShootRunner
         {
             get
             {
-                const int WS_EX_TOOLWINDOW = 0x00000080;
                 CreateParams cp = base.CreateParams;
-                cp.ExStyle |= WS_EX_TOOLWINDOW; // Add the tool window style
+                cp.ExStyle |= ToolsWindow.WS_EX_TOOLWINDOW; // Add the tool window style
                 return cp;
             }
         }
@@ -292,7 +265,7 @@ namespace ShootRunner
                 if (request.type == "getData")
                 {
                     JSMessage response = new JSMessage();
-                    response.uid = Program.widgetManager.uid();
+                    response.uid = Generator.uid();
                     response.parent = request.uid;
                     response.key = request.key;
                     response.value = this.widget.data.ContainsKey(request.key) ? this.widget.data[request.key] : "";
@@ -316,44 +289,10 @@ namespace ShootRunner
 
         ///////////////////////////////////////////////////////////////////////
 
-        private void RemoveTitleBar()
-        {
-            /*initTop = this.Top;
-            initHeight = this.Height;
-            this.FormBorderStyle = FormBorderStyle.None;
-
-            this.Top = initTop + initialCaptionHeight;
-            this.Height = initHeight - initialCaptionHeight;*/
-
-
-            int style = GetWindowLong(this.Handle, GWL_STYLE);
-            SetWindowLong(this.Handle, GWL_STYLE, style & ~WS_CAPTION);
-            this.Refresh();
-
-            //titleBarHeight = SystemInformation.CaptionHeight;
-            //ToggleBorder(FormBorderStyle.None);
-
-
-        }
-
-        private void AddTitleBar()
-        {
-
-            /*this.FormBorderStyle = FormBorderStyle.Sizable;
-            this.Top = initTop;
-            this.Height = initHeight;*/
-
-            int style = GetWindowLong(this.Handle, GWL_STYLE);
-            SetWindowLong(this.Handle, GWL_STYLE, style | WS_CAPTION);
-            this.Refresh();
-
-            //ToggleBorder(FormBorderStyle.Sizable);
-        }
-
         protected override void WndProc(ref Message m)
         {
 
-            if (this.widget.locked && (m.Msg == WM_NCLBUTTONDOWN && m.WParam.ToInt32() == HTCAPTION))
+            if (this.widget.locked && (m.Msg == ToolsWindow.WM_NCLBUTTONDOWN && m.WParam.ToInt32() == ToolsWindow.HTCAPTION))
             {
                 return;
             }
@@ -365,12 +304,15 @@ namespace ShootRunner
 
         private void Form_Deactivate(object sender, EventArgs e)
         {
-            RemoveTitleBar();
+            ToolsWindow.RemoveTitleBar(this.Handle);
+            
+
         }
 
         private void Form_Activated(object sender, EventArgs e)
         {
-            AddTitleBar();
+            ToolsWindow.AddTitleBar(this.Handle);
+            this.Refresh();
         }
 
         private void FormWidget_FormClosed(object sender, FormClosedEventArgs e)
@@ -486,22 +428,11 @@ namespace ShootRunner
                 {
                     SystemTools.OpenFileWithEditor(defaultEditor, widget.widgetType.source);
                 }
-                else
-                {
-                    Console.WriteLine("Default text editor not found.");
-                }
             }
             catch (Exception ex)
             {
-                Program.error($"Error opening file: {ex.Message}");
+                Program.error(ex.Message);
             }
-        }
-
-        private async void timer1_Tick(object sender, EventArgs e)
-        {
-            /*string titleJson = await webView.ExecuteScriptAsync("document.title");
-            string title = System.Text.Json.JsonSerializer.Deserialize<string>(titleJson);
-            this.Text = title == null || title.Trim() == "" ? "Widget" : title;*/
         }
 
         private void FormWidget_Resize(object sender, EventArgs e)

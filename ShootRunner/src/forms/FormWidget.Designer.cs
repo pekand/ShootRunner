@@ -43,7 +43,6 @@
             mostTopToolStripMenuItem = new ToolStripMenuItem();
             lockedToolStripMenuItem = new ToolStripMenuItem();
             transparentToolStripMenuItem = new ToolStripMenuItem();
-            timer1 = new System.Windows.Forms.Timer(components);
             contextMenuStrip.SuspendLayout();
             SuspendLayout();
             // 
@@ -138,12 +137,6 @@
             transparentToolStripMenuItem.Text = "Transparent";
             transparentToolStripMenuItem.Click += transparentToolStripMenuItem_Click;
             // 
-            // timer1
-            // 
-            timer1.Enabled = true;
-            timer1.Interval = 1000;
-            timer1.Tick += timer1_Tick;
-            // 
             // FormWidget
             // 
             AutoScaleDimensions = new SizeF(8F, 19F);
@@ -179,6 +172,5 @@
         private System.Windows.Forms.ToolStripMenuItem typeToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem reloadToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem editToolStripMenuItem;
-        private System.Windows.Forms.Timer timer1;
     }
 }

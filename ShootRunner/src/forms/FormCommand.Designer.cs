@@ -39,17 +39,18 @@
             textBox1.Dock = DockStyle.Top;
             textBox1.Font = new Font("Microsoft Sans Serif", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
             textBox1.Location = new Point(0, 0);
-            textBox1.Margin = new Padding(4, 4, 4, 4);
+            textBox1.Margin = new Padding(4);
             textBox1.Multiline = true;
             textBox1.Name = "textBox1";
             textBox1.ScrollBars = ScrollBars.Vertical;
             textBox1.Size = new Size(1067, 280);
             textBox1.TabIndex = 0;
+            textBox1.TextChanged += textBox1_TextChanged;
             // 
             // button1
             // 
             button1.Location = new Point(16, 291);
-            button1.Margin = new Padding(4, 4, 4, 4);
+            button1.Margin = new Padding(4);
             button1.Name = "button1";
             button1.Size = new Size(111, 47);
             button1.TabIndex = 1;
@@ -63,7 +64,7 @@
             checkBox1.Checked = true;
             checkBox1.CheckState = CheckState.Checked;
             checkBox1.Location = new Point(135, 303);
-            checkBox1.Margin = new Padding(4, 4, 4, 4);
+            checkBox1.Margin = new Padding(4);
             checkBox1.Name = "checkBox1";
             checkBox1.Size = new Size(283, 23);
             checkBox1.TabIndex = 2;
@@ -80,7 +81,7 @@
             Controls.Add(textBox1);
             FormBorderStyle = FormBorderStyle.Fixed3D;
             Icon = (Icon)resources.GetObject("$this.Icon");
-            Margin = new Padding(4, 4, 4, 4);
+            Margin = new Padding(4);
             Name = "FormCommand";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "Custom Command";

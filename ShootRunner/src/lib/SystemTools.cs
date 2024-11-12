@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Microsoft.Win32;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using Microsoft.Win32;
 
 #nullable disable
 
@@ -24,50 +18,6 @@ namespace ShootRunner
             LockWorkStation();
         }
 
-        [DllImport("User32.dll")]
-        private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
-
-        [DllImport("User32.dll")]
-        private static extern IntPtr GetShellWindow();
-
-        [DllImport("User32.dll")]
-        private static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
-
-        const int SW_SHOWMINIMIZED = 2;
-        const int SW_RESTORE = 9;
-
-
-
-        [DllImport("user32.dll")]
-        private static extern IntPtr SendMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
-
-        private const int WM_COMMAND = 0x0111;
-        private const int MIN_ALL = 0x1A3;
-        private const int MIN_ALL_UNDO = 0x1A0;
-
-        public static void ShowDesktop(bool undo = false)
-        {
-
-            IntPtr hWnd = FindWindow("Shell_TrayWnd", null);
-            if (hWnd != IntPtr.Zero)
-            {
-                if (undo)
-                {
-
-                    SendMessage(hWnd, WM_COMMAND, (IntPtr)MIN_ALL_UNDO, IntPtr.Zero);
-
-                }
-                else
-                {
-
-                    SendMessage(hWnd, WM_COMMAND, (IntPtr)MIN_ALL, IntPtr.Zero);
-
-                }
-            }
-
-        }
-
-
         ////////////////////////////////////////////////////////////////////
 
         // Method to get the default editor path for a given file extension
@@ -76,14 +26,12 @@ namespace ShootRunner
             string progId = GetProgId(fileExtension);
             if (string.IsNullOrEmpty(progId))
             {
-                Console.WriteLine($"ProgID for {fileExtension} not found.");
                 return null;
             }
 
             string command = GetOpenCommand(progId);
             if (string.IsNullOrEmpty(command))
             {
-                Console.WriteLine($"Open command for ProgID '{progId}' not found.");
                 return null;
             }
 
@@ -179,11 +127,10 @@ namespace ShootRunner
                 };
 
                 Process.Start(psi);
-                Console.WriteLine($"Opened '{filePath}' with '{editorPath}'.");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Failed to open file with editor: {ex.Message}");
+                Program.error(ex.Message);
             }
         }
 

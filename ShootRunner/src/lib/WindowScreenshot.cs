@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.Linq;
+﻿using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 #nullable disable
 
@@ -52,26 +46,44 @@ namespace ShootRunner
             int width = rect.Right - rect.Left;
             int height = rect.Bottom - rect.Top;
 
-            Bitmap bmp = new Bitmap(width, height, PixelFormat.Format64bppArgb);
-            using (Graphics gfxBmp = Graphics.FromImage(bmp))
+            using (Bitmap bmp = new Bitmap(width, height, PixelFormat.Format64bppArgb))
             {
-                IntPtr hdcBitmap = gfxBmp.GetHdc();
-                IntPtr hdcWindow = GetDC(window.Handle);
-                BitBlt(hdcBitmap, 0, 0, width, height, hdcWindow, 0, 0, SRCCOPY);
-                gfxBmp.ReleaseHdc(hdcBitmap);
-                ReleaseDC(window.Handle, hdcWindow);
-            }
+                using (Graphics gfxBmp = Graphics.FromImage(bmp))
+                {
+                    IntPtr hdcBitmap = gfxBmp.GetHdc();
+                    IntPtr hdcWindow = GetDC(window.Handle);
+                    BitBlt(hdcBitmap, 0, 0, width, height, hdcWindow, 0, 0, SRCCOPY);
+                    gfxBmp.ReleaseHdc(hdcBitmap);
+                    ReleaseDC(window.Handle, hdcWindow);
+                }
 
-            if (resizeWidth > 0 && resizeHeight > 0)
-            {
-                bmp =  ResizeBitmap(bmp, resizeWidth, resizeHeight);
-            }
+                if (resizeWidth > 0 && resizeHeight > 0)
+                {
+                    using (Bitmap resizedBmp = ResizeBitmap(bmp, resizeWidth, resizeHeight))
+                    {
 
-            if (IsSingleColor(bmp)) {
-                return null;
-            }
+                        if (resizedBmp == null){
+                            return null;
+                            
+                        }
 
-            return bmp;
+                        if (IsSingleColor(resizedBmp))
+                        {
+                            return null;
+                        }
+
+                        return (Bitmap)resizedBmp.Clone();
+                    }
+                        
+                }
+
+                if (IsSingleColor(bmp))
+                {
+                    return null;
+                }
+
+                return (Bitmap)bmp.Clone();
+            }
         }
 
         public static Bitmap CaptureWindow2(Window window, int resizeWidth = 0, int resizeHeight = 0)
@@ -103,46 +115,52 @@ namespace ShootRunner
                     
                     if (resizeWidth > 0 && resizeHeight > 0)
                     {
-                        Bitmap resizedBitmap = ResizeBitmap(bitmap, resizeWidth, resizeHeight);
-
-                        if (IsSingleColor(resizedBitmap))
+                        using (Bitmap resizedBitmap = ResizeBitmap(bitmap, resizeWidth, resizeHeight))
                         {
-                            return null;
-                        }
 
-                        return resizedBitmap;
+                            if (IsSingleColor(resizedBitmap))
+                            {
+                                return null;
+                            }
+
+                            return (Bitmap)resizedBitmap.Clone();
+                        }
                     }
 
-                    return bitmap;
+                    return (Bitmap)bitmap.Clone();
 
                 }
             }
         }
 
 
-        public static Bitmap ResizeBitmap(Bitmap bitmap, int width, int height)
+        public static Bitmap ResizeBitmap(Bitmap originalImage, int width, int height)
         {
-            Bitmap resizedBitmap = new Bitmap(bitmap, new Size(width, height));
-            using (MemoryStream ms = new MemoryStream())
+
+            using (Bitmap resizedImage = new Bitmap(width, height))
             {
-                resizedBitmap.Save(ms, ImageFormat.Png);
-                using (Bitmap pngBitmap = new Bitmap(ms))
+                using (Graphics graphics = Graphics.FromImage(resizedImage))
                 {
-                    return (Bitmap)pngBitmap.Clone();
+                    graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                    graphics.DrawImage(originalImage, 0, 0, width, height);
                 }
+
+                return (Bitmap)resizedImage.Clone();
             }
         }
 
 
         public static Icon ConvertToIcon(Bitmap bitmap, int width, int height)
         {
-            Bitmap resizedBitmap = new Bitmap(bitmap, new Size(width, height));
-            using (MemoryStream ms = new MemoryStream())
+            using (Bitmap resizedBitmap = new Bitmap(bitmap, new Size(width, height)))
             {
-                resizedBitmap.Save(ms, ImageFormat.Png);
-                using (Bitmap pngBitmap = new Bitmap(ms))
+                using (MemoryStream ms = new MemoryStream())
                 {
-                    return Icon.FromHandle(pngBitmap.GetHicon());
+                    resizedBitmap.Save(ms, ImageFormat.Png);
+                    using (Bitmap pngBitmap = new Bitmap(ms))
+                    {
+                        return Icon.FromHandle(pngBitmap.GetHicon());
+                    }
                 }
             }
         }
@@ -165,5 +183,78 @@ namespace ShootRunner
             return true; // All pixels have the same color
         }
 
+
+        public static Bitmap CaptureWindow3(Window window, int resizeWidth = 0, int resizeHeight = 0)
+        {
+            if (window.Handle == IntPtr.Zero)
+            {               
+                return null;
+            }
+
+            if (!ToolsWindow.IsWindowValid(window))
+            {
+                return null;
+            }
+
+            if (ToolsWindow.IsMinimalized(window)) {
+                return null;
+            }
+
+            if (GetWindowRect(window.Handle, out RECT rect))
+            {
+
+                int width = rect.Right - rect.Left;
+                int height = rect.Bottom - rect.Top;
+
+
+                Rectangle windowRectangle = new Rectangle(rect.Left, rect.Top, width, height);
+                Screen screen = Screen.FromRectangle(windowRectangle);
+
+
+                using (Bitmap screenshot = new Bitmap(screen.Bounds.Width, screen.Bounds.Height))
+                {
+                    using (Graphics g = Graphics.FromImage(screenshot))
+                    {
+                        g.CopyFromScreen(screen.Bounds.X, screen.Bounds.Y, 0, 0, screenshot.Size, CopyPixelOperation.SourceCopy);
+                    }
+
+                    Rectangle windowRectRelativeToScreen = new Rectangle(
+                        rect.Left - screen.Bounds.X,
+                        rect.Top - screen.Bounds.Y,
+                        width,
+                        height
+                    );
+
+                    using (Bitmap resizedScreenshot = screenshot.Clone(windowRectRelativeToScreen, screenshot.PixelFormat)) {
+
+                        if (resizeWidth > 0 && resizeHeight > 0)
+                        {
+                            using (Bitmap resizedBmp = ResizeBitmap(resizedScreenshot, resizeWidth, resizeHeight))
+                            {
+
+                                if (resizedBmp == null)
+                                {
+                                    return null;
+
+                                }
+
+                                if (IsSingleColor(resizedBmp))
+                                {
+                                    return null;
+                                }
+
+                                return (Bitmap)resizedBmp.Clone();
+                            }
+
+                        }
+
+                        return (Bitmap)resizedScreenshot.Clone();
+                    }
+                    
+                }
+            }
+
+            return null;
+        }
     }
 }

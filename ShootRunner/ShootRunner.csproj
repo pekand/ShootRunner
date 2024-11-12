@@ -24,6 +24,16 @@
     <DebugType>full</DebugType>
   </PropertyGroup>
 
+<PropertyGroup>
+  <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
+  <NoWarn>MSB3277</NoWarn>
+  <ApplicationIcon>ShootRunner.ico</ApplicationIcon>
+</PropertyGroup>
+
+<ItemGroup>
+  <Content Include="ShootRunner.ico" />
+</ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="Microsoft.PowerShell.SDK" Version="7.4.6" />
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2849.39" />

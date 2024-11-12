@@ -78,7 +78,6 @@
             textBox2.ScrollBars = ScrollBars.Vertical;
             textBox2.Size = new Size(821, 584);
             textBox2.TabIndex = 1;
-            textBox2.TextChanged += textBox2_TextChanged;
             // 
             // FormConsole
             // 
