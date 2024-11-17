@@ -1,6 +1,8 @@
 ﻿using Humanizer;
+using ShootRunner.src.forms;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 #nullable disable
 
@@ -11,6 +13,7 @@ namespace ShootRunner
     {
         public Widget widget = null;
         public List<Window> taskbarWindows = new List<Window>();
+
         Window selectedWindow = null;
 
         private bool dragging = false;
@@ -120,6 +123,27 @@ namespace ShootRunner
             this.Move += FormTaskbar_Move;
         }
 
+        public void CheckExcludeList(Window window)
+        {
+
+            if (window == null)
+            {
+                return;
+            }
+
+            if (window.Handle == this.Handle)
+            {
+                window.hidden = true;
+                return;
+            }
+
+            if (window.executable == "TextInputHost.exe")
+            {
+                window.hidden = true;
+                return;
+            }
+        }
+
         public void InitList()
         {
             List<IntPtr> windows = ToolsWindow.GetTaskbarWindows();
@@ -128,14 +152,30 @@ namespace ShootRunner
             {
                 try
                 {
-                    if (Handle == this.Handle)
-                    {
-                        continue;
-                    }
-
                     Window window = new Window();
                     window.Handle = Handle;
-                    ToolsWindow.SetWindowData(window, this.widget.useScreenshots);
+                    ToolsWindow.SetWindowData(window);
+                    this.CheckExcludeList(window);
+
+                    if (this.widget.useScreenshots)
+                    {
+                        if (!window.hidden)
+                        {
+                            using (Bitmap screenshot = WindowScreenshot.CaptureWindow(window, 256, 256))
+                            {
+                                if (screenshot != null)
+                                {
+                                    if (window.screenshot != null)
+                                    {
+                                        window.screenshot.Dispose();
+                                        window.screenshot = null;
+                                    }
+                                    window.screenshot = (Bitmap)screenshot.Clone();
+                                }
+                            }
+                        }
+                    }
+
                     taskbarWindows.Add(window);
                 }
                 catch (Exception ex)
@@ -176,20 +216,11 @@ namespace ShootRunner
 
                     try
                     {
-                        /*
-                        string path = ToolsWindow.GetApplicationPathFromWindow(Handle);
-                        if (path != null) {                            
-                            if (Path.GetFileName(path) == "TextInputHost.exe")
-                            {
-                                excludedWindows.Add(Handle);
-                                continue;
-                            }
-                        }
-                        */
                         Window window = new Window();
                         window.Handle = newWin;
-                        ToolsWindow.SetWindowData(window, this.widget.useScreenshots);
+                        ToolsWindow.SetWindowData(window);
                         taskbarWindows.Add(window);
+                        this.CheckExcludeList(window);
                         changed = true;
                     }
                     catch (Exception ex)
@@ -225,26 +256,23 @@ namespace ShootRunner
 
                 foreach (var win in toremove)
                 {
-                    if (win.icon != null) win.icon.Dispose();
-                    if (win.customicon != null) win.customicon.Dispose();
-                    if (win.screenshot != null) win.screenshot.Dispose();
+                    DisposeWindowResources(win);
                     taskbarWindows.Remove(win);
                     changed = true;
                 }
-
-               
 
                 try
                 {
                     if (widget.useScreenshots)
                     {
-                        Window currentWindowHandle = ToolsWindow.GetCurrentWindow();
+                        IntPtr currentWindowHandle = ToolsWindow.GetCurrentWindow();
                         Window currentWindow = null;
 
-                        if (currentWindowHandle != null) {
+                        if (currentWindowHandle != IntPtr.Zero)
+                        {
                             foreach (var win in taskbarWindows)
                             {
-                                if (win.Handle == currentWindowHandle.Handle)
+                                if (win.Handle == currentWindowHandle)
                                 {
                                     currentWindow = win;
                                     break;
@@ -265,33 +293,41 @@ namespace ShootRunner
                                 {
                                     if (!ToolsWindow.IsMinimalized(lastWindow))
                                     {
-                                        using (Bitmap screenshot = WindowScreenshot.CaptureWindow(lastWindow, 256, 256))
+                                        if (!lastWindow.hidden)
                                         {
-                                            if (screenshot != null)
+                                            using (Bitmap screenshot = WindowScreenshot.CaptureWindow(lastWindow, 256, 256))
                                             {
-                                                if (lastWindow.screenshot != null)
+                                                if (screenshot != null)
                                                 {
-                                                    lastWindow.screenshot.Dispose();
+                                                    if (lastWindow.screenshot != null)
+                                                    {
+                                                        lastWindow.screenshot.Dispose();
+                                                        lastWindow.screenshot = null;
+                                                    }
+                                                    lastWindow.screenshot = (Bitmap)screenshot.Clone();
+                                                    changed = true;
                                                 }
-                                                lastWindow.screenshot = (Bitmap)screenshot.Clone();
-                                                changed = true;
                                             }
                                         }
                                     }
                                 }
 
 
-                                using (Bitmap screenshotCurrentWindow = WindowScreenshot.CaptureWindow3(currentWindow, 256, 256))
+                                if (!currentWindow.hidden)
                                 {
-                                    if (screenshotCurrentWindow != null)
-                                    {                                        
-                                        currentWindow.isCurentWindowScreensot = true;
-                                        if (currentWindow.screenshot != null)
+                                    using (Bitmap screenshotCurrentWindow = WindowScreenshot.CaptureWindow3(currentWindow, 256, 256))
+                                    {
+                                        if (screenshotCurrentWindow != null)
                                         {
-                                            currentWindow.screenshot.Dispose();
+                                            currentWindow.isCurentWindowScreensot = true;
+                                            if (currentWindow.screenshot != null)
+                                            {
+                                                currentWindow.screenshot.Dispose();
+                                                currentWindow.screenshot = null;
+                                            }
+                                            currentWindow.screenshot = (Bitmap)screenshotCurrentWindow.Clone();
+                                            changed = true;
                                         }
-                                        currentWindow.screenshot = (Bitmap)screenshotCurrentWindow.Clone();
-                                        changed = true;
                                     }
                                 }
 
@@ -351,21 +387,12 @@ namespace ShootRunner
 
         public void CloseForm()
         {
-            foreach (Window win in this.taskbarWindows) {
-                if (win.icon != null) { 
-                    win.icon.Dispose();
-                }
-
-                if (win.customicon != null)
-                {
-                    win.customicon.Dispose();
-                }
-
-                if (win.screenshot != null)
-                {
-                    win.screenshot.Dispose();
-                }
+            foreach (Window win in this.taskbarWindows)
+            {
+                DisposeWindowResources(win);
             }
+
+            this.taskbarWindows.Clear();
 
             Program.widgetManager.RemoveTaskbarWidget(this);
             Program.Update();
@@ -386,6 +413,11 @@ namespace ShootRunner
             {
                 foreach (Window window in taskbarWindows)
                 {
+                    if (window.hidden)
+                    {
+                        continue;
+                    }
+
                     if (window.icon != null)
                     {
                         if (widget.useScreenshots && window.screenshot != null)
@@ -468,6 +500,11 @@ namespace ShootRunner
 
             foreach (Window window in taskbarWindows)
             {
+                if (window.hidden)
+                {
+                    continue;
+                }
+
                 if (window.icon != null)
                 {
                     if (X <= eX && eX <= (X + W) && Y <= eY && eY <= (Y + H))
@@ -514,6 +551,12 @@ namespace ShootRunner
 
             foreach (Window window in taskbarWindows)
             {
+                if (window.hidden)
+                {
+                    pos++;
+                    continue;
+                }
+
                 if (rX1 <= eX && eX <= rX2 && rY1 <= eY && eY <= rY2)
                 {
                     spaceOnPosition = pos;
@@ -776,6 +819,72 @@ namespace ShootRunner
         private void showDesktopToolStripMenuItem_Click(object sender, EventArgs e)
         {
             ToolsWindow.ShowDesktop();
+        }
+
+        private void hiddeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (this.selectedWindow != null)
+            {
+                this.selectedWindow.hidden = true;
+                this.Refresh();
+            }
+        }
+
+        public void DisposeWindowResources(Window window)
+        {
+            if (window == null)
+            {
+                return;
+            }
+
+            if (window.icon != null)
+            {
+                window.icon.Dispose();
+                window.icon = null;
+            }
+
+            if (window.customicon != null)
+            {
+                window.customicon.Dispose();
+                window.customicon = null;
+            }
+            if (window.screenshot != null)
+            {
+                window.screenshot.Dispose();
+                window.screenshot = null;
+            }
+
+            window.isCurentWindowScreensot = false;
+        }
+
+        private void showAllHiddenToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            foreach (Window window in taskbarWindows)
+            {
+                if (window.hidden)
+                {
+                    window.hidden = false;
+                    ToolsWindow.SetWindowData(window);
+                }
+            }
+            this.Refresh();
+        }
+
+
+
+        private void infoToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (this.selectedWindow != null)
+            {
+                FormWindowInfo windowInfoForm = new FormWindowInfo(this.selectedWindow);
+                Program.windowInfoForms.Add(windowInfoForm);
+                windowInfoForm.Show();
+            }
+        }
+
+        private void consoleToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Program.ShowConsole();
         }
     }
 }

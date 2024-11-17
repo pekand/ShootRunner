@@ -41,6 +41,7 @@
             setCommandToolStripMenuItem1 = new ToolStripMenuItem();
             widgetToolStripMenuItem = new ToolStripMenuItem();
             newWidgetToolStripMenuItem = new ToolStripMenuItem();
+            taskbarToolStripMenuItem = new ToolStripMenuItem();
             applicationToolStripMenuItem = new ToolStripMenuItem();
             closeToolStripMenuItem1 = new ToolStripMenuItem();
             optionsToolStripMenuItem = new ToolStripMenuItem();
@@ -49,7 +50,7 @@
             transparentToolStripMenuItem = new ToolStripMenuItem();
             openFileDialog1 = new OpenFileDialog();
             timer1 = new System.Windows.Forms.Timer(components);
-            taskbarToolStripMenuItem = new ToolStripMenuItem();
+            consoleToolStripMenuItem = new ToolStripMenuItem();
             contextMenuStrip1.SuspendLayout();
             SuspendLayout();
             // 
@@ -70,35 +71,35 @@
             // removeToolStripMenuItem
             // 
             removeToolStripMenuItem.Name = "removeToolStripMenuItem";
-            removeToolStripMenuItem.Size = new Size(180, 24);
+            removeToolStripMenuItem.Size = new Size(143, 24);
             removeToolStripMenuItem.Text = "Remove";
             removeToolStripMenuItem.Click += removeToolStripMenuItem_Click;
             // 
             // newPinToolStripMenuItem
             // 
             newPinToolStripMenuItem.Name = "newPinToolStripMenuItem";
-            newPinToolStripMenuItem.Size = new Size(180, 24);
+            newPinToolStripMenuItem.Size = new Size(143, 24);
             newPinToolStripMenuItem.Text = "New pin";
             newPinToolStripMenuItem.Click += newPinToolStripMenuItem_Click;
             // 
             // runToolStripMenuItem
             // 
             runToolStripMenuItem.Name = "runToolStripMenuItem";
-            runToolStripMenuItem.Size = new Size(180, 24);
+            runToolStripMenuItem.Size = new Size(143, 24);
             runToolStripMenuItem.Text = "Duplicate";
             runToolStripMenuItem.Click += duplicateToolStripMenuItem_Click;
             // 
             // minimalizeToolStripMenuItem
             // 
             minimalizeToolStripMenuItem.Name = "minimalizeToolStripMenuItem";
-            minimalizeToolStripMenuItem.Size = new Size(180, 24);
+            minimalizeToolStripMenuItem.Size = new Size(143, 24);
             minimalizeToolStripMenuItem.Text = "Minimalize";
             minimalizeToolStripMenuItem.Click += minimalizeToolStripMenuItem_Click_1;
             // 
             // selectToolStripMenuItem
             // 
             selectToolStripMenuItem.Name = "selectToolStripMenuItem";
-            selectToolStripMenuItem.Size = new Size(180, 24);
+            selectToolStripMenuItem.Size = new Size(143, 24);
             selectToolStripMenuItem.Text = "Select";
             selectToolStripMenuItem.Click += selectToolStripMenuItem_Click;
             // 
@@ -112,7 +113,7 @@
             // setCommandToolStripMenuItem1
             // 
             setCommandToolStripMenuItem1.Name = "setCommandToolStripMenuItem1";
-            setCommandToolStripMenuItem1.Size = new Size(180, 24);
+            setCommandToolStripMenuItem1.Size = new Size(162, 24);
             setCommandToolStripMenuItem1.Text = "Set command";
             setCommandToolStripMenuItem1.Click += setCommandToolStripMenuItem_Click;
             // 
@@ -126,13 +127,20 @@
             // newWidgetToolStripMenuItem
             // 
             newWidgetToolStripMenuItem.Name = "newWidgetToolStripMenuItem";
-            newWidgetToolStripMenuItem.Size = new Size(180, 24);
+            newWidgetToolStripMenuItem.Size = new Size(150, 24);
             newWidgetToolStripMenuItem.Text = "New widget";
             newWidgetToolStripMenuItem.Click += newWidgetToolStripMenuItem_Click;
             // 
+            // taskbarToolStripMenuItem
+            // 
+            taskbarToolStripMenuItem.Name = "taskbarToolStripMenuItem";
+            taskbarToolStripMenuItem.Size = new Size(150, 24);
+            taskbarToolStripMenuItem.Text = "Taskbar";
+            taskbarToolStripMenuItem.Click += taskbarToolStripMenuItem_Click;
+            // 
             // applicationToolStripMenuItem
             // 
-            applicationToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { closeToolStripMenuItem1 });
+            applicationToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { consoleToolStripMenuItem, closeToolStripMenuItem1 });
             applicationToolStripMenuItem.Name = "applicationToolStripMenuItem";
             applicationToolStripMenuItem.Size = new Size(180, 24);
             applicationToolStripMenuItem.Text = "Application";
@@ -178,12 +186,12 @@
             openFileDialog1.Filter = "Image Files|*.ico;*.bmp;*.jpg;*.jpeg;*.png;";
             openFileDialog1.Title = "Select icon";
             // 
-            // taskbarToolStripMenuItem
+            // consoleToolStripMenuItem
             // 
-            taskbarToolStripMenuItem.Name = "taskbarToolStripMenuItem";
-            taskbarToolStripMenuItem.Size = new Size(180, 24);
-            taskbarToolStripMenuItem.Text = "Taskbar";
-            taskbarToolStripMenuItem.Click += taskbarToolStripMenuItem_Click;
+            consoleToolStripMenuItem.Name = "consoleToolStripMenuItem";
+            consoleToolStripMenuItem.Size = new Size(180, 24);
+            consoleToolStripMenuItem.Text = "Console";
+            consoleToolStripMenuItem.Click += consoleToolStripMenuItem_Click;
             // 
             // FormPin
             // 
@@ -192,7 +200,7 @@
             ClientSize = new Size(1067, 658);
             ContextMenuStrip = contextMenuStrip1;
             Icon = (Icon)resources.GetObject("$this.Icon");
-            Margin = new Padding(4, 4, 4, 4);
+            Margin = new Padding(4);
             Name = "FormPin";
             StartPosition = FormStartPosition.Manual;
             Text = "FormPin";
@@ -231,5 +239,6 @@
         private System.Windows.Forms.Timer timer1;
         private System.Windows.Forms.ToolStripMenuItem minimalizeToolStripMenuItem;
         private ToolStripMenuItem taskbarToolStripMenuItem;
+        private ToolStripMenuItem consoleToolStripMenuItem;
     }
 }

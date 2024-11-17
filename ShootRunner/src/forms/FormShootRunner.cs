@@ -95,6 +95,7 @@ namespace ShootRunner
                         Program.info("System locked");
                         break;
                     case 0x8: // WTS_SESSION_UNLOCK;
+                        Program.pause = false;
                         Program.info("System unlocked");
                         break;
                 }
@@ -166,8 +167,9 @@ namespace ShootRunner
             {
                 if (command.currentwindow != null) // SEND KEYPRESS TO CURENT WINDOW IF TITLE CONTAIN STRING
                 {
-                    Window window = ToolsWindow.GetCurrentWindow();
-                    if (window.Title.Contains(command.currentwindow))
+                    IntPtr Handle = ToolsWindow.GetCurrentWindow();
+                    string title = ToolsWindow.GetWindowTitle(Handle);
+                    if (title.Contains(command.currentwindow))
                     {
                         // Keyboard.SandKeyPressToWindow(command.keypress, window.Handle);
                         Keyboard.KeyPress2(command.keypress);
@@ -211,8 +213,9 @@ namespace ShootRunner
             {
                 if (command.currentwindow != null) // OPEN FILE OR URL  ONLY IF CURRENT WINDOW HAS TITLE
                 {
-                    Window window = ToolsWindow.GetCurrentWindow();
-                    if (window.Title.Contains(command.currentwindow))
+                    IntPtr Handle = ToolsWindow.GetCurrentWindow();
+                    string title = ToolsWindow.GetWindowTitle(Handle);
+                    if (title.Contains(command.currentwindow))
                     {
                         JobTask.OpenFileInSystem(command.open);
                         return true;
@@ -228,8 +231,9 @@ namespace ShootRunner
             {
                 if (command.currentwindow != null) // RUN COMMAND AS PROCESS WITH PARAMETERS IF CURRENT WINDOW HAS TITLE
                 {
-                    Window window = ToolsWindow.GetCurrentWindow();
-                    if (window.Title.Contains(command.currentwindow))
+                    IntPtr Handle = ToolsWindow.GetCurrentWindow();
+                    string title = ToolsWindow.GetWindowTitle(Handle);
+                    if (title.Contains(command.currentwindow))
                     {
                         JobTask.RunCommand(command.command, command.parameters, command.workdir);
                         return true;
@@ -512,10 +516,12 @@ namespace ShootRunner
         // PIN
         private void CreatPin()
         {
-            Window window = ToolsWindow.GetCurrentWindow();
+            IntPtr Handle = ToolsWindow.GetCurrentWindow();
 
-            if (window.Handle != IntPtr.Zero)
+            if (Handle != IntPtr.Zero)
             {
+                Window window = new Window();
+                window.Handle = Handle;
                 ToolsWindow.SetWindowData(window);
                 FormPin pin = new FormPin(window);
                 pin.Show();
@@ -757,7 +763,7 @@ namespace ShootRunner
 
         private void createWidgetToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Program.widgetManager.CreateWidget();
+            Program.widgetManager.ShowCreateWidgetForm();
         }
     }
 }

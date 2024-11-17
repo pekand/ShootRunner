@@ -10,6 +10,7 @@ using System.Windows.Forms;
 using System.Xml;
 using System.Xml.Linq;
 using Microsoft.Win32;
+using ShootRunner.src.forms;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 
@@ -42,6 +43,7 @@ namespace ShootRunner
         public static FormShootRunner formShootRunner = null;
         public static List<Command> commands = new List<Command>();        
         public static List<FormPin> pins = new List<FormPin>();
+        public static List<FormWindowInfo> windowInfoForms = new List<FormWindowInfo>();
         public static WidgetManager widgetManager = new WidgetManager();
         public static FormConsole console = null;
         public static FormShortcut shortcutForm = null;
@@ -424,6 +426,11 @@ namespace ShootRunner
         {
             closingApplication = true;
             Program.configFile.Save();
+
+            foreach (FormWindowInfo info in windowInfoForms) { 
+                info.Close();
+            }
+
             Application.Exit();
         }
 
