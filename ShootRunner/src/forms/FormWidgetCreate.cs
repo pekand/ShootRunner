@@ -19,6 +19,9 @@ namespace ShootRunner.src.forms
 
         private void button2_Click(object sender, EventArgs e)
         {
+            string name = textBox1.Text;
+            string type = ((Item)comboBox1.SelectedValue).Name;
+            Program.widgetManager.CreateWidget(name, type);
             this.Close();
         }
 

@@ -33,6 +33,7 @@
             contextMenuStrip = new ContextMenuStrip(components);
             widgetToolStripMenuItem = new ToolStripMenuItem();
             newWidgetToolStripMenuItem = new ToolStripMenuItem();
+            createWidgetToolStripMenuItem = new ToolStripMenuItem();
             editToolStripMenuItem = new ToolStripMenuItem();
             reloadToolStripMenuItem = new ToolStripMenuItem();
             typeToolStripMenuItem = new ToolStripMenuItem();
@@ -43,6 +44,7 @@
             mostTopToolStripMenuItem = new ToolStripMenuItem();
             lockedToolStripMenuItem = new ToolStripMenuItem();
             transparentToolStripMenuItem = new ToolStripMenuItem();
+            consoleToolStripMenuItem = new ToolStripMenuItem();
             contextMenuStrip.SuspendLayout();
             SuspendLayout();
             // 
@@ -50,62 +52,69 @@
             // 
             contextMenuStrip.Items.AddRange(new ToolStripItem[] { widgetToolStripMenuItem, applicationToolStripMenuItem, optionsToolStripMenuItem });
             contextMenuStrip.Name = "contextMenuStrip1";
-            contextMenuStrip.Size = new Size(147, 76);
+            contextMenuStrip.Size = new Size(181, 98);
             contextMenuStrip.Opening += contextMenuStrip1_Opening;
             // 
             // widgetToolStripMenuItem
             // 
-            widgetToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { newWidgetToolStripMenuItem, editToolStripMenuItem, reloadToolStripMenuItem, typeToolStripMenuItem, removeToolStripMenuItem });
+            widgetToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { newWidgetToolStripMenuItem, createWidgetToolStripMenuItem, editToolStripMenuItem, reloadToolStripMenuItem, typeToolStripMenuItem, removeToolStripMenuItem });
             widgetToolStripMenuItem.Name = "widgetToolStripMenuItem";
-            widgetToolStripMenuItem.Size = new Size(146, 24);
+            widgetToolStripMenuItem.Size = new Size(180, 24);
             widgetToolStripMenuItem.Text = "Widget";
             // 
             // newWidgetToolStripMenuItem
             // 
             newWidgetToolStripMenuItem.Name = "newWidgetToolStripMenuItem";
-            newWidgetToolStripMenuItem.Size = new Size(150, 24);
+            newWidgetToolStripMenuItem.Size = new Size(163, 24);
             newWidgetToolStripMenuItem.Text = "New widget";
             newWidgetToolStripMenuItem.Click += newWidgetToolStripMenuItem_Click;
+            // 
+            // createWidgetToolStripMenuItem
+            // 
+            createWidgetToolStripMenuItem.Name = "createWidgetToolStripMenuItem";
+            createWidgetToolStripMenuItem.Size = new Size(163, 24);
+            createWidgetToolStripMenuItem.Text = "Create widget";
+            createWidgetToolStripMenuItem.Click += createWidgetToolStripMenuItem_Click;
             // 
             // editToolStripMenuItem
             // 
             editToolStripMenuItem.Name = "editToolStripMenuItem";
-            editToolStripMenuItem.Size = new Size(150, 24);
+            editToolStripMenuItem.Size = new Size(163, 24);
             editToolStripMenuItem.Text = "Edit";
             editToolStripMenuItem.Click += editToolStripMenuItem_Click;
             // 
             // reloadToolStripMenuItem
             // 
             reloadToolStripMenuItem.Name = "reloadToolStripMenuItem";
-            reloadToolStripMenuItem.Size = new Size(150, 24);
+            reloadToolStripMenuItem.Size = new Size(163, 24);
             reloadToolStripMenuItem.Text = "Reload";
             reloadToolStripMenuItem.Click += reloadToolStripMenuItem_Click;
             // 
             // typeToolStripMenuItem
             // 
             typeToolStripMenuItem.Name = "typeToolStripMenuItem";
-            typeToolStripMenuItem.Size = new Size(150, 24);
+            typeToolStripMenuItem.Size = new Size(163, 24);
             typeToolStripMenuItem.Text = "Type";
             typeToolStripMenuItem.Click += typeToolStripMenuItem_Click;
             // 
             // removeToolStripMenuItem
             // 
             removeToolStripMenuItem.Name = "removeToolStripMenuItem";
-            removeToolStripMenuItem.Size = new Size(150, 24);
+            removeToolStripMenuItem.Size = new Size(163, 24);
             removeToolStripMenuItem.Text = "Remove";
             removeToolStripMenuItem.Click += removeWidgetToolStripMenuItem_Click;
             // 
             // applicationToolStripMenuItem
             // 
-            applicationToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { exitToolStripMenuItem });
+            applicationToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { consoleToolStripMenuItem, exitToolStripMenuItem });
             applicationToolStripMenuItem.Name = "applicationToolStripMenuItem";
-            applicationToolStripMenuItem.Size = new Size(146, 24);
+            applicationToolStripMenuItem.Size = new Size(180, 24);
             applicationToolStripMenuItem.Text = "Application";
             // 
             // exitToolStripMenuItem
             // 
             exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            exitToolStripMenuItem.Size = new Size(99, 24);
+            exitToolStripMenuItem.Size = new Size(180, 24);
             exitToolStripMenuItem.Text = "Exit";
             exitToolStripMenuItem.Click += exitToolStripMenuItem_Click;
             // 
@@ -113,7 +122,7 @@
             // 
             optionsToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { mostTopToolStripMenuItem, lockedToolStripMenuItem, transparentToolStripMenuItem });
             optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
-            optionsToolStripMenuItem.Size = new Size(146, 24);
+            optionsToolStripMenuItem.Size = new Size(180, 24);
             optionsToolStripMenuItem.Text = "Options";
             // 
             // mostTopToolStripMenuItem
@@ -136,6 +145,13 @@
             transparentToolStripMenuItem.Size = new Size(150, 24);
             transparentToolStripMenuItem.Text = "Transparent";
             transparentToolStripMenuItem.Click += transparentToolStripMenuItem_Click;
+            // 
+            // consoleToolStripMenuItem
+            // 
+            consoleToolStripMenuItem.Name = "consoleToolStripMenuItem";
+            consoleToolStripMenuItem.Size = new Size(180, 24);
+            consoleToolStripMenuItem.Text = "Console";
+            consoleToolStripMenuItem.Click += consoleToolStripMenuItem_Click;
             // 
             // FormWidget
             // 
@@ -172,5 +188,7 @@
         private System.Windows.Forms.ToolStripMenuItem typeToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem reloadToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem editToolStripMenuItem;
+        private ToolStripMenuItem createWidgetToolStripMenuItem;
+        private ToolStripMenuItem consoleToolStripMenuItem;
     }
 }

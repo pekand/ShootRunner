@@ -1,6 +1,10 @@
 cd ..
+
+$tag = git describe --tags --abbrev=0
+Write-Output "TAG=>$tag<"
+
 $innoInstallPath = 'iscc'
-& $innoInstallPath /q install.iss
+& $innoInstallPath /q install.iss -dAppVersion=%TAG%
 
 $CERT_CODE = $env:CERT_CODE
 Write-Host "CERT_CODE=>$CERT_CODE<"
@@ -15,3 +19,6 @@ $signtoolPath = 'signtool.exe'
 
 $hash = Get-FileHash -Path "output\ShootRunner_v1.0.0.exe" -Algorithm SHA256
 $hash.Hash | Out-File -FilePath "output\ShootRunner_v1.0.0.SHA256"
+
+Write-Host "Press any key to continue..."
+$null = Read-Host

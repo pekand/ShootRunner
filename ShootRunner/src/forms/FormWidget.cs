@@ -305,7 +305,7 @@ namespace ShootRunner
         private void Form_Deactivate(object sender, EventArgs e)
         {
             ToolsWindow.RemoveTitleBar(this.Handle);
-            
+
 
         }
 
@@ -453,6 +453,16 @@ namespace ShootRunner
             this.widget.StartHeight = this.Height;
             Program.Update();
             this.Refresh();
+        }
+
+        private void createWidgetToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Program.widgetManager.ShowCreateWidgetForm();
+        }
+
+        private void consoleToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Program.ShowConsole();
         }
     }
 }

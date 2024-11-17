@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Reflection.Metadata;
+using System.Reflection.Metadata.Ecma335;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -48,6 +49,17 @@ namespace ShootRunner
         public const int HTCAPTION = 0x2;
         public const int HTBOTTOMRIGHT = 17;
 
+        private const uint DWMWA_CLOAKED = 14;
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct RECT
+        {
+            public int Left;
+            public int Top;
+            public int Right;
+            public int Bottom;
+        }
+
         /**********************************************************************/
 
         [DllImport("kernel32.dll", SetLastError = true)]
@@ -59,6 +71,9 @@ namespace ShootRunner
 
         [DllImport("psapi.dll", SetLastError = true, CharSet = CharSet.Auto)]
         static extern uint GetModuleFileNameEx(IntPtr hProcess, IntPtr hModule, [Out] StringBuilder lpBaseName, int nSize);
+
+        [DllImport("dwmapi.dll")]
+        private static extern int DwmGetWindowAttribute(IntPtr hWnd, uint dwAttribute, out int pvAttribute, int cbAttribute);        
 
         [DllImport("user32.dll")]
         private static extern IntPtr SendMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
@@ -131,8 +146,10 @@ namespace ShootRunner
         [DllImport("user32.dll", SetLastError = true)]
         private static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
 
+        [DllImport("user32.dll")]
+        private static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
         /**********************************************************************/
-        public static Window SetWindowData(Window window, bool makeScreenshot = false)
+        public static Window SetWindowData(Window window)
         {
             if (window.Handle != IntPtr.Zero)
             {
@@ -190,23 +207,6 @@ namespace ShootRunner
                         window.isGpuRenderedChecked = true;
                         window.isGpuRendered = ToolsWindow.IsGpuRenderedWindow(window);
                     }
-
-                    if (makeScreenshot)
-                    {
-                        using (Bitmap screenshot = WindowScreenshot.CaptureWindow(window, 256, 256))
-                        {
-                            if (screenshot != null)
-                            {
-                                if (window.screenshot != null)
-                                {
-                                    window.screenshot.Dispose();
-                                }
-                                window.screenshot = (Bitmap)screenshot.Clone();
-                            }
-                        }
-                    }
-
-                    
                 }
                 catch (Exception ex)
                 {
@@ -312,7 +312,13 @@ namespace ShootRunner
                             excludedWindows.Add(Handle);
                             continue;
                         }
-       
+
+                        if (IsWindowCloaked(Handle))
+                        {
+                            excludedWindows.Add(Handle);
+                            continue;
+                        }
+
                         taskbarWindows.Add(Handle);
                     }
                     catch (Exception ex)
@@ -345,18 +351,15 @@ namespace ShootRunner
             return className.ToString();
         }
 
-        public static Window GetCurrentWindow()
+        public static IntPtr GetCurrentWindow()
         {
             IntPtr activeWindowHandle = ToolsWindow.GetForegroundWindow();
 
             if (activeWindowHandle == IntPtr.Zero)
             {
-                return null;
+                return IntPtr.Zero;
             }
-
-            Window window = new Window();
-            window.Handle = activeWindowHandle;
-            return window;
+            return activeWindowHandle;
         }
 
         static void SimulateMouseInput()
@@ -632,7 +635,7 @@ namespace ShootRunner
         }
 
         public static string GetWindowTitle(IntPtr Handle)
-        {
+        {            
             StringBuilder windowText = new StringBuilder(256);
             GetWindowText(Handle, windowText, windowText.Capacity);
             return windowText.ToString();
@@ -828,6 +831,45 @@ namespace ShootRunner
         }
 
         /*************************************************************************/
+
+
+
+        public static Rectangle? GetWindowPosition(IntPtr hWnd)
+        {
+            if (GetWindowRect(hWnd, out RECT rect))
+            {
+                return new Rectangle(rect.Left, rect.Top, rect.Right - rect.Left, rect.Bottom - rect.Top);
+            }
+            return null;
+        }
+
+        public static bool WindowHasPosition(IntPtr hWnd)
+        {
+            if (GetWindowRect(hWnd, out RECT rect))
+            {
+                if (rect.Left >= 0 &&
+                    rect.Top >= 0 &&
+                    (rect.Right - rect.Left) > 0 &&
+                    (rect.Bottom - rect.Top) > 0
+                    ) { 
+                    return true;
+                }
+                
+            }
+            throw new InvalidOperationException("Unable to get window position.");
+        }
+
+
+
+        public static bool IsWindowCloaked(IntPtr hWnd)
+        {
+            if (DwmGetWindowAttribute(hWnd, DWMWA_CLOAKED, out int isCloaked, Marshal.SizeOf(typeof(int))) == 0)
+            {
+                return isCloaked != 0;
+            }
+            return false;
+        }
+
 
 
     }

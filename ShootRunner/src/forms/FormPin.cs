@@ -82,7 +82,7 @@ namespace ShootRunner
             {
                 const int WS_EX_TOOLWINDOW = 0x00000080;
                 CreateParams cp = base.CreateParams;
-                cp.ExStyle |= WS_EX_TOOLWINDOW; // Add the tool window style
+                cp.ExStyle |= WS_EX_TOOLWINDOW;
                 return cp;
             }
         }
@@ -145,7 +145,7 @@ namespace ShootRunner
                             if (window != null && window.Handle != IntPtr.Zero)
                             {
                                 this.window.Handle = window.Handle;
-                            }                     
+                            }
                         }
                     }
                 }
@@ -286,7 +286,8 @@ namespace ShootRunner
                     string selectedFilePath = openFileDialog1.FileName;
                     using (var image = Image.FromFile(selectedFilePath))
                     {
-                        if (this.window.customicon != null) {
+                        if (this.window.customicon != null)
+                        {
                             this.window.customicon.Dispose();
                         }
                         this.window.customicon = new Bitmap(image);
@@ -371,11 +372,10 @@ namespace ShootRunner
                 {
                     Window window = await JobTask.StartProcessAndGetWindowHandleAsync(this.window.app, null, null, this.window.silentCommand);
 
-                    if (window.Handle != IntPtr.Zero)
+                    if (window != null && window.Handle != IntPtr.Zero)
                     {
                         ToolsWindow.SetWindowData(window);
                         Program.CreatePin(window);
-
                     }
                 }
             }
@@ -468,6 +468,11 @@ namespace ShootRunner
             this.window = window;
             this.Refresh();
 
+        }
+
+        private void consoleToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Program.ShowConsole();
         }
 
         /*********************************************************************************/

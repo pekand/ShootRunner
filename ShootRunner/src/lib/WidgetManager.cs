@@ -164,7 +164,20 @@ namespace ShootRunner
             }
         }
 
-        public  void CreateWidget()
+        public void CreateWidget(string name = "", string type = "")
+        {
+
+            if (name.Trim() == "") {
+                return;
+            }
+
+            
+            Directory.CreateDirectory(Path.Combine(Program.widgetsPath, name));
+
+
+        }
+
+        public  void ShowCreateWidgetForm()
         {
 
             if (this.formWidgetCreate == null) {

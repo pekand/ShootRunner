@@ -39,6 +39,7 @@
             newPinToolStripMenuItem = new ToolStripMenuItem();
             widgetsToolStripMenuItem = new ToolStripMenuItem();
             newWidgetToolStripMenuItem = new ToolStripMenuItem();
+            createWidgetToolStripMenuItem = new ToolStripMenuItem();
             taskbarToolStripMenuItem1 = new ToolStripMenuItem();
             applicationToolStripMenuItem = new ToolStripMenuItem();
             errorLogToolStripMenuItem = new ToolStripMenuItem();
@@ -49,7 +50,6 @@
             hideAllToolStripMenuItem = new ToolStripMenuItem();
             showAllToolStripMenuItem = new ToolStripMenuItem();
             timer1 = new System.Windows.Forms.Timer(components);
-            createWidgetToolStripMenuItem = new ToolStripMenuItem();
             contextMenuStrip1.SuspendLayout();
             SuspendLayout();
             // 
@@ -62,7 +62,7 @@
             // 
             // contextMenuStrip1
             // 
-            contextMenuStrip1.Items.AddRange(new ToolStripItem[] { commandsToolStripMenuItem1, pinsToolStripMenuItem, widgetsToolStripMenuItem, applicationToolStripMenuItem, optionsToolStripMenuItem, hideAllToolStripMenuItem, showAllToolStripMenuItem });
+            contextMenuStrip1.Items.AddRange(new ToolStripItem[] { applicationToolStripMenuItem, commandsToolStripMenuItem1, pinsToolStripMenuItem, widgetsToolStripMenuItem, optionsToolStripMenuItem, hideAllToolStripMenuItem, showAllToolStripMenuItem });
             contextMenuStrip1.Name = "contextMenuStrip1";
             contextMenuStrip1.Size = new Size(181, 194);
             contextMenuStrip1.Opening += contextMenuStrip1_Opening;
@@ -77,14 +77,14 @@
             // editCommandsToolStripMenuItem
             // 
             editCommandsToolStripMenuItem.Name = "editCommandsToolStripMenuItem";
-            editCommandsToolStripMenuItem.Size = new Size(172, 24);
+            editCommandsToolStripMenuItem.Size = new Size(180, 24);
             editCommandsToolStripMenuItem.Text = "Edit commands";
             editCommandsToolStripMenuItem.Click += commandsToolStripMenuItem_Click;
             // 
             // shortcutFormToolStripMenuItem
             // 
             shortcutFormToolStripMenuItem.Name = "shortcutFormToolStripMenuItem";
-            shortcutFormToolStripMenuItem.Size = new Size(172, 24);
+            shortcutFormToolStripMenuItem.Size = new Size(180, 24);
             shortcutFormToolStripMenuItem.Text = "Shortcut form";
             shortcutFormToolStripMenuItem.Click += shortcutFormToolStripMenuItem_Click;
             // 
@@ -112,14 +112,21 @@
             // newWidgetToolStripMenuItem
             // 
             newWidgetToolStripMenuItem.Name = "newWidgetToolStripMenuItem";
-            newWidgetToolStripMenuItem.Size = new Size(180, 24);
+            newWidgetToolStripMenuItem.Size = new Size(163, 24);
             newWidgetToolStripMenuItem.Text = "New widget";
             newWidgetToolStripMenuItem.Click += newWidgetToolStripMenuItem_Click;
+            // 
+            // createWidgetToolStripMenuItem
+            // 
+            createWidgetToolStripMenuItem.Name = "createWidgetToolStripMenuItem";
+            createWidgetToolStripMenuItem.Size = new Size(163, 24);
+            createWidgetToolStripMenuItem.Text = "Create widget";
+            createWidgetToolStripMenuItem.Click += createWidgetToolStripMenuItem_Click;
             // 
             // taskbarToolStripMenuItem1
             // 
             taskbarToolStripMenuItem1.Name = "taskbarToolStripMenuItem1";
-            taskbarToolStripMenuItem1.Size = new Size(180, 24);
+            taskbarToolStripMenuItem1.Size = new Size(163, 24);
             taskbarToolStripMenuItem1.Text = "Taskbar";
             taskbarToolStripMenuItem1.Click += taskbarToolStripMenuItem_Click;
             // 
@@ -162,7 +169,7 @@
             // autorunToolStripMenuItem
             // 
             autorunToolStripMenuItem.Name = "autorunToolStripMenuItem";
-            autorunToolStripMenuItem.Size = new Size(129, 24);
+            autorunToolStripMenuItem.Size = new Size(180, 24);
             autorunToolStripMenuItem.Text = "Autorun";
             autorunToolStripMenuItem.Click += autorunToolStripMenuItem_Click;
             // 
@@ -186,13 +193,6 @@
             timer1.Enabled = true;
             timer1.Interval = 1000;
             timer1.Tick += timer1_Tick;
-            // 
-            // createWidgetToolStripMenuItem
-            // 
-            createWidgetToolStripMenuItem.Name = "createWidgetToolStripMenuItem";
-            createWidgetToolStripMenuItem.Size = new Size(180, 24);
-            createWidgetToolStripMenuItem.Text = "Create widget";
-            createWidgetToolStripMenuItem.Click += createWidgetToolStripMenuItem_Click;
             // 
             // FormShootRunner
             // 
