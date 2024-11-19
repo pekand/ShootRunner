@@ -271,6 +271,39 @@ namespace ShootRunner
             AddWindowsToContextMenu();
         }
 
+        public void AddWindowsToContextMenu()
+        {
+            this.taskbarWindows = ToolsWindow.GetTaskbarWindows();
+
+            selectToolStripMenuItem.DropDownItems.Clear();
+            foreach (IntPtr Handle in this.taskbarWindows)
+            {
+                Window window = new Window();
+                window.Handle = Handle;
+                ToolsWindow.SetWindowData(window);
+                ToolStripMenuItem item = new ToolStripMenuItem(window.Title);
+                item.Image = window.icon;
+                item.Click += (sender, e) => SelectType(window);
+                selectToolStripMenuItem.DropDownItems.Add(item);
+            }
+        }
+
+        public void SelectType(Window window)
+        {
+            ToolsWindow.SetWindowData(window);
+
+            if (window == null) {
+                return;
+            }
+
+            window.customicon = (Bitmap)this.window.customicon?.Clone();
+            this.window.Dispose();
+            this.window = window;
+
+            this.Refresh();
+
+        }
+
         private void setCommandToolStripMenuItem_Click(object sender, EventArgs e)
         {
             FormCommand formCommand = new FormCommand(this.window);
@@ -444,30 +477,6 @@ namespace ShootRunner
         {
 
             this.Region = null;
-        }
-        public void AddWindowsToContextMenu()
-        {
-            this.taskbarWindows = ToolsWindow.GetTaskbarWindows();
-
-            selectToolStripMenuItem.DropDownItems.Clear();
-            foreach (IntPtr Handle in this.taskbarWindows)
-            {
-                Window window = new Window();
-                window.Handle = Handle;
-                ToolsWindow.SetWindowData(window);
-                ToolStripMenuItem item = new ToolStripMenuItem(window.Title);
-                item.Image = window.icon;
-                item.Click += (sender, e) => SelectType(window);
-                selectToolStripMenuItem.DropDownItems.Add(item);
-            }
-        }
-
-        public void SelectType(Window window)
-        {
-            ToolsWindow.SetWindowData(window);
-            this.window = window;
-            this.Refresh();
-
         }
 
         private void consoleToolStripMenuItem_Click(object sender, EventArgs e)

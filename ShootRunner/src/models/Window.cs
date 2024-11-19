@@ -2,7 +2,7 @@
 
 namespace ShootRunner
 {
-    public class Window
+    public class Window:IDisposable
     {
         public String Type = ""; // WINDOW, COMMAND 
 
@@ -40,5 +40,33 @@ namespace ShootRunner
         public double transparent = 1.0;
         public bool mosttop = false;
         public bool hidden = false;
+
+        private bool disposed = false;
+
+        ~Window()
+        {
+            Dispose(false);
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposed)
+            {
+                if (disposing)
+                {
+                    icon?.Dispose();
+                    customicon?.Dispose();
+                    screenshot?.Dispose();
+                }
+
+                disposed = true;
+            }
+        }
     }
 }

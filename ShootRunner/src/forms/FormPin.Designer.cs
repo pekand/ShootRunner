@@ -32,90 +32,109 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormPin));
             contextMenuStrip1 = new ContextMenuStrip(components);
             pinToolStripMenuItem = new ToolStripMenuItem();
-            removeToolStripMenuItem = new ToolStripMenuItem();
+            selectToolStripMenuItem = new ToolStripMenuItem();
+            commandToolStripMenuItem = new ToolStripMenuItem();
             newPinToolStripMenuItem = new ToolStripMenuItem();
             runToolStripMenuItem = new ToolStripMenuItem();
             minimalizeToolStripMenuItem = new ToolStripMenuItem();
-            selectToolStripMenuItem = new ToolStripMenuItem();
-            commandToolStripMenuItem = new ToolStripMenuItem();
-            setCommandToolStripMenuItem1 = new ToolStripMenuItem();
+            removeToolStripMenuItem = new ToolStripMenuItem();
+            toolStripMenuItem1 = new ToolStripSeparator();
+            applicationToolStripMenuItem = new ToolStripMenuItem();
+            consoleToolStripMenuItem = new ToolStripMenuItem();
+            closeToolStripMenuItem1 = new ToolStripMenuItem();
             widgetToolStripMenuItem = new ToolStripMenuItem();
             newWidgetToolStripMenuItem = new ToolStripMenuItem();
             taskbarToolStripMenuItem = new ToolStripMenuItem();
-            applicationToolStripMenuItem = new ToolStripMenuItem();
-            closeToolStripMenuItem1 = new ToolStripMenuItem();
             optionsToolStripMenuItem = new ToolStripMenuItem();
             setIconToolStripMenuItem1 = new ToolStripMenuItem();
             dobleClickToActivateToolStripMenuItem = new ToolStripMenuItem();
             transparentToolStripMenuItem = new ToolStripMenuItem();
             openFileDialog1 = new OpenFileDialog();
             timer1 = new System.Windows.Forms.Timer(components);
-            consoleToolStripMenuItem = new ToolStripMenuItem();
             contextMenuStrip1.SuspendLayout();
             SuspendLayout();
             // 
             // contextMenuStrip1
             // 
-            contextMenuStrip1.Items.AddRange(new ToolStripItem[] { pinToolStripMenuItem, commandToolStripMenuItem, widgetToolStripMenuItem, applicationToolStripMenuItem, optionsToolStripMenuItem });
+            contextMenuStrip1.Items.AddRange(new ToolStripItem[] { pinToolStripMenuItem, optionsToolStripMenuItem, toolStripMenuItem1, widgetToolStripMenuItem, applicationToolStripMenuItem });
             contextMenuStrip1.Name = "contextMenuStrip1";
-            contextMenuStrip1.Size = new Size(181, 146);
+            contextMenuStrip1.Size = new Size(181, 128);
             contextMenuStrip1.Opening += contextMenuStrip1_Opening;
             // 
             // pinToolStripMenuItem
             // 
-            pinToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { removeToolStripMenuItem, newPinToolStripMenuItem, runToolStripMenuItem, minimalizeToolStripMenuItem, selectToolStripMenuItem });
+            pinToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { selectToolStripMenuItem, commandToolStripMenuItem, newPinToolStripMenuItem, runToolStripMenuItem, minimalizeToolStripMenuItem, removeToolStripMenuItem });
             pinToolStripMenuItem.Name = "pinToolStripMenuItem";
             pinToolStripMenuItem.Size = new Size(180, 24);
             pinToolStripMenuItem.Text = "Pin";
             // 
-            // removeToolStripMenuItem
+            // selectToolStripMenuItem
             // 
-            removeToolStripMenuItem.Name = "removeToolStripMenuItem";
-            removeToolStripMenuItem.Size = new Size(143, 24);
-            removeToolStripMenuItem.Text = "Remove";
-            removeToolStripMenuItem.Click += removeToolStripMenuItem_Click;
+            selectToolStripMenuItem.Name = "selectToolStripMenuItem";
+            selectToolStripMenuItem.Size = new Size(180, 24);
+            selectToolStripMenuItem.Text = "Select";
+            selectToolStripMenuItem.Click += selectToolStripMenuItem_Click;
+            // 
+            // commandToolStripMenuItem
+            // 
+            commandToolStripMenuItem.Name = "commandToolStripMenuItem";
+            commandToolStripMenuItem.Size = new Size(180, 24);
+            commandToolStripMenuItem.Text = "Command";
+            commandToolStripMenuItem.Click += setCommandToolStripMenuItem_Click;
             // 
             // newPinToolStripMenuItem
             // 
             newPinToolStripMenuItem.Name = "newPinToolStripMenuItem";
-            newPinToolStripMenuItem.Size = new Size(143, 24);
+            newPinToolStripMenuItem.Size = new Size(180, 24);
             newPinToolStripMenuItem.Text = "New pin";
             newPinToolStripMenuItem.Click += newPinToolStripMenuItem_Click;
             // 
             // runToolStripMenuItem
             // 
             runToolStripMenuItem.Name = "runToolStripMenuItem";
-            runToolStripMenuItem.Size = new Size(143, 24);
+            runToolStripMenuItem.Size = new Size(180, 24);
             runToolStripMenuItem.Text = "Duplicate";
             runToolStripMenuItem.Click += duplicateToolStripMenuItem_Click;
             // 
             // minimalizeToolStripMenuItem
             // 
             minimalizeToolStripMenuItem.Name = "minimalizeToolStripMenuItem";
-            minimalizeToolStripMenuItem.Size = new Size(143, 24);
+            minimalizeToolStripMenuItem.Size = new Size(180, 24);
             minimalizeToolStripMenuItem.Text = "Minimalize";
             minimalizeToolStripMenuItem.Click += minimalizeToolStripMenuItem_Click_1;
             // 
-            // selectToolStripMenuItem
+            // removeToolStripMenuItem
             // 
-            selectToolStripMenuItem.Name = "selectToolStripMenuItem";
-            selectToolStripMenuItem.Size = new Size(143, 24);
-            selectToolStripMenuItem.Text = "Select";
-            selectToolStripMenuItem.Click += selectToolStripMenuItem_Click;
+            removeToolStripMenuItem.Name = "removeToolStripMenuItem";
+            removeToolStripMenuItem.Size = new Size(180, 24);
+            removeToolStripMenuItem.Text = "Remove";
+            removeToolStripMenuItem.Click += removeToolStripMenuItem_Click;
             // 
-            // commandToolStripMenuItem
+            // toolStripMenuItem1
             // 
-            commandToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { setCommandToolStripMenuItem1 });
-            commandToolStripMenuItem.Name = "commandToolStripMenuItem";
-            commandToolStripMenuItem.Size = new Size(180, 24);
-            commandToolStripMenuItem.Text = "Command";
+            toolStripMenuItem1.Name = "toolStripMenuItem1";
+            toolStripMenuItem1.Size = new Size(177, 6);
             // 
-            // setCommandToolStripMenuItem1
+            // applicationToolStripMenuItem
             // 
-            setCommandToolStripMenuItem1.Name = "setCommandToolStripMenuItem1";
-            setCommandToolStripMenuItem1.Size = new Size(162, 24);
-            setCommandToolStripMenuItem1.Text = "Set command";
-            setCommandToolStripMenuItem1.Click += setCommandToolStripMenuItem_Click;
+            applicationToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { consoleToolStripMenuItem, closeToolStripMenuItem1 });
+            applicationToolStripMenuItem.Name = "applicationToolStripMenuItem";
+            applicationToolStripMenuItem.Size = new Size(180, 24);
+            applicationToolStripMenuItem.Text = "Application";
+            // 
+            // consoleToolStripMenuItem
+            // 
+            consoleToolStripMenuItem.Name = "consoleToolStripMenuItem";
+            consoleToolStripMenuItem.Size = new Size(180, 24);
+            consoleToolStripMenuItem.Text = "Console";
+            consoleToolStripMenuItem.Click += consoleToolStripMenuItem_Click;
+            // 
+            // closeToolStripMenuItem1
+            // 
+            closeToolStripMenuItem1.Name = "closeToolStripMenuItem1";
+            closeToolStripMenuItem1.Size = new Size(180, 24);
+            closeToolStripMenuItem1.Text = "Exit";
+            closeToolStripMenuItem1.Click += closeToolStripMenuItem1_Click_1;
             // 
             // widgetToolStripMenuItem
             // 
@@ -127,30 +146,16 @@
             // newWidgetToolStripMenuItem
             // 
             newWidgetToolStripMenuItem.Name = "newWidgetToolStripMenuItem";
-            newWidgetToolStripMenuItem.Size = new Size(150, 24);
+            newWidgetToolStripMenuItem.Size = new Size(180, 24);
             newWidgetToolStripMenuItem.Text = "New widget";
             newWidgetToolStripMenuItem.Click += newWidgetToolStripMenuItem_Click;
             // 
             // taskbarToolStripMenuItem
             // 
             taskbarToolStripMenuItem.Name = "taskbarToolStripMenuItem";
-            taskbarToolStripMenuItem.Size = new Size(150, 24);
+            taskbarToolStripMenuItem.Size = new Size(180, 24);
             taskbarToolStripMenuItem.Text = "Taskbar";
             taskbarToolStripMenuItem.Click += taskbarToolStripMenuItem_Click;
-            // 
-            // applicationToolStripMenuItem
-            // 
-            applicationToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { consoleToolStripMenuItem, closeToolStripMenuItem1 });
-            applicationToolStripMenuItem.Name = "applicationToolStripMenuItem";
-            applicationToolStripMenuItem.Size = new Size(180, 24);
-            applicationToolStripMenuItem.Text = "Application";
-            // 
-            // closeToolStripMenuItem1
-            // 
-            closeToolStripMenuItem1.Name = "closeToolStripMenuItem1";
-            closeToolStripMenuItem1.Size = new Size(180, 24);
-            closeToolStripMenuItem1.Text = "Exit";
-            closeToolStripMenuItem1.Click += closeToolStripMenuItem1_Click_1;
             // 
             // optionsToolStripMenuItem
             // 
@@ -186,13 +191,6 @@
             openFileDialog1.Filter = "Image Files|*.ico;*.bmp;*.jpg;*.jpeg;*.png;";
             openFileDialog1.Title = "Select icon";
             // 
-            // consoleToolStripMenuItem
-            // 
-            consoleToolStripMenuItem.Name = "consoleToolStripMenuItem";
-            consoleToolStripMenuItem.Size = new Size(180, 24);
-            consoleToolStripMenuItem.Text = "Console";
-            consoleToolStripMenuItem.Click += consoleToolStripMenuItem_Click;
-            // 
             // FormPin
             // 
             AutoScaleDimensions = new SizeF(8F, 19F);
@@ -221,8 +219,6 @@
 
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
-        private System.Windows.Forms.ToolStripMenuItem commandToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem setCommandToolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem optionsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem setIconToolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem dobleClickToActivateToolStripMenuItem;
@@ -240,5 +236,7 @@
         private System.Windows.Forms.ToolStripMenuItem minimalizeToolStripMenuItem;
         private ToolStripMenuItem taskbarToolStripMenuItem;
         private ToolStripMenuItem consoleToolStripMenuItem;
+        private ToolStripSeparator toolStripMenuItem1;
+        private ToolStripMenuItem commandToolStripMenuItem;
     }
 }

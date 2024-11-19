@@ -39,20 +39,21 @@
             typeToolStripMenuItem = new ToolStripMenuItem();
             removeToolStripMenuItem = new ToolStripMenuItem();
             applicationToolStripMenuItem = new ToolStripMenuItem();
+            consoleToolStripMenuItem = new ToolStripMenuItem();
             exitToolStripMenuItem = new ToolStripMenuItem();
             optionsToolStripMenuItem = new ToolStripMenuItem();
             mostTopToolStripMenuItem = new ToolStripMenuItem();
             lockedToolStripMenuItem = new ToolStripMenuItem();
             transparentToolStripMenuItem = new ToolStripMenuItem();
-            consoleToolStripMenuItem = new ToolStripMenuItem();
+            toolStripMenuItem1 = new ToolStripSeparator();
             contextMenuStrip.SuspendLayout();
             SuspendLayout();
             // 
             // contextMenuStrip
             // 
-            contextMenuStrip.Items.AddRange(new ToolStripItem[] { widgetToolStripMenuItem, applicationToolStripMenuItem, optionsToolStripMenuItem });
+            contextMenuStrip.Items.AddRange(new ToolStripItem[] { widgetToolStripMenuItem, optionsToolStripMenuItem, toolStripMenuItem1, applicationToolStripMenuItem });
             contextMenuStrip.Name = "contextMenuStrip1";
-            contextMenuStrip.Size = new Size(181, 98);
+            contextMenuStrip.Size = new Size(181, 104);
             contextMenuStrip.Opening += contextMenuStrip1_Opening;
             // 
             // widgetToolStripMenuItem
@@ -111,6 +112,13 @@
             applicationToolStripMenuItem.Size = new Size(180, 24);
             applicationToolStripMenuItem.Text = "Application";
             // 
+            // consoleToolStripMenuItem
+            // 
+            consoleToolStripMenuItem.Name = "consoleToolStripMenuItem";
+            consoleToolStripMenuItem.Size = new Size(180, 24);
+            consoleToolStripMenuItem.Text = "Console";
+            consoleToolStripMenuItem.Click += consoleToolStripMenuItem_Click;
+            // 
             // exitToolStripMenuItem
             // 
             exitToolStripMenuItem.Name = "exitToolStripMenuItem";
@@ -128,30 +136,28 @@
             // mostTopToolStripMenuItem
             // 
             mostTopToolStripMenuItem.Name = "mostTopToolStripMenuItem";
-            mostTopToolStripMenuItem.Size = new Size(150, 24);
+            mostTopToolStripMenuItem.Size = new Size(180, 24);
             mostTopToolStripMenuItem.Text = "Most top";
             mostTopToolStripMenuItem.Click += mostTopToolStripMenuItem_Click;
             // 
             // lockedToolStripMenuItem
             // 
             lockedToolStripMenuItem.Name = "lockedToolStripMenuItem";
-            lockedToolStripMenuItem.Size = new Size(150, 24);
+            lockedToolStripMenuItem.Size = new Size(180, 24);
             lockedToolStripMenuItem.Text = "Locked";
             lockedToolStripMenuItem.Click += lockedToolStripMenuItem_Click;
             // 
             // transparentToolStripMenuItem
             // 
             transparentToolStripMenuItem.Name = "transparentToolStripMenuItem";
-            transparentToolStripMenuItem.Size = new Size(150, 24);
+            transparentToolStripMenuItem.Size = new Size(180, 24);
             transparentToolStripMenuItem.Text = "Transparent";
             transparentToolStripMenuItem.Click += transparentToolStripMenuItem_Click;
             // 
-            // consoleToolStripMenuItem
+            // toolStripMenuItem1
             // 
-            consoleToolStripMenuItem.Name = "consoleToolStripMenuItem";
-            consoleToolStripMenuItem.Size = new Size(180, 24);
-            consoleToolStripMenuItem.Text = "Console";
-            consoleToolStripMenuItem.Click += consoleToolStripMenuItem_Click;
+            toolStripMenuItem1.Name = "toolStripMenuItem1";
+            toolStripMenuItem1.Size = new Size(177, 6);
             // 
             // FormWidget
             // 
@@ -190,5 +196,6 @@
         private System.Windows.Forms.ToolStripMenuItem editToolStripMenuItem;
         private ToolStripMenuItem createWidgetToolStripMenuItem;
         private ToolStripMenuItem consoleToolStripMenuItem;
+        private ToolStripSeparator toolStripMenuItem1;
     }
 }
