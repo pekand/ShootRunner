@@ -235,26 +235,6 @@ namespace ShootRunner
 
                         string xml = File.ReadAllText(Program.commandFielPath);
 
-                        /*if (Program.isDebug())
-                        {
-                            xml =  @"<root>
-                            <commands>
-                            <command>
-                            <shortcut>F7</shortcut>
-                            <enabled>1</enabled>
-                            <action>CreatePin</action>
-                            <parameters></parameters>y
-                            </command>
-                            <command>
-                            <shortcut>F8</shortcut>
-                            <enabled>1</enabled>
-                            <action>Close</action>
-                            <parameters></parameters>
-                            </command>
-                            </commands>
-                            </root>";
-                        }*/
-
                         try
                         {
                             XmlReaderSettings xws = new XmlReaderSettings
