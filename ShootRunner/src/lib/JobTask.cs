@@ -309,7 +309,7 @@ namespace ShootRunner
                 }
 
                 // get all process windows and try find wisible window
-                List<Window> processWindows = ToolsWindow.FindWindowByProcessId(process.Id);
+                List<Window> processWindows = ToolsWindow.FindWindowByProcessId((uint)process.Id);
                 if (processWindows.Count == 1)
                 {
                     Window window = new Window();
