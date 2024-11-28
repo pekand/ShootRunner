@@ -1,4 +1,5 @@
-cd ..
+$scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
+Set-Location (Join-Path $scriptDir "..")
 
 $tag = git describe --tags --abbrev=0
 Write-Output "TAG=>$tag<"

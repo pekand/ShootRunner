@@ -34,6 +34,7 @@ namespace ShootRunner
         public const int WM_COMMAND = 0x0111;
         public const int WM_NCLBUTTONDOWN = 0xA1;
         public const int WM_NCHITTEST = 0x84;
+        
 
         public const int GWL_EXSTYLE = -20;
         public const int GWL_STYLE = -16;
@@ -42,6 +43,8 @@ namespace ShootRunner
         public const long WS_POPUP = 0x80000000L;
         public const int WS_CAPTION = 0x00C00000;
         public const int WS_EX_NOREDIRECTIONBITMAP = 0x00200000;
+        public const int WS_VISIBLE = 0x10000000;
+        public const int WS_DISABLED = 0x08000000;
 
         public const int MIN_ALL = 0x1A3;
         public const int MIN_ALL_UNDO = 0x1A0;
@@ -60,6 +63,11 @@ namespace ShootRunner
             public int Bottom;
         }
 
+        public static IntPtr shellWindow = IntPtr.Zero;
+
+        public static List<IntPtr> excludedWindows = new List<IntPtr>();
+        public static List<IntPtr> includedWindows = new List<IntPtr>();
+
         /**********************************************************************/
 
         [DllImport("kernel32.dll", SetLastError = true)]
@@ -68,6 +76,9 @@ namespace ShootRunner
         [DllImport("kernel32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         static extern bool CloseHandle(IntPtr hObject);
+
+        [DllImport("kernel32.dll")]
+        private static extern bool ProcessIdToSessionId(uint processId, out uint sessionId);
 
         [DllImport("psapi.dll", SetLastError = true, CharSet = CharSet.Auto)]
         static extern uint GetModuleFileNameEx(IntPtr hProcess, IntPtr hModule, [Out] StringBuilder lpBaseName, int nSize);
@@ -119,7 +130,7 @@ namespace ShootRunner
         public static extern bool DestroyIcon(IntPtr hIcon);
 
         [DllImport("user32.dll", SetLastError = true)]
-        static extern uint GetWindowThreadProcessId(IntPtr hWnd, out int processId);
+        static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint processId);
 
         [DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
@@ -148,7 +159,12 @@ namespace ShootRunner
 
         [DllImport("user32.dll")]
         private static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
+
+        [DllImport("user32.dll")]
+        private static extern bool IsZoomed(IntPtr hWnd);
+
         /**********************************************************************/
+
         public static Window SetWindowData(Window window)
         {
             if (window.Handle != IntPtr.Zero)
@@ -203,10 +219,6 @@ namespace ShootRunner
 
                     window.isDesktop = ToolsWindow.IsDesktopWindow(window);
                     window.isTaskbar = ToolsWindow.IsTaskbarWindow(window);
-                    if (!window.isGpuRenderedChecked) {
-                        window.isGpuRenderedChecked = true;
-                        window.isGpuRendered = ToolsWindow.IsGpuRenderedWindow(window);
-                    }
                 }
                 catch (Exception ex)
                 {
@@ -217,7 +229,6 @@ namespace ShootRunner
 
             return window;
         }
-
 
         public static List<IntPtr> GetAlWindows()
         {
@@ -254,7 +265,6 @@ namespace ShootRunner
             return windows;
         }
 
-        public static IntPtr shellWindow = IntPtr.Zero;
         public static IntPtr GetShellWindowHandle() {
             if (shellWindow == IntPtr.Zero) {
                 shellWindow = GetShellWindow();
@@ -263,9 +273,7 @@ namespace ShootRunner
             return shellWindow;
         }
 
-        public static List<IntPtr> excludedWindows = new List<IntPtr>();
-
-        public static List<IntPtr> GetTaskbarWindows()
+        public static List<IntPtr> GetTaskbarWindows(bool allowExclude = false)
         {
             List<IntPtr> taskbarWindows = new List<IntPtr>();
 
@@ -277,13 +285,24 @@ namespace ShootRunner
                 {
                     try
                     {
+                        /*Window w = new Window(); //debug
+                        w.Handle = Handle;
+                        ToolsWindow.SetWindowData(w);*/
+
                         if (excludedWindows.Contains(Handle)) {
                             continue;
                         }
 
+
                         if (!IsWindowVisible(Handle))
                         {
-                            excludedWindows.Add(Handle);
+                            if(allowExclude) excludedWindows.Add(Handle);
+                            continue;
+                        }
+
+                        if (!IsWindowVisible2(Handle))
+                        {
+                            if (allowExclude) excludedWindows.Add(Handle);
                             continue;
                         }
 
@@ -293,15 +312,27 @@ namespace ShootRunner
                             continue;
                         }*/
 
-                        if (IsToolWindow(Handle))
+                        if (IsUWPWindow(Handle) && IsWindowCloaked(Handle))
                         {
-                            excludedWindows.Add(Handle);
+                            if (allowExclude) excludedWindows.Add(Handle);
                             continue;
                         }
 
-                        if (Handle == GetShellWindowHandle())
+                        if (includedWindows.Contains(Handle))
                         {
-                            excludedWindows.Add(Handle);
+                            taskbarWindows.Add(Handle);
+                            continue;
+                        }
+
+                        if (IsToolWindow(Handle))
+                        {
+                            if (allowExclude) excludedWindows.Add(Handle);
+                            continue;
+                        }
+
+                        if (Handle == GetShellWindowHandle()) // is explorer window
+                        {
+                            if (allowExclude) excludedWindows.Add(Handle);
                             continue;
                         }
 
@@ -309,15 +340,23 @@ namespace ShootRunner
 
                         if (string.IsNullOrEmpty(title))
                         {
-                            excludedWindows.Add(Handle);
+                            if (allowExclude) excludedWindows.Add(Handle);
                             continue;
                         }
 
-                        if (IsWindowCloaked(Handle))
-                        {
-                            excludedWindows.Add(Handle);
+                        string className = GetWindowClassName(Handle); 
+                        if (className == "Windows.UI.Core.CoreWindow") {  // is container window
+                            if (allowExclude) excludedWindows.Add(Handle);
                             continue;
                         }
+
+                        if (GetWindowSessionId(Handle) <= 0)
+                        {
+                            if (allowExclude) excludedWindows.Add(Handle);
+                            continue;
+                        }
+
+                        includedWindows.Add(Handle);
 
                         taskbarWindows.Add(Handle);
                     }
@@ -346,9 +385,18 @@ namespace ShootRunner
 
         public static string GetWindowClassName(IntPtr Handle)
         {
-            StringBuilder className = new StringBuilder(256);
-            GetClassName(Handle, className, className.Capacity);
-            return className.ToString();
+            try
+            {
+                StringBuilder className = new StringBuilder(256);
+                GetClassName(Handle, className, className.Capacity);
+                return className.ToString();
+            }
+            catch (Exception)
+            {
+
+                return "";
+            }
+            
         }
 
         public static IntPtr GetCurrentWindow()
@@ -441,11 +489,12 @@ namespace ShootRunner
         {
             return GetApplicationPathFromWindow(window.Handle);
         }
+
         public static string GetApplicationPathFromWindow(IntPtr Handle)
         {
-            GetWindowThreadProcessId(Handle,out int processId);
+            GetWindowThreadProcessId(Handle,out uint processId);
 
-            IntPtr hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, false, (uint)processId);
+            IntPtr hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, false, processId);
 
             if (hProcess != IntPtr.Zero)
             {
@@ -496,6 +545,16 @@ namespace ShootRunner
             return null;
         }
 
+        public static bool IsMaximalized(IntPtr hWnd)
+        {
+            if (IsZoomed(hWnd))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
         public static bool IsMinimalized(Window window)
         {
             if (window == null || !ToolsWindow.IsWindowValid(window))
@@ -507,7 +566,7 @@ namespace ShootRunner
             return isMinimized;
         }
 
-        private static bool IsDesktopWindow(Window window)
+        public static bool IsDesktopWindow(Window window)
         {
             // Class names for the desktop window
             string[] desktopClasses = { "Progman", "WorkerW" };
@@ -529,7 +588,7 @@ namespace ShootRunner
             return false;
         }
 
-        private static bool IsTaskbarWindow(Window window)
+        public static bool IsTaskbarWindow(Window window)
         {
             IntPtr foregroundWindow = GetForegroundWindow();
             StringBuilder className = new StringBuilder(256);
@@ -705,7 +764,7 @@ namespace ShootRunner
             SetWindowLong(hWnd, GWL_STYLE, style | WS_CAPTION);
         }
 
-        public static List<Window> FindWindowByProcessId(int processId)
+        public static List<Window> FindWindowByProcessId(uint processId)
         {
             List<Window> windows = new List<Window>();
 
@@ -716,7 +775,7 @@ namespace ShootRunner
                 {
                     try
                     {
-                        GetWindowThreadProcessId(hWnd, out int windowProcessId);
+                        GetWindowThreadProcessId(hWnd, out uint windowProcessId);
                         if (windowProcessId == processId)
                         {
                             StringBuilder windowText = new StringBuilder(256);
@@ -763,18 +822,16 @@ namespace ShootRunner
             return windows;
         }
 
-
-        public static int GetWindowProcessId(Window window)
+        public static uint GetWindowProcessId(Window window)
         {
             return GetWindowProcessId(window.Handle);
         }
 
-
-        public static int GetWindowProcessId(IntPtr Handle) {
+        public static uint GetWindowProcessId(IntPtr Handle) {
 
             try
             {
-                GetWindowThreadProcessId(Handle, out int processId);
+                GetWindowThreadProcessId(Handle, out uint processId);
                 return processId;
             }
             catch (Exception ex)
@@ -787,7 +844,7 @@ namespace ShootRunner
 
         public static bool IsGpuLibraryLoaded(Window window)
         {
-            int processId = window.processId;
+            uint processId = window.processId;
             if (processId == 0) {
                 processId = ToolsWindow.GetWindowProcessId(window);
             }
@@ -799,7 +856,7 @@ namespace ShootRunner
 
             try
             {
-                Process process = Process.GetProcessById(window.processId);
+                Process process = Process.GetProcessById((int)window.processId);
                 return process.Modules.Cast<ProcessModule>().Any(m => m.ModuleName.Contains("d3d") || m.ModuleName.Contains("opengl"));
             }
             catch (Exception ex)
@@ -830,10 +887,6 @@ namespace ShootRunner
             return IsWindowNoBitmapType(window) || IsGpuLibraryLoaded(window);
         }
 
-        /*************************************************************************/
-
-
-
         public static Rectangle? GetWindowPosition(IntPtr hWnd)
         {
             if (GetWindowRect(hWnd, out RECT rect))
@@ -856,10 +909,9 @@ namespace ShootRunner
                 }
                 
             }
-            throw new InvalidOperationException("Unable to get window position.");
+
+            return false;
         }
-
-
 
         public static bool IsWindowCloaked(IntPtr hWnd)
         {
@@ -870,7 +922,41 @@ namespace ShootRunner
             return false;
         }
 
+        public static bool IsUWPWindow(IntPtr Handle) {
 
+            return GetWindowClassName(Handle) == "ApplicationFrameWindow";
+        }
+
+        public static bool IsWindowVisible2(IntPtr hWnd)
+        {
+            int style = GetWindowLong(hWnd, GWL_STYLE);
+            return ((style & WS_VISIBLE) != 0) || ((style & WS_DISABLED) != 0);
+        }
+
+        public static uint GetWindowSessionId(IntPtr hWnd)
+        {
+            try
+            {
+
+                if (GetWindowThreadProcessId(hWnd, out uint processId) == 0)
+                {
+                    return 0;
+                }
+
+
+                if (!ProcessIdToSessionId(processId, out uint sessionId))
+                {
+                    return 0;
+                }
+
+                return sessionId;
+            }
+            catch
+            {
+            }
+
+            return 0;
+        }
 
     }
 

@@ -14,7 +14,7 @@ namespace ShootRunner
         public bool isTaskbar = false;
 
         // WINDOW
-        public int processId = 0;
+        public uint processId = 0;
         public string className = null;
         public string app = null;
         public string directory = null;
@@ -32,8 +32,6 @@ namespace ShootRunner
         // SCRENSHOT
         public Bitmap screenshot = null;
         public bool isCurentWindowScreensot = false;        
-        public bool isGpuRenderedChecked = false;
-        public bool isGpuRendered = false;
 
         // PROPERTIES
         public bool locked = false;

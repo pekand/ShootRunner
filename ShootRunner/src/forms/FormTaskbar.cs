@@ -137,16 +137,26 @@ namespace ShootRunner
                 return;
             }
 
-            if (window.executable == "TextInputHost.exe")
+            /*if (window.Title  == "Windows Input Experience" &&
+                window.className == "Windows.UI.Core.CoreWindow" &&
+                window.executable == "TextInputHost.exe")
             {
                 window.hidden = true;
                 return;
-            }
+            }*/
+
+            /*if (window.Title == "Settings" &&
+                window.className == "Windows.UI.Core.CoreWindow" &&
+                window.executable == "SystemSettings.exe")
+            {
+                window.hidden = true;
+                return;
+            }*/
         }
 
         public void InitList()
         {
-            List<IntPtr> windows = ToolsWindow.GetTaskbarWindows();
+            List<IntPtr> windows = ToolsWindow.GetTaskbarWindows(true);
 
             foreach (var Handle in windows)
             {
@@ -194,7 +204,7 @@ namespace ShootRunner
             {
                 bool changed = false;
 
-                List<IntPtr> newWindows = ToolsWindow.GetTaskbarWindows();
+                List<IntPtr> newWindows = ToolsWindow.GetTaskbarWindows(false);
 
                 foreach (var newWin in newWindows)
                 {

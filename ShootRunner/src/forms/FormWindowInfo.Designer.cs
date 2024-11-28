@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormWindowInfo));
             label1 = new Label();
             textBox1 = new TextBox();
@@ -52,6 +53,8 @@
             label9 = new Label();
             label10 = new Label();
             label11 = new Label();
+            console = new TextBox();
+            timer = new System.Windows.Forms.Timer(components);
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox2).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox3).BeginInit();
@@ -277,11 +280,31 @@
             label11.TabIndex = 22;
             label11.Text = "Screenshot";
             // 
+            // console
+            // 
+            console.BackColor = Color.White;
+            console.BorderStyle = BorderStyle.None;
+            console.Font = new Font("Consolas", 15.75F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            console.Location = new Point(12, 621);
+            console.Multiline = true;
+            console.Name = "console";
+            console.ReadOnly = true;
+            console.ScrollBars = ScrollBars.Vertical;
+            console.Size = new Size(757, 439);
+            console.TabIndex = 23;
+            // 
+            // timer
+            // 
+            timer.Enabled = true;
+            timer.Interval = 1000;
+            timer.Tick += timer_Tick;
+            // 
             // FormWindowInfo
             // 
             AutoScaleDimensions = new SizeF(8F, 19F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(800, 630);
+            ClientSize = new Size(786, 1072);
+            Controls.Add(console);
             Controls.Add(label11);
             Controls.Add(label10);
             Controls.Add(label9);
@@ -342,5 +365,7 @@
         private Label label9;
         private Label label10;
         private Label label11;
+        private TextBox console;
+        private System.Windows.Forms.Timer timer;
     }
 }
