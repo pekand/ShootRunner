@@ -63,6 +63,9 @@ namespace ShootRunner
         {
             InitializeComponent();
 
+            this.ShowInTaskbar = false;
+            this.Visible = false;
+
             Load += (s, e) => WTSRegisterSessionNotification(this.Handle, NOTIFY_FOR_THIS_SESSION);
             FormClosing += (s, e) => WTSUnRegisterSessionNotification(this.Handle);
 
@@ -73,14 +76,12 @@ namespace ShootRunner
         // LOAD
         private void FormShootRunner_Load(object sender, EventArgs e)
         {
+            this.WindowState = FormWindowState.Minimized;
+            this.Hide();
             if (Program.isDebug())
             {
                 this.notifyIconShootRunner.Icon = Pictures.CreateCustomIcon();
             }
-
-            this.WindowState = FormWindowState.Minimized;
-            this.ShowInTaskbar = false;
-            this.Hide();
         }
 
         protected override void WndProc(ref Message m)
@@ -102,6 +103,17 @@ namespace ShootRunner
             }
 
             base.WndProc(ref m);
+        }
+
+        protected override CreateParams CreateParams
+        {
+            get
+            {
+                const int WS_EX_TOOLWINDOW = 0x00000080;
+                CreateParams cp = base.CreateParams;
+                cp.ExStyle |= WS_EX_TOOLWINDOW;
+                return cp;
+            }
         }
 
         // COMMAND

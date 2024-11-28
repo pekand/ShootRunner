@@ -18,12 +18,8 @@ namespace ShootRunner
             window.command = textBox1.Text;
             if (window.command.Trim() != "")
             {
-                if (window.Type == "WINDOW")
-                {
-                    window.doubleClickCommand = true;
-                }
-
                 window.Type = "COMMAND";
+                window.doubleClickCommand = checkBoxDoubleclick.Checked;
                 Program.Update();
             }
             this.window.silentCommand = checkBox1.Checked;
@@ -37,11 +33,30 @@ namespace ShootRunner
             textBox1.SelectionLength = 0;
             this.ActiveControl = null;
             checkBox1.Checked = this.window.silentCommand;
+            checkMatchWindow.Checked = this.window.matchNewWindow;
+
+            checkBoxDoubleclick.Checked = this.window.doubleClickCommand;
+            if (window.Type == "WINDOW")
+            {
+                checkBoxDoubleclick.Checked = true;
+            }
+            
+
         }
 
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
 
+        }
+
+        private void checkMatchWindow_CheckedChanged(object sender, EventArgs e)
+        {
+            this.window.matchNewWindow = !this.window.matchNewWindow;
+        }
+
+        private void checkBoxDoubleclick_CheckedChanged(object sender, EventArgs e)
+        {
+            this.window.doubleClickCommand = !this.window.doubleClickCommand;
         }
     }
 }

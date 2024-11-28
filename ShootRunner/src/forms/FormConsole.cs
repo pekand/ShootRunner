@@ -13,8 +13,11 @@ namespace ShootRunner
 
         public void write(string message)
         {
-            textBox2.Text += message + "\r\n";
-            this.ScrollToBottom();
+            this.Invoke(new Action(() =>
+            {
+                textBox2.Text += message + "\r\n";
+                this.ScrollToBottom();
+            }));
         }
 
         private void FormConsole_Load(object sender, EventArgs e)

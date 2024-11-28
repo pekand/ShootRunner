@@ -24,7 +24,8 @@ namespace ShootRunner
         public string command = null;
         public bool silentCommand = true; 
         public bool doubleClickCommand = false; // to activate use doble click instead of one click
-       
+        public bool matchNewWindow = true;
+
         // ICON
         public Bitmap icon = null;
         public Bitmap customicon = null;

@@ -30,7 +30,7 @@
         {
             components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormTaskbar));
-            timer1 = new System.Windows.Forms.Timer(components);
+            timer = new System.Windows.Forms.Timer(components);
             contextMenuStrip1 = new ContextMenuStrip(components);
             taskbarToolStripMenuItem = new ToolStripMenuItem();
             removeToolStripMenuItem = new ToolStripMenuItem();
@@ -54,11 +54,11 @@
             contextMenuStrip1.SuspendLayout();
             SuspendLayout();
             // 
-            // timer1
+            // timer
             // 
-            timer1.Enabled = true;
-            timer1.Interval = 1000;
-            timer1.Tick += timer1_Tick;
+            timer.Enabled = true;
+            timer.Interval = 1000;
+            timer.Tick += timer_Tick;
             // 
             // contextMenuStrip1
             // 
@@ -218,6 +218,7 @@
             Activated += Form_Activated;
             Deactivate += Form_Deactivate;
             FormClosing += FormTaskbar_FormClosing;
+            FormClosed += FormTaskbar_FormClosed;
             Load += FormTaskbar_Load;
             Paint += FormTaskbar_Paint;
             MouseDown += FormTaskbar_MouseDown;
@@ -228,7 +229,7 @@
         }
 
         #endregion
-        private System.Windows.Forms.Timer timer1;
+        private System.Windows.Forms.Timer timer;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
         private System.Windows.Forms.ToolStripMenuItem applicationToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;

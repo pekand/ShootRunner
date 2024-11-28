@@ -33,104 +33,99 @@ namespace ShootRunner
             public int Bottom;
         }
 
-        public static Bitmap CaptureWindow(Window window, int resizeWidth = 0, int resizeHeight = 0)
+        public static Bitmap CaptureWindow(Window window, int resizeWidth = 0, int resizeHeight = 0, int wait = 0, Action callback = null)
         {
-            if (!GetWindowRect(window.Handle, out RECT rect))
-                return null;
+            try
+            {            
+                if (!GetWindowRect(window.Handle, out RECT rect))
+                    return null;
 
-            if (ToolsWindow.IsMinimalized(window))
-            {
-                return null;
-            }
-
-            int width = rect.Right - rect.Left;
-            int height = rect.Bottom - rect.Top;
-
-            using (Bitmap bmp = new Bitmap(width, height, PixelFormat.Format64bppArgb))
-            {
-                using (Graphics gfxBmp = Graphics.FromImage(bmp))
-                {
-                    IntPtr hdcBitmap = gfxBmp.GetHdc();
-                    IntPtr hdcWindow = GetDC(window.Handle);
-                    BitBlt(hdcBitmap, 0, 0, width, height, hdcWindow, 0, 0, SRCCOPY);
-                    gfxBmp.ReleaseHdc(hdcBitmap);
-                    ReleaseDC(window.Handle, hdcWindow);
-                }
-
-                if (resizeWidth > 0 && resizeHeight > 0)
-                {
-                    using (Bitmap resizedBmp = ResizeBitmap(bmp, resizeWidth, resizeHeight))
-                    {
-
-                        if (resizedBmp == null){
-                            return null;
-                            
-                        }
-
-                        if (IsSingleColor(resizedBmp))
-                        {
-                            return null;
-                        }
-
-                        return (Bitmap)resizedBmp.Clone();
-                    }
-                        
-                }
-
-                if (IsSingleColor(bmp))
+                if (ToolsWindow.IsMinimalized(window))
                 {
                     return null;
                 }
 
-                return (Bitmap)bmp.Clone();
-            }
-        }
+                int width = rect.Right - rect.Left;
+                int height = rect.Bottom - rect.Top;
 
-        public static Bitmap CaptureWindow2(Window window, int resizeWidth = 0, int resizeHeight = 0)
-        {
-            if (!GetWindowRect(window.Handle, out RECT rect))
-                return null;
+                if (width <=0 || height<=0) {
+                    return null;
+                }
 
-            if (ToolsWindow.IsMinimalized(window))
-            {
-                return null;
-            }
-
-            int width = rect.Right - rect.Left;
-            int height = rect.Bottom - rect.Top;
-
-            using (Bitmap bitmap = new Bitmap(width, height, PixelFormat.Format32bppArgb))
-            {
-                using (Graphics graphics = Graphics.FromImage(bitmap))
+                using (Bitmap bmp = new Bitmap(width, height, PixelFormat.Format64bppArgb))
                 {
-                    IntPtr hdc = graphics.GetHdc();
-                    bool success = PrintWindow(window.Handle, hdc, 0);
-                    graphics.ReleaseHdc(hdc);
-
-                    if (!success)
-                    {
-                        return null;
+                    if (wait>0) { 
+                        Thread.Sleep(wait);
                     }
 
-                    
+                    using (Graphics gfxBmp = Graphics.FromImage(bmp))
+                    {
+                        IntPtr hdcBitmap = gfxBmp.GetHdc();
+                        IntPtr hdcWindow = GetDC(window.Handle);
+                        BitBlt(hdcBitmap, 0, 0, width, height, hdcWindow, 0, 0, SRCCOPY);
+                        gfxBmp.ReleaseHdc(hdcBitmap);
+                        ReleaseDC(window.Handle, hdcWindow);
+                    }
+
                     if (resizeWidth > 0 && resizeHeight > 0)
                     {
-                        using (Bitmap resizedBitmap = ResizeBitmap(bitmap, resizeWidth, resizeHeight))
+                        using (Bitmap resizedBmp = ResizeBitmap(bmp, resizeWidth, resizeHeight))
                         {
 
-                            if (IsSingleColor(resizedBitmap))
+                            if (resizedBmp == null){
+                                return null;
+                            
+                            }
+
+                            if (IsSingleColor(resizedBmp))
                             {
                                 return null;
                             }
 
-                            return (Bitmap)resizedBitmap.Clone();
+                            if (window.screenshot != null)
+                            {
+                                window.screenshot.Dispose();
+                            }
+                            window.screenshot = (Bitmap)resizedBmp.Clone();
+
+                            callback?.Invoke();
+
+                            return window.screenshot;
                         }
+                        
                     }
 
-                    return (Bitmap)bitmap.Clone();
+                    if (IsSingleColor(bmp))
+                    {
+                        return null;
+                    }
 
+                    if (window.screenshot != null) {
+                        window.screenshot.Dispose();
+                    }
+
+                    window.screenshot = (Bitmap)bmp.Clone();
+
+                    callback?.Invoke();
+
+                    return window.screenshot;
                 }
+
             }
+            catch (Exception)
+            {
+
+
+            }
+
+            return null;
+        }
+
+        public static void CaptureWindowTask(Window window, int resizeWidth = 0, int resizeHeight = 0, int wait = 0, Action callback = null)
+        {
+            Thread screenshotThread = new Thread(() => CaptureWindow(window, resizeWidth, resizeHeight, wait, callback));
+            screenshotThread.SetApartmentState(ApartmentState.STA);
+            screenshotThread.Start();
         }
 
 
@@ -184,77 +179,111 @@ namespace ShootRunner
         }
 
 
-        public static Bitmap CaptureWindow3(Window window, int resizeWidth = 0, int resizeHeight = 0)
+        public static void CaptureWindow3(Window window, int resizeWidth = 0, int resizeHeight = 0, int wait = 0, Action callback = null)
         {
-            if (window.Handle == IntPtr.Zero)
-            {               
-                return null;
-            }
-
-            if (!ToolsWindow.IsWindowValid(window))
+            try
             {
-                return null;
-            }
-
-            if (ToolsWindow.IsMinimalized(window)) {
-                return null;
-            }
-
-            if (GetWindowRect(window.Handle, out RECT rect))
-            {
-
-                int width = rect.Right - rect.Left;
-                int height = rect.Bottom - rect.Top;
-
-
-                Rectangle windowRectangle = new Rectangle(rect.Left, rect.Top, width, height);
-                Screen screen = Screen.FromRectangle(windowRectangle);
-
-
-                using (Bitmap screenshot = new Bitmap(screen.Bounds.Width, screen.Bounds.Height))
+                if (window.Handle == IntPtr.Zero)
                 {
-                    using (Graphics g = Graphics.FromImage(screenshot))
+                    return;
+                }
+
+                if (!ToolsWindow.IsWindowValid(window))
+                {
+                    return;
+                }
+
+                if (ToolsWindow.IsMinimalized(window))
+                {
+                    return;
+                }
+
+                if (GetWindowRect(window.Handle, out RECT rect))
+                {
+
+                    int width = rect.Right - rect.Left;
+                    int height = rect.Bottom - rect.Top;
+
+
+                    Rectangle windowRectangle = new Rectangle(rect.Left, rect.Top, width, height);
+                    Screen screen = Screen.FromRectangle(windowRectangle);
+
+
+                    using (Bitmap screenshot = new Bitmap(screen.Bounds.Width, screen.Bounds.Height))
                     {
-                        g.CopyFromScreen(screen.Bounds.X, screen.Bounds.Y, 0, 0, screenshot.Size, CopyPixelOperation.SourceCopy);
-                    }
-
-                    Rectangle windowRectRelativeToScreen = new Rectangle(
-                        rect.Left - screen.Bounds.X,
-                        rect.Top - screen.Bounds.Y,
-                        width,
-                        height
-                    );
-
-                    using (Bitmap resizedScreenshot = screenshot.Clone(windowRectRelativeToScreen, screenshot.PixelFormat)) {
-
-                        if (resizeWidth > 0 && resizeHeight > 0)
+                        using (Graphics g = Graphics.FromImage(screenshot))
                         {
-                            using (Bitmap resizedBmp = ResizeBitmap(resizedScreenshot, resizeWidth, resizeHeight))
+                            if (wait > 0)
                             {
-
-                                if (resizedBmp == null)
-                                {
-                                    return null;
-
-                                }
-
-                                if (IsSingleColor(resizedBmp))
-                                {
-                                    return null;
-                                }
-
-                                return (Bitmap)resizedBmp.Clone();
+                                Thread.Sleep(wait);
                             }
 
+                            g.CopyFromScreen(screen.Bounds.X, screen.Bounds.Y, 0, 0, screenshot.Size, CopyPixelOperation.SourceCopy);
                         }
 
-                        return (Bitmap)resizedScreenshot.Clone();
+                        Rectangle windowRectRelativeToScreen = new Rectangle(
+                            rect.Left - screen.Bounds.X,
+                            rect.Top - screen.Bounds.Y,
+                            width,
+                            height
+                        );
+
+                        using (Bitmap resizedScreenshot = screenshot.Clone(windowRectRelativeToScreen, screenshot.PixelFormat))
+                        {
+
+                            if (resizeWidth > 0 && resizeHeight > 0)
+                            {
+                                using (Bitmap resizedBmp = ResizeBitmap(resizedScreenshot, resizeWidth, resizeHeight))
+                                {
+
+                                    if (resizedBmp == null)
+                                    {
+                                        return;
+
+                                    }
+
+                                    if (IsSingleColor(resizedBmp))
+                                    {
+                                        return;
+                                    }
+
+                                    if (window.screenshot != null)
+                                    {
+                                        window.screenshot.Dispose();
+                                    }
+
+                                    window.screenshot = (Bitmap)resizedBmp.Clone();
+
+                                    callback?.Invoke();
+                                    return;
+                                }
+
+                            }
+
+                            if (window.screenshot != null)
+                            {
+                                window.screenshot.Dispose();
+                            }
+
+                            window.screenshot = (Bitmap)resizedScreenshot.Clone();
+
+                            callback?.Invoke();
+                            return;
+                        }
+
                     }
-                    
                 }
+            } catch { 
             }
 
-            return null;
+            return;
+        }
+
+        public static void CaptureWindow3Task(Window window, int resizeWidth = 0, int resizeHeight = 0, int wait = 0, Action callback = null)
+        {
+            Thread screenshotThread = new Thread(() => CaptureWindow3(window, resizeWidth, resizeHeight, wait, callback));
+            screenshotThread.SetApartmentState(ApartmentState.STA);
+            screenshotThread.Start();
         }
     }
 }
