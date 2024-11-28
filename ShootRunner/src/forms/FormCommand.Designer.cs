@@ -32,6 +32,8 @@
             textBox1 = new TextBox();
             button1 = new Button();
             checkBox1 = new CheckBox();
+            checkMatchWindow = new CheckBox();
+            checkBoxDoubleclick = new CheckBox();
             SuspendLayout();
             // 
             // textBox1
@@ -71,11 +73,41 @@
             checkBox1.Text = "Run PowerShell command without output";
             checkBox1.UseVisualStyleBackColor = true;
             // 
+            // checkMatchWindow
+            // 
+            checkMatchWindow.AutoSize = true;
+            checkMatchWindow.Checked = true;
+            checkMatchWindow.CheckState = CheckState.Checked;
+            checkMatchWindow.Location = new Point(436, 303);
+            checkMatchWindow.Margin = new Padding(4);
+            checkMatchWindow.Name = "checkMatchWindow";
+            checkMatchWindow.Size = new Size(147, 23);
+            checkMatchWindow.TabIndex = 3;
+            checkMatchWindow.Text = "Match new window";
+            checkMatchWindow.UseVisualStyleBackColor = true;
+            checkMatchWindow.CheckedChanged += checkMatchWindow_CheckedChanged;
+            // 
+            // checkBoxDoubleclick
+            // 
+            checkBoxDoubleclick.AutoSize = true;
+            checkBoxDoubleclick.Checked = true;
+            checkBoxDoubleclick.CheckState = CheckState.Checked;
+            checkBoxDoubleclick.Location = new Point(603, 303);
+            checkBoxDoubleclick.Margin = new Padding(4);
+            checkBoxDoubleclick.Name = "checkBoxDoubleclick";
+            checkBoxDoubleclick.Size = new Size(158, 23);
+            checkBoxDoubleclick.TabIndex = 4;
+            checkBoxDoubleclick.Text = "Run with DoubleClick";
+            checkBoxDoubleclick.UseVisualStyleBackColor = true;
+            checkBoxDoubleclick.CheckedChanged += checkBoxDoubleclick_CheckedChanged;
+            // 
             // FormCommand
             // 
             AutoScaleDimensions = new SizeF(8F, 19F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1067, 345);
+            Controls.Add(checkBoxDoubleclick);
+            Controls.Add(checkMatchWindow);
             Controls.Add(checkBox1);
             Controls.Add(button1);
             Controls.Add(textBox1);
@@ -95,5 +127,7 @@
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.CheckBox checkBox1;
+        private CheckBox checkMatchWindow;
+        private CheckBox checkBoxDoubleclick;
     }
 }

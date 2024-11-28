@@ -140,7 +140,7 @@ namespace ShootRunner
         private static extern int GetClassName(IntPtr hWnd, StringBuilder lpClassName, int nMaxCount);
 
         [DllImport("user32.dll", SetLastError = true)]
-        private static extern bool IsWindowVisible(IntPtr hWnd);
+        public static extern bool IsWindowVisible(IntPtr hWnd);
 
         [DllImport("user32.dll", SetLastError = true)]
         private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
@@ -362,7 +362,7 @@ namespace ShootRunner
                     }
                     catch (Exception ex)
                     {
-
+                        excludedWindows.Add(Handle);
                         Program.error(ex.Message);
                     }
 
@@ -647,8 +647,7 @@ namespace ShootRunner
         }
 
         public static bool BringWindowToFront(Window window)
-        {
-
+        {            
             if (window.Handle != IntPtr.Zero)
             {
                 SimulateMouseInput();

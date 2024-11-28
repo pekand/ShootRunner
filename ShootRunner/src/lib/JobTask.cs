@@ -362,5 +362,161 @@ namespace ShootRunner
 
             return null;
         }
+
+        public static void RunPowerShellCommand(Window window) 
+        {
+            if (Program.powershell == null)
+            {
+                Program.error("Powershell not available. Install powershell.");
+                return;
+            }
+
+            Job.DoJob(
+                new DoWorkEventHandler(
+                    delegate (object o, DoWorkEventArgs args)
+                    {
+                        var job = (BackgroundJob)args.Argument;
+
+                        if (TextTools.IsURL(window.command))
+                        {
+                            Process.Start(new ProcessStartInfo(window.command) { UseShellExecute = true });
+                        }
+                        else if (Directory.Exists(window.command))
+                        {
+                            System.Diagnostics.Process.Start("explorer.exe", window.command);
+                        }
+                        else if (File.Exists(window.command))
+                        {
+                            System.Diagnostics.Process.Start(window.command);
+                        }
+                        else
+                        {
+                            try
+                            {
+                                List<IntPtr> taskbarWindows1 = null;
+
+                                if (window.matchNewWindow)
+                                {
+                                    taskbarWindows1 = ToolsWindow.GetTaskbarWindows();
+                                }
+
+                                if (window.silentCommand)
+                                {
+                                    try
+                                    {
+                                        using (PowerShell ps = PowerShell.Create())
+                                        {
+                                            ps.AddScript(window.command);
+
+                                            // string workingDirectory = @"C:\Your\Desired\Path";
+                                            // ps.AddScript($"Set-Location -Path \"{workingDirectory}\"");
+
+                                            try
+                                            {
+                                                var result = ps.BeginInvoke();
+                                                Program.write(result.ToString());
+                                                while (!result.IsCompleted)
+                                                {
+                                                    if (job.token.IsCancellationRequested)
+                                                    {
+                                                        ps.Stop();
+                                                        job.token.ThrowIfCancellationRequested();
+                                                    }
+                                                }
+
+                                            }
+                                            catch (Exception ex)
+                                            {
+                                                Program.error(ex.Message);
+                                            }
+
+                                        }
+                                    }
+                                    catch (Exception ex)
+                                    {
+
+                                        Program.error(ex.Message);
+                                    }
+
+                                }
+                                else
+                                {
+                                    Process process = new Process();
+                                    ProcessStartInfo startInfo = new ProcessStartInfo();
+
+                                    startInfo.FileName = Program.powershell;
+                                    string escapedCmd = EscapeString(window.command);
+                                    if (window.silentCommand)
+                                    {
+                                        startInfo.Arguments = $"-NoProfile -Command \"{escapedCmd}\"";
+                                    }
+                                    else
+                                    {
+                                        startInfo.Arguments = $"-NoExit -NoProfile -Command \"{escapedCmd}\"";
+                                    }
+
+                                    //startInfo.WorkingDirectory = workdir;
+                                    startInfo.UseShellExecute = true;
+                                    startInfo.RedirectStandardOutput = false;
+                                    startInfo.RedirectStandardError = false;
+                                    startInfo.CreateNoWindow = false;
+                                    if (window.silentCommand)
+                                    {
+                                        startInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                                        startInfo.CreateNoWindow = true;
+                                    }
+                                    process.StartInfo = startInfo;
+                                    process.Start();
+                                }
+
+                                if (window.matchNewWindow) // compare taskbar windows and check for change
+                                {
+                                    Thread.Sleep(1500);
+
+                                    List<IntPtr> taskbarWindows2 = ToolsWindow.GetTaskbarWindows();
+                                    List<IntPtr> foundWindows = new List<IntPtr>();
+
+                                    foreach (IntPtr win2 in taskbarWindows2)
+                                    {
+                                        bool found = false;
+                                        foreach (IntPtr win1 in taskbarWindows1)
+                                        {
+                                            if (win1 == win2)
+                                            {
+                                                found = true;
+                                                break;
+                                            }
+                                        }
+
+                                        if (!found)
+                                        {
+                                            foundWindows.Add(win2);
+                                        }
+                                    }
+
+                                    if (foundWindows.Count == 1) {
+                                        window.Handle = foundWindows[0];
+                                        window.doubleClickCommand = false;                                        
+                                        ToolsWindow.SetWindowData(window);
+                                        window.Type = "COMMAND";
+                                    }
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                Program.error("exception: " + ex.Message);
+                            }
+                        }
+
+                    }
+                ),
+                new RunWorkerCompletedEventHandler(
+                    delegate (object o, RunWorkerCompletedEventArgs args)
+                    {
+
+                    }
+                )
+            );
+        }
     }
 }

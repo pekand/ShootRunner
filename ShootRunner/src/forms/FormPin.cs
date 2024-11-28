@@ -39,6 +39,7 @@ namespace ShootRunner
 
             this.window = window;
             this.ShowInTaskbar = false;
+            this.AllowDrop = true;
         }
 
         private void FormPin_Load(object sender, EventArgs e)
@@ -95,7 +96,15 @@ namespace ShootRunner
             }
             else if (this.window.Type == "COMMAND" && this.window.command != null && this.window.command.Trim() != "")
             {
-                JobTask.RunPowerShellCommand(this.window.command, null, this.window.silentCommand);
+                if (this.window.matchNewWindow && this.window.Handle != IntPtr.Zero && ToolsWindow.IsWindowValid(this.window))
+                {
+                    ToolsWindow.BringWindowToFront(this.window);
+                }
+                else
+                {
+
+                    JobTask.RunPowerShellCommand(window);
+                }
             }
             else if (this.window.Type == "WINDOW")
             {
@@ -177,7 +186,12 @@ namespace ShootRunner
                 {
                     ToolsWindow.ShowDesktop(true);
                 }
-                else if (this.window.Type == "WINDOW" && this.window.Handle != IntPtr.Zero)
+                else if (this.window.Type == "WINDOW" && this.window.Handle != IntPtr.Zero && ToolsWindow.IsWindowValid(this.window))
+                {
+
+                    ToolsWindow.MinimizeWindow(this.window);
+                }
+                else if (this.window.Type == "COMMAND" && this.window.matchNewWindow && this.window.Handle != IntPtr.Zero && ToolsWindow.IsWindowValid(this.window))
                 {
 
                     ToolsWindow.MinimizeWindow(this.window);
@@ -288,11 +302,17 @@ namespace ShootRunner
             }
         }
 
+        private void selectToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            /* select window from oppened windows, is filled with code */
+        }
+
         public void SelectType(Window window)
         {
             ToolsWindow.SetWindowData(window);
 
-            if (window == null) {
+            if (window == null)
+            {
                 return;
             }
 
@@ -377,11 +397,6 @@ namespace ShootRunner
         private void removeToolStripMenuItem_Click(object sender, EventArgs e)
         {
             this.CloseForm();
-        }
-
-        private void selectToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            /* select window from oppened windows, is filled with code */
         }
 
         private void dobleClickToActivateToolStripMenuItem_Click(object sender, EventArgs e)
@@ -482,6 +497,42 @@ namespace ShootRunner
         private void consoleToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Program.ShowConsole();
+        }
+
+        private void FormPin_DragEnter(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                e.Effect = DragDropEffects.Copy;
+
+                if (this.window != null) {
+                    if (this.window.Type == "COMMAND" && this.window.command != null && this.window.command.Trim() != "")
+                    {
+                        if (this.window.matchNewWindow && this.window.Handle != IntPtr.Zero && ToolsWindow.IsWindowValid(this.window))
+                        {
+                            IntPtr currentWindow = ToolsWindow.GetCurrentWindow();
+                            if (currentWindow!=IntPtr.Zero && this.window.Handle != currentWindow)
+                            {
+                                Program.info("front");
+                                ToolsWindow.BringWindowToFront(this.window);
+                            }
+                            
+                        }
+                    }
+                    else if (this.window.Type == "WINDOW")
+                    {
+                        if (this.window.Handle != IntPtr.Zero && ToolsWindow.IsWindowValid(this.window))
+                        {
+                            IntPtr currentWindow = ToolsWindow.GetCurrentWindow();
+                            if (currentWindow != IntPtr.Zero && this.window.Handle != currentWindow)
+                            {
+                                Program.info("front");
+                                ToolsWindow.BringWindowToFront(this.window);
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         /*********************************************************************************/

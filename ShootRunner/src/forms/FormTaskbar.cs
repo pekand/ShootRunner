@@ -2,6 +2,7 @@
 using ShootRunner.src.forms;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
+using System.Threading.Channels;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 #nullable disable
@@ -13,6 +14,8 @@ namespace ShootRunner
     {
         public Widget widget = null;
         public List<Window> taskbarWindows = new List<Window>();
+
+        public WindowMonitor windowMonitor = new WindowMonitor();
 
         Window selectedWindow = null;
 
@@ -53,10 +56,26 @@ namespace ShootRunner
 
             SwitchIconType();
 
-            InitList();
+            //InitList();
 
             this.SetStartPosition();
             Visible = true;
+
+            windowMonitor.OnWindowCreateTriggered += WindowCreate;
+            windowMonitor.OnWindowDestroyTriggered += WindowDestroy;
+            windowMonitor.Register();
+        }
+
+        public void ScreenshotCreated() {
+            this.Invoke(new Action(() =>
+            {
+                this.Refresh();
+            }));
+        }
+
+        private void FormTaskbar_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            windowMonitor.UnRegister();
         }
 
         public void SwitchIconType()
@@ -123,37 +142,6 @@ namespace ShootRunner
             this.Move += FormTaskbar_Move;
         }
 
-        public void CheckExcludeList(Window window)
-        {
-
-            if (window == null)
-            {
-                return;
-            }
-
-            if (window.Handle == this.Handle)
-            {
-                window.hidden = true;
-                return;
-            }
-
-            /*if (window.Title  == "Windows Input Experience" &&
-                window.className == "Windows.UI.Core.CoreWindow" &&
-                window.executable == "TextInputHost.exe")
-            {
-                window.hidden = true;
-                return;
-            }*/
-
-            /*if (window.Title == "Settings" &&
-                window.className == "Windows.UI.Core.CoreWindow" &&
-                window.executable == "SystemSettings.exe")
-            {
-                window.hidden = true;
-                return;
-            }*/
-        }
-
         public void InitList()
         {
             List<IntPtr> windows = ToolsWindow.GetTaskbarWindows(true);
@@ -165,24 +153,12 @@ namespace ShootRunner
                     Window window = new Window();
                     window.Handle = Handle;
                     ToolsWindow.SetWindowData(window);
-                    this.CheckExcludeList(window);
 
                     if (this.widget.useScreenshots)
                     {
                         if (!window.hidden)
                         {
-                            using (Bitmap screenshot = WindowScreenshot.CaptureWindow(window, 256, 256))
-                            {
-                                if (screenshot != null)
-                                {
-                                    if (window.screenshot != null)
-                                    {
-                                        window.screenshot.Dispose();
-                                        window.screenshot = null;
-                                    }
-                                    window.screenshot = (Bitmap)screenshot.Clone();
-                                }
-                            }
+                            WindowScreenshot.CaptureWindowTask(window, 256, 256, 0, this.ScreenshotCreated);
                         }
                     }
 
@@ -196,6 +172,11 @@ namespace ShootRunner
 
             }
 
+        }
+
+        private void timer_Tick(object sender, EventArgs e)
+        {
+            //UpdateList();
         }
 
         public void UpdateList()
@@ -230,7 +211,6 @@ namespace ShootRunner
                         window.Handle = newWin;
                         ToolsWindow.SetWindowData(window);
                         taskbarWindows.Add(window);
-                        this.CheckExcludeList(window);
                         changed = true;
                     }
                     catch (Exception ex)
@@ -305,19 +285,8 @@ namespace ShootRunner
                                     {
                                         if (!lastWindow.hidden)
                                         {
-                                            using (Bitmap screenshot = WindowScreenshot.CaptureWindow(lastWindow, 256, 256))
-                                            {
-                                                if (screenshot != null)
-                                                {
-                                                    if (lastWindow.screenshot != null)
-                                                    {
-                                                        lastWindow.screenshot.Dispose();
-                                                        lastWindow.screenshot = null;
-                                                    }
-                                                    lastWindow.screenshot = (Bitmap)screenshot.Clone();
-                                                    changed = true;
-                                                }
-                                            }
+                                            WindowScreenshot.CaptureWindowTask(selectedWindow, 256, 256, 100, this.ScreenshotCreated);
+                                            changed = true;
                                         }
                                     }
                                 }
@@ -325,20 +294,8 @@ namespace ShootRunner
 
                                 if (!currentWindow.hidden)
                                 {
-                                    using (Bitmap screenshotCurrentWindow = WindowScreenshot.CaptureWindow3(currentWindow, 256, 256))
-                                    {
-                                        if (screenshotCurrentWindow != null)
-                                        {
-                                            currentWindow.isCurentWindowScreensot = true;
-                                            if (currentWindow.screenshot != null)
-                                            {
-                                                currentWindow.screenshot.Dispose();
-                                                currentWindow.screenshot = null;
-                                            }
-                                            currentWindow.screenshot = (Bitmap)screenshotCurrentWindow.Clone();
-                                            changed = true;
-                                        }
-                                    }
+                                    WindowScreenshot.CaptureWindow3Task(selectedWindow, 256, 256, 100, this.ScreenshotCreated);
+                                    changed = true;
                                 }
 
                                 lastWindow = currentWindow;
@@ -366,9 +323,54 @@ namespace ShootRunner
 
         }
 
-        private void timer1_Tick(object sender, EventArgs e)
+        void WindowCreate(IntPtr Handle)
         {
-            UpdateList();
+            try
+            {
+                Window window = new Window();
+                window.Handle = Handle;
+                ToolsWindow.SetWindowData(window);
+
+                if (this.widget.useScreenshots)
+                {
+                    if (!window.hidden)
+                    {
+                        WindowScreenshot.CaptureWindowTask(window, 256, 256, 100, this.ScreenshotCreated);
+                    }
+                }
+
+                taskbarWindows.Add(window);
+
+                this.Invoke(() => this.Refresh());
+            }
+            catch (Exception ex)
+            {
+                Program.error(ex.Message);
+
+            }
+        }
+
+        void WindowDestroy(IntPtr Handle)
+        {
+            List<Window> toremove = new List<Window>();
+
+            foreach (var win in taskbarWindows)
+            {
+                if (Handle == win.Handle)
+                {
+                    toremove.Add(win);
+                    break;
+                }
+            }
+
+            foreach (var win in toremove)
+            {
+                DisposeWindowResources(win);
+                taskbarWindows.Remove(win);
+            }
+            if (toremove.Count > 0) {
+                this.Invoke(()=>this.Refresh());
+            }
         }
 
         protected override void WndProc(ref Message m)
@@ -705,7 +707,8 @@ namespace ShootRunner
 
                 if (!draggingItem && e.Button == MouseButtons.Left)
                 {
-                    ToolsWindow.BringWindowToFront(selectedWindow);
+                    ToolsWindow.BringWindowToFront(selectedWindow);                    
+                    WindowScreenshot.CaptureWindow3Task(selectedWindow, 256, 256, 100, this.ScreenshotCreated);
                 }
 
                 if (e.Button == MouseButtons.Middle)
