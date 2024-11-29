@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
@@ -21,8 +22,13 @@ namespace ShootRunner
 {
     internal static class Program
     {
+        // APPLICATION
         public static string AppName = "ShootRunner";
         private static int processId;
+        private static Mutex mutex = null;
+        public static bool pause = false;
+
+        // PATH
         public static string roamingAppDataPath = "";
         public static string configPath = "";
         public static string errorLogPath = "";
@@ -33,40 +39,97 @@ namespace ShootRunner
         public static string commandFielName = "";
         public static string powershell = null;
 
-        private static Mutex mutex = null;
-
+        // CONFIG
         public static Config config = null;
         public static ConfigFile configFile = null;
+        public static bool autorun = false;
+        public static bool autosave = true;
 
+        // COMMANDS
         public static DateTime commandFielPathLastChange;
-
+        public static Shortcut shortcut = new Shortcut();
+        public static int tick = 0;        
+        public static List<Command> commands = new List<Command>();
+        
+        // FORMS
         public static FormShootRunner formShootRunner = null;
-        public static List<Command> commands = new List<Command>();        
         public static List<FormPin> pins = new List<FormPin>();
-        public static List<FormWindowInfo> windowInfoForms = new List<FormWindowInfo>();
-        public static WidgetManager widgetManager = new WidgetManager();
+        public static List<FormWindowInfo> windowInfoForms = new List<FormWindowInfo>();        
         public static FormConsole console = null;
         public static FormShortcut shortcutForm = null;
 
+        // WIDGETS
+        public static WidgetManager widgetManager = new WidgetManager();
+
+        // LOG
         public static string text = "";
         
-        public static bool autorun = false;
-        public static bool autosave = true;
-        public static Shortcut shortcut = new Shortcut();
-        public static int tick = 0;
-        public static bool pause = false;
+        // AUTOSAVE
         public static bool updated = false;
         public static DateTime updatedTime = new DateTime();
         public static System.Timers.Timer timer;
-       
-        public static bool closingApplication = false;
-        
 
+#if DEBUG
+        [DllImport("kernel32.dll")]
+        static extern bool AllocConsole();
+#endif
+
+        // DEBUG
+        public static bool isDebug()
+        {
+#if DEBUG
+            return true;
+#else
+            return false;
+#endif
+        }
+
+        // DEBUG
+        public static string GetDebugPrefix()
+        {
+#if DEBUG
+            return "DEBUG.";
+#else
+            return "";
+#endif            
+        }
+
+        // PATH
+        public static void SetPath()
+        {
+            Program.roamingAppDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            Program.configPath = Path.Combine(Program.roamingAppDataPath, Program.AppName);
+            if (!Directory.Exists(configPath))
+            {
+                Directory.CreateDirectory(configPath);
+            }
+
+            Program.commandFielName = GetDebugPrefix() + "commands.xml";
+            Program.configFielPath = Path.Combine(Program.configPath, GetDebugPrefix() + "config.xml");
+            Program.commandFielPath = Path.Combine(Program.configPath, Program.commandFielName);
+            Program.errorLogPath = Path.Combine(Program.configPath, GetDebugPrefix() + "error.log");
+            Program.widgetsPath = Path.Combine(Program.configPath, GetDebugPrefix() + "widgets");
+            Program.webview2Path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), Program.AppName, "WebView2UserData");
+        }
+
+        // PATH
+        public static void FindPowershell()
+        {
+            powershell = ScriptsTools.IsCommandAvailable("pwsh.exe");
+
+            if (powershell == null)
+            {
+                powershell = ScriptsTools.IsCommandAvailable("powershell.exe");
+            }
+        }
+
+        // AUTOSAVE
         public static void Update() {
             Program.updated = true;
             Program.updatedTime = DateTime.Now;
         }
 
+        // AUTOSAVE
         public static void StartTimer()
         {
             timer = new System.Timers.Timer(1000*60);
@@ -75,6 +138,7 @@ namespace ShootRunner
             timer.Enabled = true;
         }
 
+        // AUTOSAVE
         public static void OnTimedEvent(object sender, EventArgs e)
         {
             if (Program.autosave && Program.updated && (DateTime.Now - Program.updatedTime).TotalMinutes >= 2)
@@ -85,14 +149,7 @@ namespace ShootRunner
             }
         }
 
-        public static void FindPowershell() {
-            powershell = ScriptsTools.IsCommandAvailable("pwsh.exe");
-
-            if (powershell == null) {
-                powershell = ScriptsTools.IsCommandAvailable("powershell.exe");
-            }
-        }
-
+        // LOG
         public static void ClearBigLog()
         {
 
@@ -105,24 +162,7 @@ namespace ShootRunner
             }
         }
 
-        public static bool isDebug()
-        {
-#if DEBUG
-            return true;
-#else
-            return false;
-#endif
-        }
-
-        public static string GetDebugPrefix()
-        {
-#if DEBUG
-            return "DEBUG.";
-#else
-            return "";
-#endif            
-        }
-
+        // LOG
         public static void debug(string message) {
 #if DEBUG
             string unixTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
@@ -136,6 +176,7 @@ namespace ShootRunner
 #endif
         }
 
+        // LOG
         public static void info(string message)
         {
 
@@ -151,6 +192,7 @@ namespace ShootRunner
             }
         }
 
+        // LOG
         public static void error(string message)
         {
             string unixTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
@@ -164,7 +206,8 @@ namespace ShootRunner
 #endif
             }
         }
-        
+
+        // LOG
         public static void write(string message)
         { 
             text += message+"\r\n";
@@ -174,6 +217,15 @@ namespace ShootRunner
             }
         }
 
+        // LOG
+        public static void message(string message)
+        {
+#if DEBUG
+            Console.WriteLine(message);
+#endif
+        }
+
+        // CONSOLE
         public static void ShowConsole()
         {
             if (console == null) {
@@ -184,11 +236,13 @@ namespace ShootRunner
             console.BringToFront();
         }
 
+        // CONSOLE
         public static void CloseConsole()
         {
             Program.console = null;
         }
 
+        // COMMANDS
         public static void loadCommands()
         {
             if (!File.Exists(Program.commandFielPath))
@@ -298,21 +352,7 @@ namespace ShootRunner
 
         }
         
-
-        public static bool ChecKDuplicateRun(){
-            bool createdNew;
-
-            
-            mutex = new Mutex(true, (isDebug() ? "DEBUG.":"")+Program.AppName, out createdNew);
-
-            if (!createdNew)
-            {                
-                return true;
-            }
-            return false;
-        }
-
-
+        // SHORTCUT FORM
         public static void ShowShortcutForm() {
             if (shortcutForm == null)
             {
@@ -321,6 +361,7 @@ namespace ShootRunner
             Program.shortcutForm.Show();
         }
 
+        // SHORTCUT FORM
         public static void ShowShortcutInShortcutForm(Shortcut shortcut)
         {
             if (shortcutForm == null)
@@ -337,6 +378,7 @@ namespace ShootRunner
                 (shortcut.key);
         }
 
+        // SHORTCUT FORM
         public static void CloseShortcutForm()
         {
             if (shortcutForm != null)
@@ -345,7 +387,7 @@ namespace ShootRunner
             }            
         }
 
-
+        // PIN FORM
         public static void CreatePin(Window window = null)
         {
             FormPin pin = new FormPin(window);
@@ -356,7 +398,7 @@ namespace ShootRunner
             Program.Update();
         }
 
-
+        // PIN FORM
         public static void AddEmptyPin() {
 
             Window window = new Window();
@@ -368,6 +410,7 @@ namespace ShootRunner
             Program.Update();
         }
 
+        // PIN FORM
         public static void OpenPins()
         {
             
@@ -377,41 +420,22 @@ namespace ShootRunner
             }
         }
 
+        // PIPE SERVER
         public static void OnMessageReceived(string message)
         {
            Program.info("Message Received: " + message);
         }
 
-
-        public static void SetPath() {
-            Program.roamingAppDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            Program.configPath = Path.Combine(Program.roamingAppDataPath, Program.AppName);
-            if (!Directory.Exists(configPath))
-            {
-                Directory.CreateDirectory(configPath);
+        // PIPE SERVER
+        public static void InitPipeServer() {
+            PipeServer.MessageReceived += OnMessageReceived;
+            PipeServer.SetPipeName(GetDebugPrefix() + Program.AppName);
+            if (!PipeServer.StartServerAsync()) {
+                Program.info("Pipe server exists");
             }
-
-            Program.commandFielName = GetDebugPrefix()+"commands.xml";
-            Program.configFielPath = Path.Combine(Program.configPath, GetDebugPrefix() + "config.xml");
-            Program.commandFielPath = Path.Combine(Program.configPath, Program.commandFielName);
-            Program.errorLogPath = Path.Combine(Program.configPath, GetDebugPrefix() + "error.log");
-            Program.widgetsPath = Path.Combine(Program.configPath, GetDebugPrefix() + "widgets");
-            Program.webview2Path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), Program.AppName, "WebView2UserData");
         }
 
-
-        public static void Exit()
-        {
-            closingApplication = true;
-            Program.configFile.Save();
-
-            foreach (FormWindowInfo info in windowInfoForms) { 
-                info.Close();
-            }
-
-            Application.Exit();
-        }
-
+        // FORMS 
         public static void HideAllForms()
         {
             if (formShootRunner != null) formShootRunner.Hide();
@@ -427,6 +451,7 @@ namespace ShootRunner
 
         }
 
+        // FORMS
         public static void ShowAllForms()
         {
             if (formShootRunner != null) formShootRunner.Show();
@@ -442,6 +467,7 @@ namespace ShootRunner
 
         }
 
+        // FORMS
         public static void ToggleAllForms()
         {
             bool allHiden = false;
@@ -485,10 +511,63 @@ namespace ShootRunner
             }
         }
 
+        // APPLICATION
+        public static bool ChecKDuplicateRun()
+        {
+            bool createdNew;
 
+
+            mutex = new Mutex(true, (isDebug() ? "DEBUG." : "") + Program.AppName, out createdNew);
+
+            if (!createdNew)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        // APPLICATION
+        public static void Exit()
+        {
+            Program.configFile.Save();
+
+            foreach (FormWindowInfo info in windowInfoForms)
+            {
+                info.Close();
+            }
+
+            Application.Exit();
+        }
+
+        // MAIN
         [STAThread]
         public static void Main()
         {
+
+#if DEBUG
+            AllocConsole();
+#endif
+
+
+            Program.message("Application Start");
+
+            AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
+            {
+                Console.WriteLine($"Unhandled exception: {e.ExceptionObject}");
+
+                var process = Process.GetCurrentProcess();
+                Console.WriteLine($"Handles: {process.HandleCount}, Threads: {process.Threads.Count}, Memory: {process.PrivateMemorySize64}");
+
+            };
+
+            TaskScheduler.UnobservedTaskException += (sender, e) =>
+            {
+                Console.WriteLine($"Unobserved task exception: {e.Exception}");
+                e.SetObserved();
+
+                var process = Process.GetCurrentProcess();
+                Console.WriteLine($"Handles: {process.HandleCount}, Threads: {process.Threads.Count}, Memory: {process.PrivateMemorySize64}");
+            };
 
             Program.processId = Process.GetCurrentProcess().Id;
 
@@ -521,13 +600,6 @@ namespace ShootRunner
 
                 Program.StartTimer();
 
-                /*
-                PipeServer.MessageReceived += OnMessageReceived;
-                PipeServer.SetPipeName(GetDebugPrefix() + Program.AppName);
-                if (!PipeServer.StartServerAsync()) {
-                    Program.info("Pipe server exists");
-                }*/
-
                 formShootRunner = new FormShootRunner();
                 Application.Run(formShootRunner);
 
@@ -536,6 +608,8 @@ namespace ShootRunner
             {
                 Program.error(ex.Message);
             }
+
+            Program.message("Application End");
         }
 
         

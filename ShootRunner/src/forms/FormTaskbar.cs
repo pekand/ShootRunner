@@ -13,6 +13,7 @@ namespace ShootRunner
     public partial class FormTaskbar : Form
     {
         public Widget widget = null;
+
         public List<Window> taskbarWindows = new List<Window>();
 
         public WindowMonitor windowMonitor = new WindowMonitor();
@@ -708,7 +709,7 @@ namespace ShootRunner
                 if (!draggingItem && e.Button == MouseButtons.Left)
                 {
                     ToolsWindow.BringWindowToFront(selectedWindow);                    
-                    WindowScreenshot.CaptureWindow3Task(selectedWindow, 256, 256, 100, this.ScreenshotCreated);
+                    WindowScreenshot.CaptureWindow3Task(selectedWindow, 256, 256, 300, this.ScreenshotCreated);
                 }
 
                 if (e.Button == MouseButtons.Middle)
@@ -735,7 +736,6 @@ namespace ShootRunner
                 ghostForm = null;
             }
         }
-
 
         /////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -882,8 +882,6 @@ namespace ShootRunner
             }
             this.Refresh();
         }
-
-
 
         private void infoToolStripMenuItem_Click(object sender, EventArgs e)
         {

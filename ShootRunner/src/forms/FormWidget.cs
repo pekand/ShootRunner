@@ -322,23 +322,7 @@ namespace ShootRunner
 
         private void FormWidget_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (Program.closingApplication)
-            {
-                return;
-            }
-
-            // Display a confirmation dialog
-            DialogResult result = MessageBox.Show(
-                "Are you sure you want to close form? Data will be lost.",
-                "Confirm Exit",
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question
-            );
-
-            if (result == DialogResult.No)
-            {
-                e.Cancel = true;
-            }
+            
         }
 
         public void CloseForm()
