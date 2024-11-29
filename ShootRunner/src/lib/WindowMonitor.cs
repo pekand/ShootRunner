@@ -17,7 +17,8 @@ namespace ShootRunner
         public List<IntPtr> excludedWindows = new List<IntPtr>();
         public List<IntPtr> includedWindows = new List<IntPtr>();
 
-        private struct MSG
+        [StructLayout(LayoutKind.Sequential)]
+        public struct MSG
         {
             public IntPtr hwnd;
             public uint message;
@@ -45,11 +46,11 @@ namespace ShootRunner
         public delegate void WindowCreate(IntPtr Handle);
         public delegate void WindowDestroy(IntPtr Handle);
 
-        public event WindowCreate OnWindowCreateTriggered;
-        public event WindowDestroy OnWindowDestroyTriggered;
+        public event WindowCreate? OnWindowCreateTriggered;
+        public event WindowDestroy? OnWindowDestroyTriggered;
 
 
-        delegate void WinEventDelegate(
+        public delegate void WinEventDelegate(
             IntPtr hWinEventHook, uint eventType, IntPtr hwnd, int idObject, int idChild,
             uint dwEventThread, uint dwmsEventTime);
 
@@ -75,6 +76,12 @@ namespace ShootRunner
 
         [DllImport("user32.dll")]
         private static extern uint MsgWaitForMultipleObjects(uint nCount, IntPtr[] pHandles, bool bWaitAll, uint dwMilliseconds, uint dwWakeMask);
+
+        [DllImport("user32.dll")]
+        public static extern IntPtr DispatchMessage(ref MSG lpmsg);
+
+        [DllImport("user32.dll")]
+        public static extern IntPtr TranslateMessage(ref MSG lpmsg);
 
         public void InitTaskbarWindowsList(bool allowExclude = false)
         {
@@ -126,6 +133,53 @@ namespace ShootRunner
             }
         }
 
+        public bool CheckWindowCandidateHandle(IntPtr Handle)
+        {
+            try
+            {
+                if (!ToolsWindow.IsWindow(Handle))
+                {
+                    return false;
+                }
+
+                if (ToolsWindow.IsToolWindow(Handle))
+                {
+                    return false;
+                }
+
+                if (ToolsWindow.IsChild(Handle))
+                {
+                    return false;
+                }
+
+                if (ToolsWindow.HaveParent(Handle))
+                {
+                    return false;
+                }
+
+                string title = ToolsWindow.GetWindowTitle(Handle);
+
+                if (string.IsNullOrEmpty(title))
+                {
+                    return false;
+                }
+
+                if (ToolsWindow.GetWindowSessionId(Handle) <= 0)
+                {
+                    return false;
+                }
+
+                return true;
+
+            }
+            catch (Exception ex)
+            {
+                Program.error(ex.Message);
+            }
+
+            return false;
+        }
+
         public bool CheckWindowHandle(IntPtr Handle, bool allowExclude = false) {
             try
             {
@@ -139,6 +193,23 @@ namespace ShootRunner
                 }
 
                 if (!ToolsWindow.IsWindow(Handle))
+                {
+                    return false;
+                }
+
+                if (ToolsWindow.IsToolWindow(Handle))
+                {
+                    //if (allowExclude) excludedWindows.Add(Handle);
+                    return false;
+                }
+
+                if (ToolsWindow.IsChild(Handle))
+                {
+                    //if (allowExclude) excludedWindows.Add(Handle);
+                    return false;
+                }
+
+                if (ToolsWindow.HaveParent(Handle))
                 {
                     return false;
                 }
@@ -181,11 +252,7 @@ namespace ShootRunner
                     return true;
                 }
 
-                if (ToolsWindow.IsToolWindow(Handle))
-                {
-                    if (allowExclude) excludedWindows.Add(Handle);
-                    return false;
-                }
+                
 
                 if (Handle == ToolsWindow.GetShellWindowHandle()) // is explorer window
                 {
@@ -232,16 +299,25 @@ namespace ShootRunner
 
         public void WinEventProc(IntPtr hWinEventHook, uint eventType, IntPtr hwnd, int idObject, int idChild, uint dwEventThread, uint dwmsEventTime)
         {
-            if (idObject == 0) // OBJID_WINDOW
+            Program.message("WindowMonitor WinEventProc Start "+ hwnd.ToString());
+            if (idObject == 0 && idChild == 0) // OBJID_WINDOW
             {
                 if (eventType == EVENT_OBJECT_CREATE)
                 {
+                    Program.message("WindowMonitor WinEventProc EVENT_OBJECT_CREATE " + hwnd.ToString());
+
                     if (!createdWindows.Contains(hwnd)) {
-                        createdWindows.Add(hwnd);
+                        if (this.CheckWindowCandidateHandle(hwnd))
+                        {
+                            Program.message("WindowMonitor WinEventProc Found window candidate " + hwnd.ToString());
+                            createdWindows.Add(hwnd);
+                        }
                     }
 
                 } else if (eventType == EVENT_OBJECT_SHOW)
                 {
+                    Program.message("WindowMonitor WinEventProc EVENT_OBJECT_SHOW " + hwnd.ToString());
+
                     if (createdWindows.Contains(hwnd))
                     {
                         createdWindows.Remove(hwnd);
@@ -249,6 +325,7 @@ namespace ShootRunner
                         {
                             if (this.CheckWindowHandle(hwnd, true))
                             {
+                                Program.message("WindowMonitor WinEventProc Show window event " + hwnd.ToString());
                                 taskbarWindows.Add(hwnd);
                                 if (OnWindowCreateTriggered != null)
                                 {
@@ -260,6 +337,8 @@ namespace ShootRunner
                 }
                 else if (eventType == EVENT_OBJECT_DESTROY)
                 {
+                    Program.message("WindowMonitor WinEventProc EVENT_OBJECT_DESTROY " + hwnd.ToString());
+
                     if (includedWindows.Contains(hwnd))
                     {
                         includedWindows.Remove(hwnd);
@@ -279,29 +358,40 @@ namespace ShootRunner
                         taskbarWindows.Remove(hwnd);
                         if (OnWindowDestroyTriggered != null)
                         {
+                            Program.message("WindowMonitor WinEventProc Remove window event " + hwnd.ToString());
                             OnWindowDestroyTriggered.Invoke(hwnd);
                         }                        
                     }
                 }
             }
+
+            Program.message("WindowMonitor WinEventProc End " + hwnd.ToString());
         }
 
-        public void Register() {
-            this.InitTaskbarWindowsList();
+        public WinEventDelegate? winEventDelegate;
 
-            eventHookThread = new Thread(EventHookThread);
-            eventHookThread.Start();
+        public void Register() {
+            
+            Program.message("WindowMonitor Registration");
+
+            this.InitTaskbarWindowsList();
+            using (var cancellationTokenSource = new CancellationTokenSource())
+            {
+                var token = cancellationTokenSource.Token;
+                winEventDelegate = WinEventProc;
+                eventHookThread = new Thread(() => EventHookThread(token, winEventDelegate))
+                {
+                    IsBackground = true
+                };
+                eventHookThread.Start();
+            }
         }
         private static uint _hookThreadId;
 
-        private void EventHookThread()
+        private void EventHookThread(CancellationToken token, WinEventDelegate winEventDelegate)
         {
 
             _hookThreadId = GetCurrentThreadId();
-
-            MSG msg;
-
-            WinEventDelegate winEventDelegate = WinEventProc;
 
             hook = SetWinEventHook(
                 EVENT_OBJECT_CREATE,
@@ -320,27 +410,41 @@ namespace ShootRunner
 
             bool running = true;
 
-            while (running)
+            while (running && !token.IsCancellationRequested)
             {
-                while (PeekMessage(out msg, IntPtr.Zero, 0, 0, PM_REMOVE))
+                try
                 {
-                    if (msg.message == WM_CUSTOM_STOP)
+                    while (PeekMessage(out MSG msg, IntPtr.Zero, 0, 0, PM_REMOVE))
                     {
-                        running = false;
-                        break;
+                        if (msg.message == WM_CUSTOM_STOP)
+                        {
+                            running = false;
+                            break;
+                        }
+
+                        TranslateMessage(ref msg);
+                        DispatchMessage(ref msg);
                     }
 
+                    Thread.Sleep(1);
                 }
-
-                Thread.Sleep(10);
+                catch (ThreadAbortException ex)
+                {
+                    Program.error(ex.Message);
+                }
+                catch (Exception ex)
+                {
+                    Program.error(ex.Message);
+                }
             }
 
         }
 
-
         public void UnRegister()
         {
-            if (hook == IntPtr.Zero)
+            Program.message("WindowMonitor Unregister");
+
+            if (hook == IntPtr.Zero || eventHookThread == null)
             {
                 return;
             }
@@ -349,6 +453,8 @@ namespace ShootRunner
             eventHookThread.Join();
 
             UnhookWinEvent(hook);
+
+            Program.message("WindowMonitor Thread {_hookThreadId} closed succerusfuly");
         }
     }
 

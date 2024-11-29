@@ -957,6 +957,21 @@ namespace ShootRunner
             return 0;
         }
 
+        private const long WS_CHILD = 0x40000000;
+        public static bool IsChild(IntPtr Handle) {
+            long style = GetWindowLongPtr(Handle, GWL_STYLE).ToInt64();
+            if ((style & WS_CHILD) == WS_CHILD) return true;
+
+            return false;
+        }
+
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern IntPtr GetParent(IntPtr hWnd);
+
+
+        public static bool HaveParent(IntPtr Handle) {
+            return ToolsWindow.GetParent(Handle) != IntPtr.Zero;
+        }
     }
 
 
