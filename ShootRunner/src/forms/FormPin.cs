@@ -501,22 +501,28 @@ namespace ShootRunner
 
         private void FormPin_DragEnter(object sender, DragEventArgs e)
         {
-            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+
+            if (e.Data.GetDataPresent(DataFormats.FileDrop) ||
+                e.Data.GetDataPresent(DataFormats.Text) ||
+                e.Data.GetDataPresent(DataFormats.UnicodeText) ||
+                e.Data.GetDataPresent(DataFormats.Bitmap)
+                )
             {
                 e.Effect = DragDropEffects.Copy;
 
-                if (this.window != null) {
+                if (this.window != null)
+                {
                     if (this.window.Type == "COMMAND" && this.window.command != null && this.window.command.Trim() != "")
                     {
                         if (this.window.matchNewWindow && this.window.Handle != IntPtr.Zero && ToolsWindow.IsWindowValid(this.window))
                         {
                             IntPtr currentWindow = ToolsWindow.GetCurrentWindow();
-                            if (currentWindow!=IntPtr.Zero && this.window.Handle != currentWindow)
+                            if (currentWindow != IntPtr.Zero && this.window.Handle != currentWindow)
                             {
                                 Program.info("front");
                                 ToolsWindow.BringWindowToFront(this.window);
                             }
-                            
+
                         }
                     }
                     else if (this.window.Type == "WINDOW")
@@ -532,6 +538,9 @@ namespace ShootRunner
                         }
                     }
                 }
+            }
+            else {
+                e.Effect = DragDropEffects.None;
             }
         }
 

@@ -165,8 +165,6 @@ namespace ShootRunner
             }
         }
         
-        
-
         public static void write(string message)
         { 
             text += message+"\r\n";

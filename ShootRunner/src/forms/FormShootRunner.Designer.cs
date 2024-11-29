@@ -198,15 +198,22 @@
             // 
             AutoScaleDimensions = new SizeF(8F, 19F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(318, 176);
+            BackColor = Color.Red;
+            ClientSize = new Size(50, 50);
+            ContextMenuStrip = contextMenuStrip1;
+            ForeColor = Color.Black;
+            FormBorderStyle = FormBorderStyle.None;
             Icon = (Icon)resources.GetObject("$this.Icon");
             Margin = new Padding(4);
             Name = "FormShootRunner";
+            ShowInTaskbar = false;
             Text = "ShootRunner";
             FormClosing += FormShootRunner_FormClosing;
             FormClosed += FormShootRunner_FormClosed;
             Load += FormShootRunner_Load;
             InputLanguageChanging += FormShootRunner_InputLanguageChanging;
+            VisibleChanged += FormShootRunner_VisibleChanged;
+            DragEnter += FormShootRunner_DragEnter;
             contextMenuStrip1.ResumeLayout(false);
             ResumeLayout(false);
         }

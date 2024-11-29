@@ -76,8 +76,6 @@ namespace ShootRunner
         // LOAD
         private void FormShootRunner_Load(object sender, EventArgs e)
         {
-            this.WindowState = FormWindowState.Minimized;
-            this.Hide();
             if (Program.isDebug())
             {
                 this.notifyIconShootRunner.Icon = Pictures.CreateCustomIcon();
@@ -776,6 +774,22 @@ namespace ShootRunner
         private void createWidgetToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Program.widgetManager.ShowCreateWidgetForm();
+        }
+
+        private void exitToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            Application.Exit();
+        }
+
+        private void FormShootRunner_DragEnter(object sender, DragEventArgs e)
+        {
+            return;
+        }
+
+        private void FormShootRunner_VisibleChanged(object sender, EventArgs e)
+        {
+
+            this.Visible = false;
         }
     }
 }
