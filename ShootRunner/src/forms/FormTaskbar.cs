@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Threading.Channels;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using System.Timers;
 
 #nullable disable
 
@@ -15,6 +16,7 @@ namespace ShootRunner
         public Widget widget = null;
 
         public List<Window> taskbarWindows = new List<Window>();
+        public List<IntPtr> taskbarWindowsHandle = new List<IntPtr>();
 
         public WindowMonitor windowMonitor = new WindowMonitor();
 
@@ -143,191 +145,18 @@ namespace ShootRunner
             this.Move += FormTaskbar_Move;
         }
 
-        public void InitList()
-        {
-            List<IntPtr> windows = ToolsWindow.GetTaskbarWindows(true);
-
-            foreach (var Handle in windows)
-            {
-                try
-                {
-                    Window window = new Window();
-                    window.Handle = Handle;
-                    ToolsWindow.SetWindowData(window);
-
-                    if (this.widget.useScreenshots)
-                    {
-                        if (!window.hidden)
-                        {
-                            WindowScreenshot.CaptureWindowTask(window, 256, 256, 0, this.ScreenshotCreated);
-                        }
-                    }
-
-                    taskbarWindows.Add(window);
-                }
-                catch (Exception ex)
-                {
-                    Program.error(ex.Message);
-
-                }
-
-            }
-
-        }
-
-        private void timer_Tick(object sender, EventArgs e)
-        {
-            //UpdateList();
-        }
-
-        public void UpdateList()
-        {
-            try
-            {
-                bool changed = false;
-
-                List<IntPtr> newWindows = ToolsWindow.GetTaskbarWindows(false);
-
-                foreach (var newWin in newWindows)
-                {
-                    bool found = false;
-
-                    foreach (var win in taskbarWindows)
-                    {
-                        if (newWin == win.Handle)
-                        {
-                            found = true;
-                            break;
-                        }
-                    }
-
-                    if (found)
-                    {
-                        continue;
-                    }
-
-                    try
-                    {
-                        Window window = new Window();
-                        window.Handle = newWin;
-                        ToolsWindow.SetWindowData(window);
-                        taskbarWindows.Add(window);
-                        changed = true;
-                    }
-                    catch (Exception ex)
-                    {
-                        Program.error(ex.Message);
-
-                    }
-
-                }
-
-                List<Window> toremove = new List<Window>();
-
-                foreach (var win in taskbarWindows)
-                {
-                    bool found = false;
-
-                    foreach (var newWin in newWindows)
-                    {
-                        if (newWin == win.Handle)
-                        {
-                            found = true;
-                            break;
-                        }
-                    }
-
-                    if (found)
-                    {
-                        continue;
-                    }
-
-                    toremove.Add(win);
-                }
-
-                foreach (var win in toremove)
-                {
-                    DisposeWindowResources(win);
-                    taskbarWindows.Remove(win);
-                    changed = true;
-                }
-
-                try
-                {
-                    if (widget.useScreenshots)
-                    {
-                        IntPtr currentWindowHandle = ToolsWindow.GetCurrentWindow();
-                        Window currentWindow = null;
-
-                        if (currentWindowHandle != IntPtr.Zero)
-                        {
-                            foreach (var win in taskbarWindows)
-                            {
-                                if (win.Handle == currentWindowHandle)
-                                {
-                                    currentWindow = win;
-                                    break;
-                                }
-                            }
-                        }
-
-                        if (currentWindow != null)
-                        {
-                            if (lastWindow == null)
-                            {
-                                lastWindow = currentWindow;
-                            }
-
-                            if (currentWindow.Handle != lastWindow.Handle)
-                            {
-                                if (!lastWindow.isCurentWindowScreensot)
-                                {
-                                    if (!ToolsWindow.IsMinimalized(lastWindow))
-                                    {
-                                        if (!lastWindow.hidden)
-                                        {
-                                            WindowScreenshot.CaptureWindowTask(selectedWindow, 256, 256, 100, this.ScreenshotCreated);
-                                            changed = true;
-                                        }
-                                    }
-                                }
-
-
-                                if (!currentWindow.hidden)
-                                {
-                                    WindowScreenshot.CaptureWindow3Task(selectedWindow, 256, 256, 100, this.ScreenshotCreated);
-                                    changed = true;
-                                }
-
-                                lastWindow = currentWindow;
-                            }
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-
-                    Program.error(ex.Message);
-                }
-
-
-                if (changed)
-                {
-                    this.Refresh();
-                }
-            }
-            catch (Exception ex)
-            {
-
-                Program.error(ex.Message);
-            }
-
-        }
-
         void WindowCreate(IntPtr Handle)
         {
-            try
+
+            if (taskbarWindowsHandle.Contains(Handle))
             {
+                return;
+            }
+
+            taskbarWindowsHandle.Add(Handle);
+
+            try
+            {                
                 Window window = new Window();
                 window.Handle = Handle;
                 ToolsWindow.SetWindowData(window);
@@ -353,6 +182,13 @@ namespace ShootRunner
 
         void WindowDestroy(IntPtr Handle)
         {
+            if (!taskbarWindowsHandle.Contains(Handle))
+            {
+                return;
+            }
+
+            taskbarWindowsHandle.Remove(Handle);
+
             List<Window> toremove = new List<Window>();
 
             foreach (var win in taskbarWindows)
@@ -798,12 +634,6 @@ namespace ShootRunner
             widget.useScreenshots = !widget.useScreenshots;
             useScreenshotsToolStripMenuItem.Checked = widget.useScreenshots;
             SwitchIconType();
-
-            if (widget.useScreenshots)
-            {
-                this.taskbarWindows.Clear();
-                this.InitList();
-            }
             this.Refresh();
         }
 

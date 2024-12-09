@@ -293,7 +293,6 @@ namespace ShootRunner
                             continue;
                         }
 
-
                         if (!IsWindowVisible(Handle))
                         {
                             if(allowExclude) excludedWindows.Add(Handle);

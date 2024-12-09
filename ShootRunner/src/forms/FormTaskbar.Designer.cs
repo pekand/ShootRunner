@@ -30,7 +30,6 @@
         {
             components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormTaskbar));
-            timer = new System.Windows.Forms.Timer(components);
             contextMenuStrip1 = new ContextMenuStrip(components);
             taskbarToolStripMenuItem = new ToolStripMenuItem();
             removeToolStripMenuItem = new ToolStripMenuItem();
@@ -53,12 +52,6 @@
             exitToolStripMenuItem = new ToolStripMenuItem();
             contextMenuStrip1.SuspendLayout();
             SuspendLayout();
-            // 
-            // timer
-            // 
-            timer.Enabled = true;
-            timer.Interval = 1000;
-            timer.Tick += timer_Tick;
             // 
             // contextMenuStrip1
             // 
@@ -229,7 +222,6 @@
         }
 
         #endregion
-        private System.Windows.Forms.Timer timer;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
         private System.Windows.Forms.ToolStripMenuItem applicationToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
