@@ -57,6 +57,7 @@ namespace ShootRunner
         public static List<FormWindowInfo> windowInfoForms = new List<FormWindowInfo>();        
         public static FormConsole console = null;
         public static FormShortcut shortcutForm = null;
+        public static List<Form> selectedForms = new List<Form>();
 
         // WIDGETS
         public static WidgetManager widgetManager = new WidgetManager();
@@ -537,6 +538,86 @@ namespace ShootRunner
             }
 
             Application.Exit();
+        }
+
+        public static void AddFormToSelected(Form form) {
+            selectedForms.Add(form);
+        }
+
+        public static void RemoveFormFromSelected(Form form)
+        {
+            selectedForms.Remove(form);
+        }
+
+        public static void SetDragStartToSelectedForms(Form activeForm) {
+            foreach (Form form in selectedForms)
+            {
+                if (form == activeForm) {
+                    continue;
+                }
+
+                try
+                {
+                    FormPin pin = form as FormPin;
+                    pin.SetDragStartLocation();
+                }
+                catch
+                {
+
+
+                }
+            }
+        }
+
+        public static void SetDragSelectedFormsPosition(Form activeForm)
+        {
+            foreach (Form form in selectedForms)
+            {
+                if (form == activeForm)
+                {
+                    continue;
+                }
+
+                try
+                {
+                    FormPin pin = form as FormPin;
+                    pin.SetDragNewLocation();
+                }
+                catch
+                {
+
+
+                }
+            }
+        }
+
+        public static void ClearSelectedForms()
+        {
+            foreach (Form form in selectedForms)
+            {
+                try
+                {
+                    FormPin pin = form as FormPin;
+                    pin.selected = false;
+                }
+                catch 
+                {
+
+                    
+                }
+            }
+
+            selectedForms.Clear();
+        }
+
+        public static void MoveSelected(Form activeForm, int X, int Y)
+        {
+            foreach (Form form in selectedForms) {
+                if (form != activeForm) {
+                    form.Left += X;
+                    form.Top += Y;
+                }
+            }
         }
 
         // MAIN

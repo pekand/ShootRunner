@@ -20,9 +20,11 @@ namespace ShootRunner
         List<IntPtr> taskbarWindows = null;
 
         // Variables to track mouse movement
-        private bool dragging = false;
-        private Point dragCursorPoint;
-        private Point dragFormPoint;
+        public bool dragging = false;
+        public Point dragCursorPoint;
+        public Point dragFormPoint;
+
+        public bool selected = false;
 
         public FormPin(Window window)
         {
@@ -52,6 +54,7 @@ namespace ShootRunner
 
         public void CloseForm()
         {
+            Program.RemoveFormFromSelected(this);
             Program.pins.Remove(this);
             Program.Update();
             this.Close();
@@ -62,11 +65,10 @@ namespace ShootRunner
 
             if (m.Msg == ToolsWindow.WM_NCHITTEST)
             {
-                // Get mouse position relative to the form
                 Point pos = PointToClient(Cursor.Position);
                 Size size = this.ClientSize;
 
-                // If mouse is near the bottom-right corner, trigger resize
+                // RESIZE RIGHT BOTTOM CORNER
                 if (pos.X >= size.Width - 10 && pos.Y >= size.Height - 10)
                 {
                     this.makeSquery();
@@ -199,13 +201,39 @@ namespace ShootRunner
             }
         }
 
+
+        public void SetDragStartLocation() {
+            dragFormPoint = this.Location;
+            dragCursorPoint = Cursor.Position;
+        }
+
+        public void SetDragNewLocation()
+        {
+            Point diff = Point.Subtract(Cursor.Position, new Size(dragCursorPoint));
+            Point sum = Point.Add(dragFormPoint, new Size(diff));
+            this.Location = sum;
+        }
+
         private void FormPin_MouseDown(object sender, MouseEventArgs e)
         {
-            if (e.Button == MouseButtons.Left)
-            {
+            if ((Control.ModifierKeys & Keys.Shift) == Keys.Shift && e.Button == MouseButtons.Left) {
+                selected = !selected;
+                if (selected)
+                {
+                    Program.AddFormToSelected(this);
+                }
+                else { 
+                    Program.RemoveFormFromSelected(this);
+                }
+                this.Refresh();
+            } else if (e.Button == MouseButtons.Left) {
                 dragging = true;
                 dragCursorPoint = Cursor.Position;
                 dragFormPoint = this.Location;
+                if (selected)
+                {
+                    Program.SetDragStartToSelectedForms(this);
+                }
             }
         }
 
@@ -214,7 +242,11 @@ namespace ShootRunner
             if (dragging)
             {
                 Point diff = Point.Subtract(Cursor.Position, new Size(dragCursorPoint));
-                this.Location = Point.Add(dragFormPoint, new Size(diff));
+                Point sum = Point.Add(dragFormPoint, new Size(diff));
+                this.Location = sum;
+                if (this.selected) {
+                    Program.SetDragSelectedFormsPosition(this);
+                }
             }
         }
 
@@ -264,6 +296,10 @@ namespace ShootRunner
             else if (this.window.icon != null)
             {
                 e.Graphics.DrawImage(this.window.icon, new Rectangle(0, 0, this.Width, this.Height));
+            }
+
+            if (selected) {
+                e.Graphics.FillEllipse(new SolidBrush(Color.Beige), 0, 0, 10, 10);
             }
         }
 
@@ -396,6 +432,7 @@ namespace ShootRunner
 
         private void removeToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            
             this.CloseForm();
         }
 
@@ -539,8 +576,34 @@ namespace ShootRunner
                     }
                 }
             }
-            else {
+            else
+            {
                 e.Effect = DragDropEffects.None;
+            }
+        }
+
+        private void FormPin_KeyDown(object sender, KeyEventArgs e)
+        {
+            int moveAmount = e.Shift ? 1 : 10;
+
+            switch (e.KeyCode)
+            {
+                case Keys.Up:
+                    Top -= moveAmount;
+                    Program.MoveSelected(this, 0, -moveAmount);
+                    break;
+                case Keys.Down:
+                    Top += moveAmount;
+                    Program.MoveSelected(this, 0, +moveAmount);
+                    break;
+                case Keys.Left:
+                    Left -= moveAmount;
+                    Program.MoveSelected(this, -moveAmount, 0);
+                    break;
+                case Keys.Right:
+                    Left += moveAmount;
+                    Program.MoveSelected(this, +moveAmount, 0);
+                    break;
             }
         }
 
