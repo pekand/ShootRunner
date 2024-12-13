@@ -51,6 +51,9 @@ namespace ShootRunner
 
         public const int HTCAPTION = 0x2;
         public const int HTBOTTOMRIGHT = 17;
+        public const int HTTOPLEFT = 13;
+        public const int HTTOPRIGHT = 14;
+        public const int HTBOTTOMLEFT = 16;
 
         private const uint DWMWA_CLOAKED = 14;
 

@@ -214,21 +214,33 @@ namespace ShootRunner
         {
             if (!this.widget.locked && m.Msg == ToolsWindow.WM_NCHITTEST)
             {
-                // Get mouse position relative to the form
                 Point pos = PointToClient(Cursor.Position);
                 Size size = this.ClientSize;
 
-                // If mouse is near the bottom-right corner, trigger resize
-                if (pos.X >= size.Width - 10 && pos.Y >= size.Height - 10)
+                // RESIZE WITH CORNER
+                if (size.Width - 10 <= pos.X && size.Height - 10 <= pos.Y)
                 {
                     m.Result = (IntPtr)ToolsWindow.HTBOTTOMRIGHT;
                     return;
                 }
-            }
 
-            if (this.widget.locked && (m.Msg == ToolsWindow.WM_NCLBUTTONDOWN && m.WParam.ToInt32() == ToolsWindow.HTCAPTION))
-            {
-                return;
+                if (pos.X <= 10 && pos.Y <= 10)
+                {
+                    m.Result = (IntPtr)ToolsWindow.HTTOPLEFT;
+                    return;
+                }
+
+                if (size.Width - 10 <= pos.X && pos.Y <= 10)
+                {
+                    m.Result = (IntPtr)ToolsWindow.HTTOPRIGHT;
+                    return;
+                }
+
+                if (pos.X <= 10 && size.Height - 10 <= pos.Y)
+                {
+                    m.Result = (IntPtr)ToolsWindow.HTBOTTOMLEFT;
+                    return;
+                }
             }
 
             base.WndProc(ref m);
@@ -451,19 +463,20 @@ namespace ShootRunner
             mouseDownX = e.X;
             mouseDownY = e.Y;
 
-            if (!this.widget.locked && e.Y < 10 && e.Button == MouseButtons.Left)
-            {
-                dragging = true;
-                dragCursorPoint = Cursor.Position;
-                dragFormPoint = this.Location;
-            }
-            else if (!dragging && e.Button == MouseButtons.Left)
+            if (!dragging && e.Button == MouseButtons.Left)
             {
                 draggingWindow = GetWindowOnposition(e.X, e.Y);
                 if (draggingWindow != null)
                 {
                     draggingItem = true;
                     mouseDownPos = GetSpaceOnposition(e.X, e.Y);
+                }
+                else {
+                    if (!this.widget.locked) {
+                        dragging = true;
+                        dragCursorPoint = Cursor.Position;
+                        dragFormPoint = this.Location;
+                    }
                 }
 
             }

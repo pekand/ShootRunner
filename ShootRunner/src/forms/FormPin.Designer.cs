@@ -207,6 +207,7 @@
             ResizeEnd += FormPin_ResizeEnd;
             DragEnter += FormPin_DragEnter;
             Paint += FormPin_Paint;
+            KeyDown += FormPin_KeyDown;
             MouseDoubleClick += FormPin_MouseDoubleClick;
             MouseDown += FormPin_MouseDown;
             MouseMove += FormPin_MouseMove;
