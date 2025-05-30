@@ -202,7 +202,8 @@ namespace ShootRunner
         }
 
 
-        public void SetDragStartLocation() {
+        public void SetDragStartLocation()
+        {
             dragFormPoint = this.Location;
             dragCursorPoint = Cursor.Position;
         }
@@ -214,19 +215,35 @@ namespace ShootRunner
             this.Location = sum;
         }
 
+        public void UnselectPin()
+        {
+            selected = false;
+            this.Refresh();
+        }
+
+        public void SelectPin()
+        {
+            selected = true;
+            this.Refresh();
+        }
+
         private void FormPin_MouseDown(object sender, MouseEventArgs e)
         {
-            if ((Control.ModifierKeys & Keys.Shift) == Keys.Shift && e.Button == MouseButtons.Left) {
+            if ((Control.ModifierKeys & Keys.Shift) == Keys.Shift && e.Button == MouseButtons.Left)
+            {
                 selected = !selected;
                 if (selected)
                 {
                     Program.AddFormToSelected(this);
                 }
-                else { 
+                else
+                {
                     Program.RemoveFormFromSelected(this);
                 }
                 this.Refresh();
-            } else if (e.Button == MouseButtons.Left) {
+            }
+            else if (e.Button == MouseButtons.Left)
+            {
                 dragging = true;
                 dragCursorPoint = Cursor.Position;
                 dragFormPoint = this.Location;
@@ -244,7 +261,8 @@ namespace ShootRunner
                 Point diff = Point.Subtract(Cursor.Position, new Size(dragCursorPoint));
                 Point sum = Point.Add(dragFormPoint, new Size(diff));
                 this.Location = sum;
-                if (this.selected) {
+                if (this.selected)
+                {
                     Program.SetDragSelectedFormsPosition(this);
                 }
             }
@@ -298,8 +316,11 @@ namespace ShootRunner
                 e.Graphics.DrawImage(this.window.icon, new Rectangle(0, 0, this.Width, this.Height));
             }
 
-            if (selected) {
-                e.Graphics.FillEllipse(new SolidBrush(Color.Beige), 0, 0, 10, 10);
+            using var pen = new Pen(Color.LightGray, 5);
+            if (selected)
+            {
+
+                e.Graphics.DrawRectangle(pen, rect);
             }
         }
 
@@ -368,11 +389,11 @@ namespace ShootRunner
 
         private void setIconToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (openFileDialog1.ShowDialog() == DialogResult.OK)
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
                 try
                 {
-                    string selectedFilePath = openFileDialog1.FileName;
+                    string selectedFilePath = openFileDialog.FileName;
                     using (var image = Image.FromFile(selectedFilePath))
                     {
                         if (this.window.customicon != null)
@@ -432,7 +453,7 @@ namespace ShootRunner
 
         private void removeToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            
+
             this.CloseForm();
         }
 
@@ -605,6 +626,16 @@ namespace ShootRunner
                     Program.MoveSelected(this, +moveAmount, 0);
                     break;
             }
+        }
+
+        private void selectAllToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Program.SelectAllPins();
+        }
+
+        private void deselectAllToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Program.DeselectAllPins();
         }
 
         /*********************************************************************************/
