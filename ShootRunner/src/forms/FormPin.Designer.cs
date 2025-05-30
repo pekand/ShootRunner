@@ -30,7 +30,7 @@
         {
             components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormPin));
-            contextMenuStrip1 = new ContextMenuStrip(components);
+            contextMenuStrip = new ContextMenuStrip(components);
             pinToolStripMenuItem = new ToolStripMenuItem();
             selectToolStripMenuItem = new ToolStripMenuItem();
             commandToolStripMenuItem = new ToolStripMenuItem();
@@ -38,6 +38,7 @@
             runToolStripMenuItem = new ToolStripMenuItem();
             minimalizeToolStripMenuItem = new ToolStripMenuItem();
             removeToolStripMenuItem = new ToolStripMenuItem();
+            selectAllToolStripMenuItem = new ToolStripMenuItem();
             optionsToolStripMenuItem = new ToolStripMenuItem();
             setIconToolStripMenuItem1 = new ToolStripMenuItem();
             dobleClickToActivateToolStripMenuItem = new ToolStripMenuItem();
@@ -49,21 +50,22 @@
             applicationToolStripMenuItem = new ToolStripMenuItem();
             consoleToolStripMenuItem = new ToolStripMenuItem();
             closeToolStripMenuItem1 = new ToolStripMenuItem();
-            openFileDialog1 = new OpenFileDialog();
-            timer1 = new System.Windows.Forms.Timer(components);
-            contextMenuStrip1.SuspendLayout();
+            openFileDialog = new OpenFileDialog();
+            timer = new System.Windows.Forms.Timer(components);
+            deselectAllToolStripMenuItem = new ToolStripMenuItem();
+            contextMenuStrip.SuspendLayout();
             SuspendLayout();
             // 
-            // contextMenuStrip1
+            // contextMenuStrip
             // 
-            contextMenuStrip1.Items.AddRange(new ToolStripItem[] { pinToolStripMenuItem, optionsToolStripMenuItem, toolStripMenuItem1, widgetToolStripMenuItem, applicationToolStripMenuItem });
-            contextMenuStrip1.Name = "contextMenuStrip1";
-            contextMenuStrip1.Size = new Size(147, 106);
-            contextMenuStrip1.Opening += contextMenuStrip1_Opening;
+            contextMenuStrip.Items.AddRange(new ToolStripItem[] { pinToolStripMenuItem, optionsToolStripMenuItem, toolStripMenuItem1, widgetToolStripMenuItem, applicationToolStripMenuItem });
+            contextMenuStrip.Name = "contextMenuStrip1";
+            contextMenuStrip.Size = new Size(147, 106);
+            contextMenuStrip.Opening += contextMenuStrip1_Opening;
             // 
             // pinToolStripMenuItem
             // 
-            pinToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { selectToolStripMenuItem, commandToolStripMenuItem, newPinToolStripMenuItem, runToolStripMenuItem, minimalizeToolStripMenuItem, removeToolStripMenuItem });
+            pinToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { selectToolStripMenuItem, commandToolStripMenuItem, newPinToolStripMenuItem, runToolStripMenuItem, minimalizeToolStripMenuItem, removeToolStripMenuItem, selectAllToolStripMenuItem, deselectAllToolStripMenuItem });
             pinToolStripMenuItem.Name = "pinToolStripMenuItem";
             pinToolStripMenuItem.Size = new Size(146, 24);
             pinToolStripMenuItem.Text = "Pin";
@@ -71,44 +73,51 @@
             // selectToolStripMenuItem
             // 
             selectToolStripMenuItem.Name = "selectToolStripMenuItem";
-            selectToolStripMenuItem.Size = new Size(143, 24);
+            selectToolStripMenuItem.Size = new Size(180, 24);
             selectToolStripMenuItem.Text = "Select";
             selectToolStripMenuItem.Click += selectToolStripMenuItem_Click;
             // 
             // commandToolStripMenuItem
             // 
             commandToolStripMenuItem.Name = "commandToolStripMenuItem";
-            commandToolStripMenuItem.Size = new Size(143, 24);
+            commandToolStripMenuItem.Size = new Size(180, 24);
             commandToolStripMenuItem.Text = "Command";
             commandToolStripMenuItem.Click += setCommandToolStripMenuItem_Click;
             // 
             // newPinToolStripMenuItem
             // 
             newPinToolStripMenuItem.Name = "newPinToolStripMenuItem";
-            newPinToolStripMenuItem.Size = new Size(143, 24);
+            newPinToolStripMenuItem.Size = new Size(180, 24);
             newPinToolStripMenuItem.Text = "New pin";
             newPinToolStripMenuItem.Click += newPinToolStripMenuItem_Click;
             // 
             // runToolStripMenuItem
             // 
             runToolStripMenuItem.Name = "runToolStripMenuItem";
-            runToolStripMenuItem.Size = new Size(143, 24);
+            runToolStripMenuItem.Size = new Size(180, 24);
             runToolStripMenuItem.Text = "Duplicate";
             runToolStripMenuItem.Click += duplicateToolStripMenuItem_Click;
             // 
             // minimalizeToolStripMenuItem
             // 
             minimalizeToolStripMenuItem.Name = "minimalizeToolStripMenuItem";
-            minimalizeToolStripMenuItem.Size = new Size(143, 24);
+            minimalizeToolStripMenuItem.Size = new Size(180, 24);
             minimalizeToolStripMenuItem.Text = "Minimalize";
             minimalizeToolStripMenuItem.Click += minimalizeToolStripMenuItem_Click_1;
             // 
             // removeToolStripMenuItem
             // 
             removeToolStripMenuItem.Name = "removeToolStripMenuItem";
-            removeToolStripMenuItem.Size = new Size(143, 24);
+            removeToolStripMenuItem.Size = new Size(180, 24);
             removeToolStripMenuItem.Text = "Remove";
             removeToolStripMenuItem.Click += removeToolStripMenuItem_Click;
+            // 
+            // selectAllToolStripMenuItem
+            // 
+            selectAllToolStripMenuItem.Name = "selectAllToolStripMenuItem";
+            selectAllToolStripMenuItem.Size = new Size(180, 24);
+            selectAllToolStripMenuItem.Text = "Select all";
+            selectAllToolStripMenuItem.Click += selectAllToolStripMenuItem_Click;
             // 
             // optionsToolStripMenuItem
             // 
@@ -185,18 +194,25 @@
             closeToolStripMenuItem1.Text = "Exit";
             closeToolStripMenuItem1.Click += closeToolStripMenuItem1_Click_1;
             // 
-            // openFileDialog1
+            // openFileDialog
             // 
-            openFileDialog1.FileName = "openFileDialog1";
-            openFileDialog1.Filter = "Image Files|*.ico;*.bmp;*.jpg;*.jpeg;*.png;";
-            openFileDialog1.Title = "Select icon";
+            openFileDialog.FileName = "openFileDialog1";
+            openFileDialog.Filter = "Image Files|*.ico;*.bmp;*.jpg;*.jpeg;*.png;";
+            openFileDialog.Title = "Select icon";
+            // 
+            // deselectAllToolStripMenuItem
+            // 
+            deselectAllToolStripMenuItem.Name = "deselectAllToolStripMenuItem";
+            deselectAllToolStripMenuItem.Size = new Size(180, 24);
+            deselectAllToolStripMenuItem.Text = "Deselect all";
+            deselectAllToolStripMenuItem.Click += deselectAllToolStripMenuItem_Click;
             // 
             // FormPin
             // 
             AutoScaleDimensions = new SizeF(8F, 19F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1067, 658);
-            ContextMenuStrip = contextMenuStrip1;
+            ContextMenuStrip = contextMenuStrip;
             Icon = (Icon)resources.GetObject("$this.Icon");
             Margin = new Padding(4);
             Name = "FormPin";
@@ -213,14 +229,14 @@
             MouseMove += FormPin_MouseMove;
             MouseUp += FormPin_MouseUp;
             Resize += FormPin_Resize;
-            contextMenuStrip1.ResumeLayout(false);
+            contextMenuStrip.ResumeLayout(false);
             ResumeLayout(false);
         }
 
         #endregion
 
-        private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
-        private System.Windows.Forms.OpenFileDialog openFileDialog1;
+        private System.Windows.Forms.ContextMenuStrip contextMenuStrip;
+        private System.Windows.Forms.OpenFileDialog openFileDialog;
         private System.Windows.Forms.ToolStripMenuItem optionsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem setIconToolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem dobleClickToActivateToolStripMenuItem;
@@ -234,11 +250,13 @@
         private System.Windows.Forms.ToolStripMenuItem selectToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem newPinToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem runToolStripMenuItem;
-        private System.Windows.Forms.Timer timer1;
+        private System.Windows.Forms.Timer timer;
         private System.Windows.Forms.ToolStripMenuItem minimalizeToolStripMenuItem;
         private ToolStripMenuItem taskbarToolStripMenuItem;
         private ToolStripMenuItem consoleToolStripMenuItem;
         private ToolStripSeparator toolStripMenuItem1;
         private ToolStripMenuItem commandToolStripMenuItem;
+        private ToolStripMenuItem selectAllToolStripMenuItem;
+        private ToolStripMenuItem deselectAllToolStripMenuItem;
     }
 }

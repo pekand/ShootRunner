@@ -549,6 +549,39 @@ namespace ShootRunner
             selectedForms.Remove(form);
         }
 
+        public static void SelectAllPins()
+        {
+            foreach (var pin in pins) {
+                if (selectedForms.Contains(pin)) { 
+                    continue;
+                }
+
+                selectedForms.Add(pin);
+                pin.SelectPin();
+            }
+            
+        }
+
+        public static void DeselectAllPins()
+        {
+            foreach (var form in selectedForms)
+            {
+                try
+                {
+                    FormPin pin = form as FormPin;
+                    pin.UnselectPin();
+                }
+                catch (Exception)
+                {
+
+                
+                }
+                
+            }
+
+            selectedForms.Clear();
+        }
+
         public static void SetDragStartToSelectedForms(Form activeForm) {
             foreach (Form form in selectedForms)
             {
