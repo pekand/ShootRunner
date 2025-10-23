@@ -42,7 +42,6 @@ namespace ShootRunner.src.forms
             textBox8.Text = window.command;
 
             pictureBox1.Image = window.icon;
-            pictureBox2.Image = window.customicon;
             pictureBox3.Image = window.screenshot;
         }
 

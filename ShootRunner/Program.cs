@@ -391,7 +391,7 @@ namespace ShootRunner
         // PIN FORM
         public static void CreatePin(Window window = null)
         {
-            FormPin pin = new FormPin(window);
+            FormPin pin = new FormPin(window, true);
             pins.Add(pin);
             pin.Show();
             pin.Center();
@@ -401,13 +401,7 @@ namespace ShootRunner
 
         // PIN FORM
         public static void AddEmptyPin() {
-
-            Window window = new Window();
-            window.Type = "COMMAND";
-            window.doubleClickCommand = true;
-
-            CreatePin(window);
-
+            CreatePin(null);
             Program.Update();
         }
 

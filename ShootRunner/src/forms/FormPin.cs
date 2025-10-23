@@ -2,6 +2,8 @@
 using System.ComponentModel;
 using System.Drawing.Drawing2D;
 using System.Runtime.InteropServices;
+using System.Threading;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TrayNotify;
 
 #nullable disable
 
@@ -15,7 +17,7 @@ namespace ShootRunner
         public int StartWidth = 64;
         public int StartHeight = 64;
 
-        public Window window = null;
+        public Pin pin = new Pin();
 
         List<IntPtr> taskbarWindows = null;
 
@@ -26,7 +28,7 @@ namespace ShootRunner
 
         public bool selected = false;
 
-        public FormPin(Window window)
+        public FormPin(Window window, bool newPin = false)
         {
             InitializeComponent();
 
@@ -39,7 +41,12 @@ namespace ShootRunner
             this.BackColor = System.Drawing.Color.Black;
             //this.TransparencyKey = System.Drawing.Color.Lime;
 
-            this.window = window;
+            this.pin.window = window;
+            if (this.pin.window != null && newPin) {
+                this.pin.useWindow = true;
+                this.pin.doubleClickCommand = false;                
+            }
+
             this.ShowInTaskbar = false;
             this.AllowDrop = true;
         }
@@ -48,8 +55,11 @@ namespace ShootRunner
         {
             this.SetStartPosition();
             this.makeRoundy();
-            this.Opacity = this.window.transparent < 0.2 ? 0.2 : this.window.transparent;
-            dobleClickToActivateToolStripMenuItem.Checked = this.window.doubleClickCommand;
+            if (this.pin.window != null) {
+                this.Opacity = this.pin.window.transparent < 0.2 ? 0.2 : this.pin.window.transparent;
+            }
+            dobleClickToActivateToolStripMenuItem.Checked = this.pin.doubleClickCommand;
+            FindPinWindow();
         }
 
         public void CloseForm()
@@ -90,143 +100,127 @@ namespace ShootRunner
             }
         }
 
-        public async void DoPinAction()
+        public void FindPinWindow()
         {
-            if (this.window.isDesktop)
+            if (this.pin.window != null && this.pin.window.app != null && this.pin.window.app.Trim() != "")
             {
-                ToolsWindow.ShowDesktop();
-            }
-            else if (this.window.Type == "COMMAND" && this.window.command != null && this.window.command.Trim() != "")
-            {
-                if (this.window.matchNewWindow && this.window.Handle != IntPtr.Zero && ToolsWindow.IsWindowValid(this.window))
+                bool foundWindow = false;
+                List<IntPtr> taskbarWindows = ToolsWindow.GetTaskbarWindows();
+                foreach (IntPtr Handle in taskbarWindows)
                 {
-                    ToolsWindow.BringWindowToFront(this.window);
+                    if (this.pin.window.Title == ToolsWindow.GetWindowTitle(Handle) && (
+                    this.pin.window.app == null || this.pin.window.app == ToolsWindow.GetApplicationPathFromWindow(Handle)))
+                    {
+                        this.pin.window.Handle = Handle;
+                        foundWindow = true;
+                        break;
+                    }
                 }
-                else
-                {
 
-                    JobTask.RunPowerShellCommand(window);
-                }
-            }
-            else if (this.window.Type == "WINDOW")
-            {
-                if (this.window.Handle != IntPtr.Zero && ToolsWindow.IsWindowValid(this.window))
+                if (!foundWindow)
                 {
-                    ToolsWindow.BringWindowToFront(this.window);
-                }
-                else if (this.window.app != null && this.window.app.Trim() != "")
-                {
-                    this.window.Handle = IntPtr.Zero;
-
-                    bool foundWindow = false;
-                    List<IntPtr> taskbarWindows = ToolsWindow.GetTaskbarWindows();
                     foreach (IntPtr Handle in taskbarWindows)
                     {
-                        if (this.window.Title == ToolsWindow.GetWindowTitle(Handle))
+                        if (this.pin.window.app != null && this.pin.window.app == ToolsWindow.GetApplicationPathFromWindow(Handle))
                         {
-                            this.window.Handle = Handle;
+                            this.pin.window.Handle = Handle;
                             foundWindow = true;
                             break;
                         }
                     }
+                }              
+            }
+        }
 
-                    if (!foundWindow)
+        public async void DoPinAction()
+        {
+
+            string wordir = null;
+
+            if (this.pin.useWorkdir) {
+                wordir = this.pin.workdir;
+            }
+
+            if (this.pin.window != null && this.pin.window.isDesktop)
+            {
+                ToolsWindow.ShowDesktop();
+            }
+
+            if (this.pin.useFilelink)
+            {
+                SystemTools.OpenFile(this.pin.filelink, wordir);
+            }
+
+            if (this.pin.useDirectorylink)
+            {
+                SystemTools.OpenDirectory(this.pin.directorylink, wordir);
+            }
+
+            if (this.pin.useHyperlink)
+            {
+                SystemTools.OpenHyperlink(this.pin.hyperlink, wordir);
+            }
+
+            if (this.pin.useScript)
+            {
+                //SystemTools.RunScript(this.pin.script, wordir, this.pin.silentCommand);
+                if (this.pin.usePowershell)
+                {
+                    if (this.pin.silentCommand) {
+                        await SystemTools.RunPowershellScriptWithTimeoutAsync(this.pin.script, wordir, this.pin.silentCommand);
+                    } else {
+                        await SystemTools.RunPowershellScriptVisibleWithTimeout(this.pin.script, wordir);
+                    }
+                }
+                if (this.pin.useCmdshell)
+                {
+                    await SystemTools.RunScriptWithTimeoutAsync(this.pin.script, wordir, this.pin.silentCommand);
+                }
+            }
+
+            if (this.pin.useCommand && this.pin.command != null && this.pin.command.Trim() != "")
+            {
+                if (this.pin.matchNewWindow && this.pin.window.Handle != IntPtr.Zero && ToolsWindow.IsWindowValid(this.pin.window))
+                {
+                    ToolsWindow.BringWindowToFront(this.pin.window);
+                }
+                else
+                {
+                    if (this.pin.usePowershell)
                     {
-                        foreach (IntPtr Handle in taskbarWindows)
+                        if (this.pin.silentCommand)
                         {
-                            if (this.window.app != null && this.window.app == ToolsWindow.GetApplicationPathFromWindow(Handle))
-                            {
-                                this.window.Handle = Handle;
-                                foundWindow = true;
-                                break;
-                            }
+                            await SystemTools.RunPowershellScriptWithTimeoutAsync(this.pin.command, wordir, this.pin.silentCommand);
+                        }
+                        else {
+                            await SystemTools.RunPowershellScriptVisibleWithTimeout(this.pin.command, wordir);
                         }
                     }
-
-                    if (foundWindow)
-                    {
-                        ToolsWindow.BringWindowToFront(this.window);
+                    if (this.pin.useCmdshell) {
+                        await SystemTools.RunScriptWithTimeoutAsync(this.pin.command, wordir, this.pin.silentCommand);
                     }
-                    else
-                    {
-                        if (this.window.app != null && this.window.app.Trim() != "")
-                        {
-                            Window window = await JobTask.StartProcessAndGetWindowHandleAsync(this.window.app, null, null, false, true);
+                }
+            }
 
-                            if (window != null && window.Handle != IntPtr.Zero)
-                            {
-                                this.window.Handle = window.Handle;
-                            }
-                        }
+            if (this.pin.useWindow && this.pin.window != null)
+            {
+                if (this.pin.window.Handle != IntPtr.Zero && ToolsWindow.IsWindowValid(this.pin.window) && ToolsWindow.IsWindowVisible(this.pin.window.Handle))
+                {
+                    ToolsWindow.BringWindowToFront(this.pin.window);
+                }
+                else if(this.pin.window.app != null && this.pin.window.app.Trim() != "")
+                    {
+                    Window window = await JobTask.StartProcessAndGetWindowHandleAsync(this.pin.window.app, null, null, false, true);
+
+                    if (window != null && window.Handle != IntPtr.Zero)
+                    {
+                        this.pin.window.Handle = window.Handle;
                     }
                 }
             }
         }
 
         /*************************************************************************/
-
-        private void FormPin_MouseUp(object sender, MouseEventArgs e)
-        {
-            if (dragging && e.Button == MouseButtons.Left)
-            {
-                dragging = false;
-
-                if (dragCursorPoint == Cursor.Position && !this.window.doubleClickCommand)
-                {
-                    this.DoPinAction();
-                }
-
-                if (dragCursorPoint != Cursor.Position)
-                {
-                    Program.Update();
-                }
-            }
-
-            if (e.Button == MouseButtons.Middle)
-            {
-                if (this.window.isDesktop)
-                {
-                    ToolsWindow.ShowDesktop(true);
-                }
-                else if (this.window.Type == "WINDOW" && this.window.Handle != IntPtr.Zero && ToolsWindow.IsWindowValid(this.window))
-                {
-
-                    ToolsWindow.MinimizeWindow(this.window);
-                }
-                else if (this.window.Type == "COMMAND" && this.window.matchNewWindow && this.window.Handle != IntPtr.Zero && ToolsWindow.IsWindowValid(this.window))
-                {
-
-                    ToolsWindow.MinimizeWindow(this.window);
-                }
-            }
-        }
-
-
-        public void SetDragStartLocation()
-        {
-            dragFormPoint = this.Location;
-            dragCursorPoint = Cursor.Position;
-        }
-
-        public void SetDragNewLocation()
-        {
-            Point diff = Point.Subtract(Cursor.Position, new Size(dragCursorPoint));
-            Point sum = Point.Add(dragFormPoint, new Size(diff));
-            this.Location = sum;
-        }
-
-        public void UnselectPin()
-        {
-            selected = false;
-            this.Refresh();
-        }
-
-        public void SelectPin()
-        {
-            selected = true;
-            this.Refresh();
-        }
-
         private void FormPin_MouseDown(object sender, MouseEventArgs e)
         {
             if ((Control.ModifierKeys & Keys.Shift) == Keys.Shift && e.Button == MouseButtons.Left)
@@ -268,11 +262,47 @@ namespace ShootRunner
             }
         }
 
+        private void FormPin_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (dragging && e.Button == MouseButtons.Left)
+            {
+                dragging = false;
+
+                if (dragCursorPoint == Cursor.Position && !this.pin.doubleClickCommand)
+                {
+                    this.DoPinAction();
+                }
+
+                if (dragCursorPoint != Cursor.Position)
+                {
+                    Program.Update();
+                }
+            }
+
+            if (e.Button == MouseButtons.Middle)
+            {
+                if (this.pin.window.isDesktop)
+                {
+                    ToolsWindow.ShowDesktop(true);
+                }
+                else if (this.pin.useWindow && this.pin.window.Handle != IntPtr.Zero && ToolsWindow.IsWindowValid(this.pin.window))
+                {
+
+                    ToolsWindow.MinimizeWindow(this.pin.window);
+                }
+                else if (this.pin.useCommand && this.pin.matchNewWindow && this.pin.window.Handle != IntPtr.Zero && ToolsWindow.IsWindowValid(this.pin.window))
+                {
+
+                    ToolsWindow.MinimizeWindow(this.pin.window);
+                }
+            }
+        }
+
         private void FormPin_MouseDoubleClick(object sender, MouseEventArgs e)
         {
             try
             {
-                if (this.window.doubleClickCommand)
+                if (this.pin.doubleClickCommand)
                 {
                     this.DoPinAction();
                 }
@@ -282,6 +312,31 @@ namespace ShootRunner
                 Program.error(ex.Message);
 
             }
+        }
+
+        public void SetDragStartLocation()
+        {
+            dragFormPoint = this.Location;
+            dragCursorPoint = Cursor.Position;
+        }
+
+        public void SetDragNewLocation()
+        {
+            Point diff = Point.Subtract(Cursor.Position, new Size(dragCursorPoint));
+            Point sum = Point.Add(dragFormPoint, new Size(diff));
+            this.Location = sum;
+        }
+
+        public void UnselectPin()
+        {
+            selected = false;
+            this.Refresh();
+        }
+
+        public void SelectPin()
+        {
+            selected = true;
+            this.Refresh();
         }
 
         private void FormPin_Resize(object sender, EventArgs e)
@@ -307,13 +362,13 @@ namespace ShootRunner
 
             }
 
-            if (this.window.customicon != null)
+            if (this.pin.customicon != null)
             {
-                e.Graphics.DrawImage(this.window.customicon, new Rectangle(0, 0, this.Width, this.Height));
+                e.Graphics.DrawImage(this.pin.customicon, new Rectangle(0, 0, this.Width, this.Height));
             }
-            else if (this.window.icon != null)
+            else if (this.pin.window != null && this.pin.window.icon != null)
             {
-                e.Graphics.DrawImage(this.window.icon, new Rectangle(0, 0, this.Width, this.Height));
+                e.Graphics.DrawImage(this.pin.window.icon, new Rectangle(0, 0, this.Width, this.Height));
             }
 
             using var pen = new Pen(Color.LightGray, 5);
@@ -338,7 +393,7 @@ namespace ShootRunner
 
         private void contextMenuStrip1_Opening(object sender, CancelEventArgs e)
         {
-            dobleClickToActivateToolStripMenuItem.Checked = this.window.doubleClickCommand;
+            dobleClickToActivateToolStripMenuItem.Checked = this.pin.doubleClickCommand;
             AddWindowsToContextMenu();
         }
 
@@ -355,6 +410,12 @@ namespace ShootRunner
                 ToolStripMenuItem item = new ToolStripMenuItem(window.Title);
                 item.Image = window.icon;
                 item.Click += (sender, e) => SelectType(window);
+
+                if (this.pin.window != null && this.pin.window.Handle == Handle) {
+                    item.Checked = true;
+                    item.Font = new Font(item.Font, FontStyle.Bold);
+                }
+
                 selectToolStripMenuItem.DropDownItems.Add(item);
             }
         }
@@ -368,22 +429,24 @@ namespace ShootRunner
         {
             ToolsWindow.SetWindowData(window);
 
-            if (window == null)
+            if (window == null || this.pin.window == window)
             {
                 return;
             }
 
-            window.customicon = (Bitmap)this.window.customicon?.Clone();
-            this.window.Dispose();
-            this.window = window;
-
-            this.Refresh();
-
+            if (this.pin.window != null) {
+                this.pin.window.Dispose();
+            }
+            if (this.pin.window != window) {
+                this.pin.useWindow = true;
+                this.pin.window = window;                
+                this.Refresh();
+            }
         }
 
         private void setCommandToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            FormCommand formCommand = new FormCommand(this.window);
+            FormCommand formCommand = new FormCommand(this);
             formCommand.Show();
         }
 
@@ -396,11 +459,11 @@ namespace ShootRunner
                     string selectedFilePath = openFileDialog.FileName;
                     using (var image = Image.FromFile(selectedFilePath))
                     {
-                        if (this.window.customicon != null)
+                        if (this.pin.customicon != null)
                         {
-                            this.window.customicon.Dispose();
+                            this.pin.customicon.Dispose();
                         }
-                        this.window.customicon = new Bitmap(image);
+                        this.pin.customicon = new Bitmap(image);
                         this.Refresh();
                     }
 
@@ -415,12 +478,12 @@ namespace ShootRunner
 
         private void minimalizeToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            ToolsWindow.MinimizeWindow(this.window);
+            ToolsWindow.MinimizeWindow(this.pin.window);
         }
 
         private void closeToolStripMenuItem1_Click(object sender, EventArgs e)
         {
-            ToolsWindow.CloseWindow(this.window);
+            ToolsWindow.CloseWindow(this.pin.window);
         }
 
         private void newPinToolStripMenuItem_Click(object sender, EventArgs e)
@@ -443,7 +506,7 @@ namespace ShootRunner
             FormTransparent form = new FormTransparent(null, this);
             form.trackBar1.Value = (int)(this.Opacity * 100);
             form.Show();
-            this.window.transparent = this.Opacity;
+            this.pin.transparent = this.Opacity;
         }
 
         private void selectWindowToolStripMenuItem_Click(object sender, EventArgs e)
@@ -460,23 +523,23 @@ namespace ShootRunner
         private void dobleClickToActivateToolStripMenuItem_Click(object sender, EventArgs e)
         {
 
-            this.window.doubleClickCommand = !this.window.doubleClickCommand;
-            dobleClickToActivateToolStripMenuItem.Checked = this.window.doubleClickCommand;
+            this.pin.doubleClickCommand = !this.pin.doubleClickCommand;
+            dobleClickToActivateToolStripMenuItem.Checked = this.pin.doubleClickCommand;
             Program.Update();
         }
 
         private async void duplicateToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (this.window.Type == "COMMAND")
+            if (this.pin.useCommand)
             {
-                JobTask.RunPowerShellCommand(this.window.command, null, this.window.silentCommand);
+                JobTask.RunPowerShellCommand(this.pin.command, null, this.pin.silentCommand);
             }
 
-            if (this.window.Type == "WINDOW")
+            if (this.pin.useWindow)
             {
-                if (this.window.app != null && this.window.app.Trim() != "")
+                if (this.pin.window.app != null && this.pin.window.app.Trim() != "")
                 {
-                    Window window = await JobTask.StartProcessAndGetWindowHandleAsync(this.window.app, null, null, this.window.silentCommand);
+                    Window window = await JobTask.StartProcessAndGetWindowHandleAsync(this.pin.window.app, null, null, this.pin.silentCommand);
 
                     if (window != null && window.Handle != IntPtr.Zero)
                     {
@@ -491,9 +554,9 @@ namespace ShootRunner
         {
             try
             {
-                if (this.window.Type == "WINDOW" && this.window.Handle != IntPtr.Zero)
+                if (this.pin.useWindow && this.pin.window.Handle != IntPtr.Zero)
                 {
-                    ToolsWindow.MinimizeWindow(this.window);
+                    ToolsWindow.MinimizeWindow(this.pin.window);
                 }
             }
             catch (Exception ex)
@@ -568,30 +631,30 @@ namespace ShootRunner
             {
                 e.Effect = DragDropEffects.Copy;
 
-                if (this.window != null)
+                if (this.pin.window != null)
                 {
-                    if (this.window.Type == "COMMAND" && this.window.command != null && this.window.command.Trim() != "")
+                    if (this.pin.useCommand && this.pin.command != null && this.pin.command.Trim() != "")
                     {
-                        if (this.window.matchNewWindow && this.window.Handle != IntPtr.Zero && ToolsWindow.IsWindowValid(this.window))
+                        if (this.pin.matchNewWindow && this.pin.window.Handle != IntPtr.Zero && ToolsWindow.IsWindowValid(this.pin.window))
                         {
                             IntPtr currentWindow = ToolsWindow.GetCurrentWindow();
-                            if (currentWindow != IntPtr.Zero && this.window.Handle != currentWindow)
+                            if (currentWindow != IntPtr.Zero && this.pin.window.Handle != currentWindow)
                             {
                                 Program.info("front");
-                                ToolsWindow.BringWindowToFront(this.window);
+                                ToolsWindow.BringWindowToFront(this.pin.window);
                             }
 
                         }
                     }
-                    else if (this.window.Type == "WINDOW")
+                    else if (this.pin.useWindow)
                     {
-                        if (this.window.Handle != IntPtr.Zero && ToolsWindow.IsWindowValid(this.window))
+                        if (this.pin.window.Handle != IntPtr.Zero && ToolsWindow.IsWindowValid(this.pin.window))
                         {
                             IntPtr currentWindow = ToolsWindow.GetCurrentWindow();
-                            if (currentWindow != IntPtr.Zero && this.window.Handle != currentWindow)
+                            if (currentWindow != IntPtr.Zero && this.pin.window.Handle != currentWindow)
                             {
                                 Program.info("front");
-                                ToolsWindow.BringWindowToFront(this.window);
+                                ToolsWindow.BringWindowToFront(this.pin.window);
                             }
                         }
                     }
@@ -601,6 +664,11 @@ namespace ShootRunner
             {
                 e.Effect = DragDropEffects.None;
             }
+        }
+
+        private void FormPin_DragDrop(object sender, DragEventArgs e)
+        {
+
         }
 
         private void FormPin_KeyDown(object sender, KeyEventArgs e)
@@ -636,6 +704,11 @@ namespace ShootRunner
         private void deselectAllToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Program.DeselectAllPins();
+        }
+
+        public void RefreshIcon() {
+            this.Refresh();
+
         }
 
         /*********************************************************************************/

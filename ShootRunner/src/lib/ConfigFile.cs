@@ -59,29 +59,52 @@ namespace ShootRunner
             XElement items = new XElement("pins");
             root.Add(items);
 
-            foreach (FormPin pin in Program.pins)
+            foreach (FormPin pinForm in Program.pins)
             {
                 XElement item = new XElement("pin");
                 items.Add(item);
-                item.Add(new XElement("type", pin.window.Type));
-                item.Add(new XElement("title", pin.window.Title));
-                item.Add(new XElement("app", pin.window.app));
-                item.Add(new XElement("command", pin.window.command));
-                item.Add(new XElement("silentcommand", ConvertTo.BoolToString(pin.window.silentCommand)));
-                item.Add(new XElement("doubleclickcommand", ConvertTo.BoolToString(pin.window.doubleClickCommand)));
-                item.Add(new XElement("icon", ConvertTo.BitmapToString(pin.window.icon)));
-                if (pin.window.customicon != null) {
-                    item.Add(new XElement("customicon", ConvertTo.BitmapToString(pin.window.customicon)));
+
+                if (pinForm.pin.window != null) {
+                    item.Add(new XElement("type", pinForm.pin.window.Type));
+                    item.Add(new XElement("title", pinForm.pin.window.Title));
+                    item.Add(new XElement("app", pinForm.pin.window.app));
+                    item.Add(new XElement("icon", ConvertTo.BitmapToString(pinForm.pin.window.icon)));
+                    item.Add(new XElement("isDesktop", ConvertTo.BoolToString(pinForm.pin.window.isDesktop)));
+                    item.Add(new XElement("isTaskbar", ConvertTo.BoolToString(pinForm.pin.window.isTaskbar)));
                 }
-                item.Add(new XElement("isDesktop", ConvertTo.BoolToString(pin.window.isDesktop)));
-                item.Add(new XElement("isTaskbar", ConvertTo.BoolToString(pin.window.isTaskbar)));
-                item.Add(new XElement("left", pin.Left.ToString()));
-                item.Add(new XElement("top", pin.Top.ToString()));
-                item.Add(new XElement("width", pin.Width.ToString()));
-                item.Add(new XElement("height", pin.Height.ToString()));
-                item.Add(new XElement("mosttop", ConvertTo.BoolToString(pin.window.mosttop)));
-                item.Add(new XElement("locked", ConvertTo.BoolToString(pin.window.locked)));
-                item.Add(new XElement("transparent", ConvertTo.DoubleToString(pin.window.transparent)));
+
+
+                item.Add(new XElement("usewindow", ConvertTo.BoolToString(pinForm.pin.useWindow)));
+                item.Add(new XElement("usefilelink", ConvertTo.BoolToString(pinForm.pin.useFilelink)));
+                item.Add(new XElement("filelink", pinForm.pin.filelink));
+                item.Add(new XElement("usedirectorylink", ConvertTo.BoolToString(pinForm.pin.useDirectorylink)));
+                item.Add(new XElement("directorylink", pinForm.pin.directorylink));
+                item.Add(new XElement("usehyperlink", ConvertTo.BoolToString(pinForm.pin.useHyperlink)));
+                item.Add(new XElement("hyperlink", pinForm.pin.hyperlink));
+                item.Add(new XElement("usescript", ConvertTo.BoolToString(pinForm.pin.useScript)));
+                item.Add(new XElement("script", pinForm.pin.script));
+
+                item.Add(new XElement("usecommand", ConvertTo.BoolToString(pinForm.pin.useCommand)));
+                item.Add(new XElement("command", pinForm.pin.command));
+                item.Add(new XElement("useworkdir", ConvertTo.BoolToString(pinForm.pin.useWorkdir)));
+                item.Add(new XElement("workdir", pinForm.pin.workdir));
+                item.Add(new XElement("usepowershell", ConvertTo.BoolToString(pinForm.pin.usePowershell)));
+                item.Add(new XElement("usecmdshell", ConvertTo.BoolToString(pinForm.pin.useCmdshell)));
+                item.Add(new XElement("silentcommand", ConvertTo.BoolToString(pinForm.pin.silentCommand)));
+                item.Add(new XElement("matchNewWindow", ConvertTo.BoolToString(pinForm.pin.matchNewWindow)));
+                item.Add(new XElement("doubleclickcommand", ConvertTo.BoolToString(pinForm.pin.doubleClickCommand)));
+                
+                if (pinForm.pin.customicon != null) {
+                    item.Add(new XElement("customicon", ConvertTo.BitmapToString(pinForm.pin.customicon)));
+                }
+
+                item.Add(new XElement("left", pinForm.Left.ToString()));
+                item.Add(new XElement("top", pinForm.Top.ToString()));
+                item.Add(new XElement("width", pinForm.Width.ToString()));
+                item.Add(new XElement("height", pinForm.Height.ToString()));
+                item.Add(new XElement("mosttop", ConvertTo.BoolToString(pinForm.pin.mosttop)));
+                item.Add(new XElement("locked", ConvertTo.BoolToString(pinForm.pin.locked)));
+                item.Add(new XElement("transparent", ConvertTo.DoubleToString(pinForm.pin.transparent)));
             }
 
             XElement widgets = new XElement("widgets");
@@ -220,19 +243,94 @@ namespace ShootRunner
                                             window.app = el.Value;
                                         }
 
+                                        if (el.Name.ToString() == "usewindow")
+                                        {
+                                            formPin.pin.useWindow = ConvertTo.StringToBool(el.Value);
+                                        }
+
+                                        if (el.Name.ToString() == "usefilelink")
+                                        {
+                                            formPin.pin.useFilelink = ConvertTo.StringToBool(el.Value);
+                                        }
+
+                                        if (el.Name.ToString() == "filelink")
+                                        {
+                                            formPin.pin.filelink = TextTools.NormalizeLineEndings(el.Value);
+                                        }
+
+                                        if (el.Name.ToString() == "usedirectorylink")
+                                        {
+                                            formPin.pin.useDirectorylink = ConvertTo.StringToBool(el.Value);
+                                        }
+
+                                        if (el.Name.ToString() == "directorylink")
+                                        {
+                                            formPin.pin.directorylink = TextTools.NormalizeLineEndings(el.Value);
+                                        }
+
+                                        if (el.Name.ToString() == "usehyperlink")
+                                        {
+                                            formPin.pin.useHyperlink = ConvertTo.StringToBool(el.Value);
+                                        }
+
+                                        if (el.Name.ToString() == "hyperlink")
+                                        {
+                                            formPin.pin.hyperlink = TextTools.NormalizeLineEndings(el.Value);
+                                        }
+
+                                        if (el.Name.ToString() == "usescript")
+                                        {
+                                            formPin.pin.useScript = ConvertTo.StringToBool(el.Value);
+                                        }
+
+                                        if (el.Name.ToString() == "script")
+                                        {
+                                            formPin.pin.script = TextTools.NormalizeLineEndings(el.Value);
+                                        }
+
+                                        if (el.Name.ToString() == "usecommand")
+                                        {
+                                            formPin.pin.useCommand = ConvertTo.StringToBool(el.Value);
+                                        }
+
                                         if (el.Name.ToString() == "command")
                                         {
                                             window.command = TextTools.NormalizeLineEndings(el.Value);
                                         }
 
+                                        if (el.Name.ToString() == "useworkdir")
+                                        {
+                                            formPin.pin.useWorkdir = ConvertTo.StringToBool(el.Value);
+                                        }
+
+                                        if (el.Name.ToString() == "workdir")
+                                        {
+                                            formPin.pin.workdir = TextTools.NormalizeLineEndings(el.Value);
+                                        }
+
+                                        if (el.Name.ToString() == "usepowershell")
+                                        {
+                                            formPin.pin.usePowershell = ConvertTo.StringToBool(el.Value);
+                                        }
+
+                                        if (el.Name.ToString() == "usecmdshell")
+                                        {
+                                            formPin.pin.useCmdshell = ConvertTo.StringToBool(el.Value);
+                                        }
+
                                         if (el.Name.ToString() == "silentcommand")
                                         {
-                                            window.silentCommand = ConvertTo.StringToBool(el.Value);
+                                            formPin.pin.silentCommand = ConvertTo.StringToBool(el.Value);
+                                        }
+
+                                        if (el.Name.ToString() == "matchNewWindow")
+                                        {
+                                            formPin.pin.matchNewWindow = ConvertTo.StringToBool(el.Value);
                                         }
 
                                         if (el.Name.ToString() == "doubleclickcommand")
                                         {
-                                            window.doubleClickCommand = ConvertTo.StringToBool(el.Value);
+                                            formPin.pin.doubleClickCommand = ConvertTo.StringToBool(el.Value);
                                         }
 
                                         if (el.Name.ToString() == "icon")
@@ -242,7 +340,7 @@ namespace ShootRunner
 
                                         if (el.Name.ToString() == "customicon")
                                         {
-                                            window.customicon = ConvertTo.StringToBitmap(el.Value);
+                                            formPin.pin.customicon = ConvertTo.StringToBitmap(el.Value);
                                         }
 
                                         if (el.Name.ToString() == "isDesktop")

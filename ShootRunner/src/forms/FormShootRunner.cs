@@ -533,10 +533,7 @@ namespace ShootRunner
                 Window window = new Window();
                 window.Handle = Handle;
                 ToolsWindow.SetWindowData(window);
-                FormPin pin = new FormPin(window);
-                pin.Show();
-                pin.Center();
-                Program.pins.Add(pin);
+                Program.CreatePin(window);
             }
 
         }

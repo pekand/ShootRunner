@@ -1,6 +1,9 @@
 ﻿using Microsoft.Win32;
 using System.Diagnostics;
+using System.Management.Automation;
 using System.Runtime.InteropServices;
+using System.Security.Policy;
+using System.Text;
 using System.Text.RegularExpressions;
 
 #nullable disable
@@ -131,6 +134,326 @@ namespace ShootRunner
             catch (Exception ex)
             {
                 Program.error(ex.Message);
+            }
+        }
+
+        public static void OpenFile(string filePath, string workdir = null)
+        {
+            try
+            {
+                ProcessStartInfo process = new ProcessStartInfo(filePath) { UseShellExecute = true };
+
+                if (workdir != null)
+                {
+                    process.WorkingDirectory = workdir;
+                }
+
+                Process.Start(process);
+            }
+            catch (Exception)
+            {
+
+            }
+        }
+
+        public static void OpenDirectory(string directoryPath, string workdir = null)
+        {
+            try
+            {
+                ProcessStartInfo process = new ProcessStartInfo(directoryPath) { UseShellExecute = true };
+
+                if (workdir != null)
+                {
+                    process.WorkingDirectory = workdir;
+                }
+
+                Process.Start(process);
+            }
+            catch (Exception)
+            {
+
+            }
+        }
+
+        public static void OpenHyperlink(string url, string workdir = null)
+        {
+            try
+            {
+                ProcessStartInfo process = new ProcessStartInfo(url) { UseShellExecute = true };
+
+                if (workdir != null)
+                {
+                    process.WorkingDirectory = workdir;
+                }
+
+                Process.Start(process);
+            }
+            catch (Exception)
+            {
+
+            }
+        }
+
+        public static void RunScript(string script, string workdir = null, bool silentCommand = true)
+        {
+            string fullCommand = string.Join(" & ",
+                script
+                    .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
+                    .Select(line => line.Trim())
+                    .Where(line => !string.IsNullOrWhiteSpace(line))
+            );
+
+            var psi = new ProcessStartInfo
+            {
+                FileName = "cmd.exe",
+                Arguments = "/C " + fullCommand,
+                UseShellExecute = false,
+                RedirectStandardOutput = false,
+                RedirectStandardError = false,
+            };
+
+            if (silentCommand) {
+                psi.CreateNoWindow = true;
+                psi.WindowStyle = ProcessWindowStyle.Hidden;
+            }
+
+            if (workdir != null) { 
+                psi.WorkingDirectory = workdir;
+            }
+
+            Process.Start(psi);
+        }
+
+
+
+        public static async Task<bool> RunScriptWithTimeoutAsync(string script, string workdir = null, bool silentCommand = true, int timeoutMs = 60_000)
+        {
+            if (string.IsNullOrWhiteSpace(script))
+                throw new ArgumentException("script is empty", nameof(script));
+
+            string fullCommand = string.Join(" & ",
+                script
+                    .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
+                    .Select(line => line.Trim())
+                    .Where(line => !string.IsNullOrWhiteSpace(line))
+            );
+
+            var psi = new ProcessStartInfo
+            {
+                FileName = "cmd.exe",
+                Arguments = "/C " + fullCommand,
+                UseShellExecute = false,
+                RedirectStandardOutput = false,
+                RedirectStandardError = false,
+            };
+
+            if (silentCommand)
+            {
+                psi.CreateNoWindow = true;
+                psi.WindowStyle = ProcessWindowStyle.Hidden;
+            }
+
+            using (var proc = new Process { StartInfo = psi, EnableRaisingEvents = true })
+            {
+                if (!proc.Start()) throw new InvalidOperationException("Failed to start process.");
+
+                var cts = new CancellationTokenSource();
+                var waitTask = proc.WaitForExitAsync(cts.Token); // .NET 5+
+                var delayTask = Task.Delay(timeoutMs, cts.Token);
+
+                var finished = await Task.WhenAny(waitTask, delayTask).ConfigureAwait(false);
+
+                if (finished == waitTask)
+                {
+                    // finished within timeout
+                    cts.Cancel(); // cancel delay if still running
+                    return true;
+                }
+
+                // timeout expired -> try to kill process tree
+                try
+                {
+                    proc.Kill(true); // kills process tree on supported runtimes
+                }
+                catch
+                {
+                    try
+                    {
+                        using (var tkill = Process.Start(new ProcessStartInfo
+                        {
+                            FileName = "taskkill",
+                            Arguments = $"/PID {proc.Id} /T /F",
+                            CreateNoWindow = true,
+                            UseShellExecute = false
+                        }))
+                        {
+                            tkill?.WaitForExit(5_000);
+                        }
+                    }
+                    catch { /* ignore fallback errors */ }
+                }
+
+                // Optionally wait a short while for proc to exit
+                try { await proc.WaitForExitAsync().ConfigureAwait(false); } catch { }
+
+                return false;
+            }
+        }
+
+        public static void RunPowershellScriptVisible(string script, string workdir = null, bool usePwsh = false)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(script)) throw new ArgumentException("script empty", nameof(script));
+
+                byte[] bytes = Encoding.Unicode.GetBytes(script);
+                string b64 = Convert.ToBase64String(bytes);
+
+                string exe = usePwsh ? "pwsh.exe" : "powershell.exe";
+                string args = $"-NoProfile -ExecutionPolicy Bypass -NoExit -EncodedCommand {b64}";
+
+                var psi = new ProcessStartInfo
+                {
+                    FileName = exe,
+                    Arguments = args,
+                    UseShellExecute = true,
+                    CreateNoWindow = false,
+                    WindowStyle = ProcessWindowStyle.Normal
+                };
+
+                psi.WorkingDirectory = workdir;
+
+                Process.Start(psi);
+            }
+            catch (Exception)
+            {
+
+
+            }
+
+        }
+
+        public static async Task<bool> RunPowershellScriptVisibleWithTimeout(string script, string workdir = null, bool usePwsh = false, int timeoutMs = 60000)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(script)) throw new ArgumentException("script empty", nameof(script));
+
+                byte[] bytes = Encoding.Unicode.GetBytes(script);
+                string b64 = Convert.ToBase64String(bytes);
+
+                string exe = usePwsh ? "pwsh.exe" : "powershell.exe";
+                string args = $"-NoProfile -ExecutionPolicy Bypass -NoExit -EncodedCommand {b64}";
+
+                var psi = new ProcessStartInfo
+                {
+                    FileName = exe,
+                    Arguments = args,
+                    UseShellExecute = true,
+                    CreateNoWindow = false,
+                    WindowStyle = ProcessWindowStyle.Normal
+                };
+
+                psi.WorkingDirectory = workdir;
+
+
+                using (var proc = new Process { StartInfo = psi, EnableRaisingEvents = true })
+                {
+                    if (!proc.Start()) throw new InvalidOperationException("Failed to start process.");
+
+                    var cts = new CancellationTokenSource();
+                    var waitTask = proc.WaitForExitAsync(cts.Token); // .NET 5+
+                    var delayTask = Task.Delay(timeoutMs, cts.Token);
+
+                    var finished = await Task.WhenAny(waitTask, delayTask).ConfigureAwait(false);
+
+                    if (finished == waitTask)
+                    {
+                        // finished within timeout
+                        cts.Cancel(); // cancel delay if still running
+                        return true;
+                    }
+
+                    // timeout expired -> try to kill process tree
+                    try
+                    {
+                        proc.Kill(true); // kills process tree on supported runtimes
+                    }
+                    catch
+                    {
+                        try
+                        {
+                            using (var tkill = Process.Start(new ProcessStartInfo
+                            {
+                                FileName = "taskkill",
+                                Arguments = $"/PID {proc.Id} /T /F",
+                                CreateNoWindow = true,
+                                UseShellExecute = false
+                            }))
+                            {
+                                tkill?.WaitForExit(5_000);
+                            }
+                        }
+                        catch { }
+                    }
+
+                    try { await proc.WaitForExitAsync().ConfigureAwait(false); } catch { }
+
+                    return false;
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+
+
+        public static async Task<bool> RunPowershellScriptWithTimeoutAsync(string script, string workdir = null, bool silentCommand = true, int timeoutMs = 60_000)
+        {
+            if (string.IsNullOrWhiteSpace(script))
+                throw new ArgumentException("Script is empty", nameof(script));
+
+            using var ps = PowerShell.Create();
+
+            if (workdir != null && Directory.Exists(workdir))
+            {
+                ps.AddScript($"Set-Location -Path \"{workdir}\"");
+            }
+
+            ps.AddScript(script);
+
+            using var cts = new CancellationTokenSource(timeoutMs);
+
+            try
+            {
+                var asyncResult = ps.BeginInvoke();
+
+                // Wait asynchronously for either completion or timeout
+                while (!asyncResult.IsCompleted)
+                {
+                    if (cts.Token.IsCancellationRequested)
+                    {
+                        try { ps.Stop(); } catch { }
+                        return false; // timeout
+                    }
+                    await Task.Delay(100);
+                }
+
+                ps.EndInvoke(asyncResult);
+                return true;
+            }
+            catch (OperationCanceledException)
+            {
+                try { ps.Stop(); } catch { }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("PowerShell error: " + ex.Message);
+                return false;
             }
         }
 

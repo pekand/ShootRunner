@@ -699,11 +699,6 @@ namespace ShootRunner
                 window.icon = null;
             }
 
-            if (window.customicon != null)
-            {
-                window.customicon.Dispose();
-                window.customicon = null;
-            }
             if (window.screenshot != null)
             {
                 window.screenshot.Dispose();

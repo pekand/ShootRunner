@@ -22,13 +22,9 @@ namespace ShootRunner
 
         // COMMAND
         public string command = null;
-        public bool silentCommand = true; 
-        public bool doubleClickCommand = false; // to activate use doble click instead of one click
-        public bool matchNewWindow = true;
 
         // ICON
         public Bitmap icon = null;
-        public Bitmap customicon = null;
 
         // SCRENSHOT
         public Bitmap screenshot = null;
@@ -60,12 +56,11 @@ namespace ShootRunner
                 if (disposing)
                 {
                     icon?.Dispose();
-                    customicon?.Dispose();
                     screenshot?.Dispose();
                 }
 
                 disposed = true;
             }
-        }
+        }        
     }
 }
