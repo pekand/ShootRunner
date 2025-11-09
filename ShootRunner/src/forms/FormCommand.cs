@@ -51,7 +51,7 @@ namespace ShootRunner
             this.pin.script = this.textBoxScript.Text;
 
             this.pin.useCommand = this.checkBoxCommand.Checked;
-            this.pin.command = commandTextBox.Text;
+            this.pin.command = this.textBoxCommand.Text;
 
             this.pin.useWorkdir = this.checkBoxWorkdir.Checked;
             this.pin.workdir = this.textBoxWorkdir.Text;
@@ -81,6 +81,8 @@ namespace ShootRunner
                 this.pinForm.RefreshIcon();
             }
 
+            Program.Update();
+
             this.Close();
         }
 
@@ -103,9 +105,10 @@ namespace ShootRunner
             this.textBoxScript.Text = this.pin.script;
 
             this.checkBoxCommand.Checked = this.pin.useCommand;
-            this.commandTextBox.Text = TextTools.NormalizeLineEndings(pin.command);
-            this.commandTextBox.SelectionStart = commandTextBox.Text.Length;
-            this.commandTextBox.SelectionLength = 0;
+            this.textBoxCommand.Text = this.pin.command;
+            this.textBoxScript.Text = TextTools.NormalizeLineEndings(pin.command);
+            this.textBoxScript.SelectionStart = textBoxScript.Text.Length;
+            this.textBoxScript.SelectionLength = 0;
             this.ActiveControl = null;
 
             this.checkBoxWorkdir.Checked = this.pin.useWorkdir;
@@ -132,6 +135,25 @@ namespace ShootRunner
 
             AddWindowsToContextMenu();
 
+            webViewHelp.EnsureCoreWebView2Async().ContinueWith(_ =>
+            {
+                webViewHelp.NavigateToString(@"
+            <html><body>
+            <style>
+            h1{font-size:16px;}</style>
+            <h1>Help 1</h1>
+            <p>Toto je pod nadpisom.</p>
+            <h2>Odstavec a zoznam</h2>
+            <ol>
+                <li>Prvý bod</li>
+                <li>Druhý bod</li>
+            </ol>
+            <ul>
+                <li>Odrážka 1</li>
+                <li>Odrážka 2</li>
+            </ul>
+            </body></html>");
+            });
         }
 
         public void AddWindowsToContextMenu()
@@ -379,6 +401,21 @@ namespace ShootRunner
         private void checkBoxUseWindow_CheckedChanged(object sender, EventArgs e)
         {
 
+        }
+
+        private void labelWindowApp_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void labelWindowApp_DoubleClick(object sender, EventArgs e)
+        {
+            Clipboard.SetText(labelWindowApp.Text);
+        }
+
+        private void buttonCopyWinApp_Click(object sender, EventArgs e)
+        {
+            Clipboard.SetText(labelWindowApp.Text);
         }
     }
 }

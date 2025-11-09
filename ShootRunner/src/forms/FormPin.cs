@@ -1,7 +1,11 @@
-﻿using Microsoft.CodeAnalysis.Operations;
+﻿using Markdig.Helpers;
+using Microsoft.CodeAnalysis.Operations;
+using Microsoft.VisualBasic.Logging;
+using System;
 using System.ComponentModel;
 using System.Drawing.Drawing2D;
 using System.Runtime.InteropServices;
+using System.Security.Policy;
 using System.Threading;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.TrayNotify;
 
@@ -622,15 +626,38 @@ namespace ShootRunner
 
         private void FormPin_DragEnter(object sender, DragEventArgs e)
         {
+            Program.info("Available formats:\r\n");
+            foreach (var f in e.Data.GetFormats()) Program.info("  " + f + "\r\n");
 
-            if (e.Data.GetDataPresent(DataFormats.FileDrop) ||
-                e.Data.GetDataPresent(DataFormats.Text) ||
-                e.Data.GetDataPresent(DataFormats.UnicodeText) ||
-                e.Data.GetDataPresent(DataFormats.Bitmap)
-                )
+            bool hasContent = false;
+
+            try
             {
-                e.Effect = DragDropEffects.Copy;
+                
 
+                if (e.Data.GetData(DataFormats.FileDrop) != null)
+                    hasContent = true;
+                else if (e.Data.GetData(DataFormats.Text) != null)
+                    hasContent = true;
+                else if (e.Data.GetData(DataFormats.UnicodeText) != null)
+                    hasContent = true;
+                else if (e.Data.GetData(DataFormats.Html) != null)
+                    hasContent = true;
+                else if (e.Data.GetData(DataFormats.Bitmap) != null)
+                    hasContent = true;
+
+            }
+            catch (Exception)
+            {
+
+
+            }
+
+            e.Effect = hasContent ? DragDropEffects.Copy : DragDropEffects.None;
+
+
+            if (hasContent)
+            {
                 if (this.pin.window != null)
                 {
                     if (this.pin.useCommand && this.pin.command != null && this.pin.command.Trim() != "")
@@ -640,7 +667,6 @@ namespace ShootRunner
                             IntPtr currentWindow = ToolsWindow.GetCurrentWindow();
                             if (currentWindow != IntPtr.Zero && this.pin.window.Handle != currentWindow)
                             {
-                                Program.info("front");
                                 ToolsWindow.BringWindowToFront(this.pin.window);
                             }
 
@@ -653,22 +679,121 @@ namespace ShootRunner
                             IntPtr currentWindow = ToolsWindow.GetCurrentWindow();
                             if (currentWindow != IntPtr.Zero && this.pin.window.Handle != currentWindow)
                             {
-                                Program.info("front");
                                 ToolsWindow.BringWindowToFront(this.pin.window);
                             }
                         }
                     }
                 }
             }
-            else
-            {
-                e.Effect = DragDropEffects.None;
-            }
+
         }
 
         private void FormPin_DragDrop(object sender, DragEventArgs e)
         {
+            string text = null;
+            string html = null;
+            Bitmap image = null;
+            string[] files = null;
 
+            try
+            {
+
+                if (e.Data.GetData(DataFormats.FileDrop) != null)
+                {
+                    files = (string[])e.Data.GetData(DataFormats.FileDrop);
+                }
+                                               
+                if (e.Data.GetData(DataFormats.Text) != null)
+                {
+                    text = (string)e.Data.GetData(DataFormats.Text);
+                }
+
+                if (e.Data.GetData(DataFormats.UnicodeText) != null)
+                {
+                    text = (string)e.Data.GetData(DataFormats.UnicodeText);
+                }
+
+                if (e.Data.GetData(DataFormats.Html) != null)
+                {
+                    html = (string)e.Data.GetData(DataFormats.Html);
+                }
+                
+                if (e.Data.GetData(DataFormats.Bitmap) != null)
+                {
+                    image = (Bitmap)e.Data.GetData(DataFormats.Bitmap);
+                }
+
+            }
+            catch (Exception)
+            {
+
+
+            }
+
+
+
+            if (files != null)
+            {
+                if (this.pin.useDirectorylink && Directory.Exists(this.pin.directorylink)) { 
+                                    
+                    foreach (var file in files)
+                    {
+                        Program.info($"File: {file}\r\n");
+                        if ((Control.ModifierKeys & Keys.Shift) == Keys.Shift)
+                        {
+                            Os.CopyOrMove(file, this.pin.directorylink, move: true);
+                        }
+                        else {
+                            Os.CopyOrMove(file, this.pin.directorylink, move: false);
+                        }
+                    }
+                }
+            }
+
+            if (html != null)
+            {               
+
+                if (Uri.IsWellFormedUriString(text.Trim(), UriKind.Absolute))
+                {
+                    Task.Run(async () =>
+                    {
+                        string url = text.Trim();
+                        string title = await Os.GetPageTitleAsync(url);
+                        Os.SaveInternetShortcut(this.pin.directorylink, url, title);
+                    });
+
+                } else if (this.pin.useDirectorylink && Directory.Exists(this.pin.directorylink))
+                {
+                    Os.SaveTextWithAutoRename(this.pin.directorylink, Os.ExtractHtmlFragment(html), "page", ".html");
+                }
+
+            } else 
+            if (text != null)
+            {
+                if (this.pin.useDirectorylink && Directory.Exists(this.pin.directorylink))
+                {
+                    if (Uri.IsWellFormedUriString(text.Trim(), UriKind.Absolute)) {
+                        Task.Run(async () =>
+                        {
+                            string url = text.Trim();
+                            string title = await Os.GetPageTitleAsync(url);
+                            Os.SaveInternetShortcut(this.pin.directorylink, url, title);
+                        });                       
+                    } else {
+                        Os.SaveTextWithAutoRename(this.pin.directorylink, text, "text", ".txt");
+                    }
+                }
+            }
+
+            if (image!=null)
+            {
+                if (this.pin.useDirectorylink && Directory.Exists(this.pin.directorylink))
+                {
+                    var path = Path.Combine(this.pin.directorylink, "image_" + Guid.NewGuid() + ".png");
+                    image.Save(path, System.Drawing.Imaging.ImageFormat.Png);
+                    Program.info("Image saved to: " + path + "\r\n");
+                }
+            }
         }
 
         private void FormPin_KeyDown(object sender, KeyEventArgs e)

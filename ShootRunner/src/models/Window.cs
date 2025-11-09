@@ -38,6 +38,11 @@ namespace ShootRunner
 
         private bool disposed = false;
 
+        public Window(IntPtr? Handle = null)
+        {
+            this.Handle = Handle ?? IntPtr.Zero;
+        }
+
         ~Window()
         {
             Dispose(false);

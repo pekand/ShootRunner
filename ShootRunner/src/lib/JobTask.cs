@@ -311,6 +311,9 @@ namespace ShootRunner
 
                 if (guesWindow) // compare taskbar windows and check for change
                 {
+                    Thread.Sleep(3000);
+
+                    // calculate diff between opened windows
                     List<IntPtr> taskbarWindows2 = ToolsWindow.GetTaskbarWindows();
                     List<IntPtr> foundWindows = new List<IntPtr>();
                     foreach (IntPtr win2 in taskbarWindows2)
@@ -331,6 +334,7 @@ namespace ShootRunner
                         }
                     }
 
+                    // Check only  new windows
                     foreach (IntPtr win3 in foundWindows)
                     {
                         string path = ToolsWindow.GetApplicationPathFromWindow(win3);
@@ -340,10 +344,20 @@ namespace ShootRunner
                             window.Handle = win3;
                             return window;
                         }
-                    }                        
-                }
+                    }
 
-                
+                    // Check all windows
+                    foreach (IntPtr win4 in taskbarWindows2)
+                    {
+                        string path = ToolsWindow.GetApplicationPathFromWindow(win4);
+                        if (path == cmd)
+                        {
+                            Window window = new Window();
+                            window.Handle = win4;
+                            return window;
+                        }
+                    }
+                }
             }
             catch (Exception ex)
             {
