@@ -11,6 +11,9 @@ namespace ShootRunner
 
     public partial class FormWidget : Form
     {
+
+        public bool inicialized = false;
+
         public Widget widget = null;
         public Microsoft.Web.WebView2.WinForms.WebView2 webView = null;
 
@@ -32,6 +35,8 @@ namespace ShootRunner
             this.Opacity = this.widget.transparent < 0.2 ? 0.2 : this.widget.transparent;
 
             AddTypesToContextMenu();
+
+            inicialized = true;
         }
 
         protected override CreateParams CreateParams
@@ -421,6 +426,8 @@ namespace ShootRunner
 
         private void FormWidget_Resize(object sender, EventArgs e)
         {
+            if (!inicialized) return;
+
             this.widget.StartLeft = this.Left;
             this.widget.StartTop = this.Top;
             this.widget.StartWidth = this.Width;
@@ -431,6 +438,8 @@ namespace ShootRunner
 
         private void FormWidget_Move(object sender, EventArgs e)
         {
+            if (!inicialized) return;
+
             this.widget.StartLeft = this.Left;
             this.widget.StartTop = this.Top;
             this.widget.StartWidth = this.Width;

@@ -46,9 +46,10 @@ namespace ShootRunner
             //this.TransparencyKey = System.Drawing.Color.Lime;
 
             this.pin.window = window;
-            if (this.pin.window != null && newPin) {
+            if (this.pin.window != null && newPin)
+            {
                 this.pin.useWindow = true;
-                this.pin.doubleClickCommand = false;                
+                this.pin.doubleClickCommand = false;
             }
 
             this.ShowInTaskbar = false;
@@ -59,7 +60,8 @@ namespace ShootRunner
         {
             this.SetStartPosition();
             this.makeRoundy();
-            if (this.pin.window != null) {
+            if (this.pin.window != null)
+            {
                 this.Opacity = this.pin.window.transparent < 0.2 ? 0.2 : this.pin.window.transparent;
             }
             dobleClickToActivateToolStripMenuItem.Checked = this.pin.doubleClickCommand;
@@ -132,7 +134,7 @@ namespace ShootRunner
                             break;
                         }
                     }
-                }              
+                }
             }
         }
 
@@ -141,7 +143,8 @@ namespace ShootRunner
 
             string wordir = null;
 
-            if (this.pin.useWorkdir) {
+            if (this.pin.useWorkdir)
+            {
                 wordir = this.pin.workdir;
             }
 
@@ -170,9 +173,12 @@ namespace ShootRunner
                 //SystemTools.RunScript(this.pin.script, wordir, this.pin.silentCommand);
                 if (this.pin.usePowershell)
                 {
-                    if (this.pin.silentCommand) {
+                    if (this.pin.silentCommand)
+                    {
                         await SystemTools.RunPowershellScriptWithTimeoutAsync(this.pin.script, wordir, this.pin.silentCommand);
-                    } else {
+                    }
+                    else
+                    {
                         await SystemTools.RunPowershellScriptVisibleWithTimeout(this.pin.script, wordir);
                     }
                 }
@@ -196,11 +202,13 @@ namespace ShootRunner
                         {
                             await SystemTools.RunPowershellScriptWithTimeoutAsync(this.pin.command, wordir, this.pin.silentCommand);
                         }
-                        else {
+                        else
+                        {
                             await SystemTools.RunPowershellScriptVisibleWithTimeout(this.pin.command, wordir);
                         }
                     }
-                    if (this.pin.useCmdshell) {
+                    if (this.pin.useCmdshell)
+                    {
                         await SystemTools.RunScriptWithTimeoutAsync(this.pin.command, wordir, this.pin.silentCommand);
                     }
                 }
@@ -212,8 +220,8 @@ namespace ShootRunner
                 {
                     ToolsWindow.BringWindowToFront(this.pin.window);
                 }
-                else if(this.pin.window.app != null && this.pin.window.app.Trim() != "")
-                    {
+                else if (this.pin.window.app != null && this.pin.window.app.Trim() != "")
+                {
                     Window window = await JobTask.StartProcessAndGetWindowHandleAsync(this.pin.window.app, null, null, false, true);
 
                     if (window != null && window.Handle != IntPtr.Zero)
@@ -415,7 +423,8 @@ namespace ShootRunner
                 item.Image = window.icon;
                 item.Click += (sender, e) => SelectType(window);
 
-                if (this.pin.window != null && this.pin.window.Handle == Handle) {
+                if (this.pin.window != null && this.pin.window.Handle == Handle)
+                {
                     item.Checked = true;
                     item.Font = new Font(item.Font, FontStyle.Bold);
                 }
@@ -438,12 +447,14 @@ namespace ShootRunner
                 return;
             }
 
-            if (this.pin.window != null) {
+            if (this.pin.window != null)
+            {
                 this.pin.window.Dispose();
             }
-            if (this.pin.window != window) {
+            if (this.pin.window != window)
+            {
                 this.pin.useWindow = true;
-                this.pin.window = window;                
+                this.pin.window = window;
                 this.Refresh();
             }
         }
@@ -633,7 +644,7 @@ namespace ShootRunner
 
             try
             {
-                
+
 
                 if (e.Data.GetData(DataFormats.FileDrop) != null)
                     hasContent = true;
@@ -702,7 +713,7 @@ namespace ShootRunner
                 {
                     files = (string[])e.Data.GetData(DataFormats.FileDrop);
                 }
-                                               
+
                 if (e.Data.GetData(DataFormats.Text) != null)
                 {
                     text = (string)e.Data.GetData(DataFormats.Text);
@@ -717,7 +728,7 @@ namespace ShootRunner
                 {
                     html = (string)e.Data.GetData(DataFormats.Html);
                 }
-                
+
                 if (e.Data.GetData(DataFormats.Bitmap) != null)
                 {
                     image = (Bitmap)e.Data.GetData(DataFormats.Bitmap);
@@ -734,8 +745,9 @@ namespace ShootRunner
 
             if (files != null)
             {
-                if (this.pin.useDirectorylink && Directory.Exists(this.pin.directorylink)) { 
-                                    
+                if (this.pin.useDirectorylink && Directory.Exists(this.pin.directorylink))
+                {
+
                     foreach (var file in files)
                     {
                         Program.info($"File: {file}\r\n");
@@ -743,7 +755,8 @@ namespace ShootRunner
                         {
                             Os.CopyOrMove(file, this.pin.directorylink, move: true);
                         }
-                        else {
+                        else
+                        {
                             Os.CopyOrMove(file, this.pin.directorylink, move: false);
                         }
                     }
@@ -751,7 +764,7 @@ namespace ShootRunner
             }
 
             if (html != null)
-            {               
+            {
 
                 if (Uri.IsWellFormedUriString(text.Trim(), UriKind.Absolute))
                 {
@@ -762,30 +775,35 @@ namespace ShootRunner
                         Os.SaveInternetShortcut(this.pin.directorylink, url, title);
                     });
 
-                } else if (this.pin.useDirectorylink && Directory.Exists(this.pin.directorylink))
+                }
+                else if (this.pin.useDirectorylink && Directory.Exists(this.pin.directorylink))
                 {
                     Os.SaveTextWithAutoRename(this.pin.directorylink, Os.ExtractHtmlFragment(html), "page", ".html");
                 }
 
-            } else 
+            }
+            else
             if (text != null)
             {
                 if (this.pin.useDirectorylink && Directory.Exists(this.pin.directorylink))
                 {
-                    if (Uri.IsWellFormedUriString(text.Trim(), UriKind.Absolute)) {
+                    if (Uri.IsWellFormedUriString(text.Trim(), UriKind.Absolute))
+                    {
                         Task.Run(async () =>
                         {
                             string url = text.Trim();
                             string title = await Os.GetPageTitleAsync(url);
                             Os.SaveInternetShortcut(this.pin.directorylink, url, title);
-                        });                       
-                    } else {
+                        });
+                    }
+                    else
+                    {
                         Os.SaveTextWithAutoRename(this.pin.directorylink, text, "text", ".txt");
                     }
                 }
             }
 
-            if (image!=null)
+            if (image != null)
             {
                 if (this.pin.useDirectorylink && Directory.Exists(this.pin.directorylink))
                 {
@@ -831,9 +849,16 @@ namespace ShootRunner
             Program.DeselectAllPins();
         }
 
-        public void RefreshIcon() {
+        public void RefreshIcon()
+        {
             this.Refresh();
 
+        }
+
+        // CONTEXTMENU create widget
+        private void createWidgetToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Program.widgetManager.ShowCreateWidgetForm();
         }
 
         /*********************************************************************************/

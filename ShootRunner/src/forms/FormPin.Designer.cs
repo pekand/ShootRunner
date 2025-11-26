@@ -53,6 +53,7 @@
             closeToolStripMenuItem1 = new ToolStripMenuItem();
             openFileDialog = new OpenFileDialog();
             timer = new System.Windows.Forms.Timer(components);
+            createWidgetToolStripMenuItem = new ToolStripMenuItem();
             contextMenuStrip.SuspendLayout();
             SuspendLayout();
             // 
@@ -60,14 +61,14 @@
             // 
             contextMenuStrip.Items.AddRange(new ToolStripItem[] { pinToolStripMenuItem, optionsToolStripMenuItem, toolStripMenuItem1, widgetToolStripMenuItem, applicationToolStripMenuItem });
             contextMenuStrip.Name = "contextMenuStrip1";
-            contextMenuStrip.Size = new Size(156, 106);
+            contextMenuStrip.Size = new Size(181, 128);
             contextMenuStrip.Opening += contextMenuStrip1_Opening;
             // 
             // pinToolStripMenuItem
             // 
             pinToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { selectToolStripMenuItem, commandToolStripMenuItem, newPinToolStripMenuItem, runToolStripMenuItem, minimalizeToolStripMenuItem, removeToolStripMenuItem, selectAllToolStripMenuItem, deselectAllToolStripMenuItem });
             pinToolStripMenuItem.Name = "pinToolStripMenuItem";
-            pinToolStripMenuItem.Size = new Size(155, 24);
+            pinToolStripMenuItem.Size = new Size(180, 24);
             pinToolStripMenuItem.Text = "Pin";
             // 
             // selectToolStripMenuItem
@@ -130,7 +131,7 @@
             // 
             optionsToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { setIconToolStripMenuItem1, dobleClickToActivateToolStripMenuItem, transparentToolStripMenuItem });
             optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
-            optionsToolStripMenuItem.Size = new Size(155, 24);
+            optionsToolStripMenuItem.Size = new Size(180, 24);
             optionsToolStripMenuItem.Text = "Options";
             // 
             // setIconToolStripMenuItem1
@@ -157,26 +158,26 @@
             // toolStripMenuItem1
             // 
             toolStripMenuItem1.Name = "toolStripMenuItem1";
-            toolStripMenuItem1.Size = new Size(152, 6);
+            toolStripMenuItem1.Size = new Size(177, 6);
             // 
             // widgetToolStripMenuItem
             // 
-            widgetToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { newWidgetToolStripMenuItem, taskbarToolStripMenuItem });
+            widgetToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { newWidgetToolStripMenuItem, createWidgetToolStripMenuItem, taskbarToolStripMenuItem });
             widgetToolStripMenuItem.Name = "widgetToolStripMenuItem";
-            widgetToolStripMenuItem.Size = new Size(155, 24);
+            widgetToolStripMenuItem.Size = new Size(180, 24);
             widgetToolStripMenuItem.Text = "Widget";
             // 
             // newWidgetToolStripMenuItem
             // 
             newWidgetToolStripMenuItem.Name = "newWidgetToolStripMenuItem";
-            newWidgetToolStripMenuItem.Size = new Size(158, 24);
+            newWidgetToolStripMenuItem.Size = new Size(180, 24);
             newWidgetToolStripMenuItem.Text = "New widget";
             newWidgetToolStripMenuItem.Click += newWidgetToolStripMenuItem_Click;
             // 
             // taskbarToolStripMenuItem
             // 
             taskbarToolStripMenuItem.Name = "taskbarToolStripMenuItem";
-            taskbarToolStripMenuItem.Size = new Size(158, 24);
+            taskbarToolStripMenuItem.Size = new Size(180, 24);
             taskbarToolStripMenuItem.Text = "Taskbar";
             taskbarToolStripMenuItem.Click += taskbarToolStripMenuItem_Click;
             // 
@@ -184,7 +185,7 @@
             // 
             applicationToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { consoleToolStripMenuItem, closeToolStripMenuItem1 });
             applicationToolStripMenuItem.Name = "applicationToolStripMenuItem";
-            applicationToolStripMenuItem.Size = new Size(155, 24);
+            applicationToolStripMenuItem.Size = new Size(180, 24);
             applicationToolStripMenuItem.Text = "Application";
             // 
             // consoleToolStripMenuItem
@@ -206,6 +207,13 @@
             openFileDialog.FileName = "openFileDialog1";
             openFileDialog.Filter = "Image Files|*.ico;*.bmp;*.jpg;*.jpeg;*.png;";
             openFileDialog.Title = "Select icon";
+            // 
+            // createWidgetToolStripMenuItem
+            // 
+            createWidgetToolStripMenuItem.Name = "createWidgetToolStripMenuItem";
+            createWidgetToolStripMenuItem.Size = new Size(180, 24);
+            createWidgetToolStripMenuItem.Text = "Create widget";
+            createWidgetToolStripMenuItem.Click += createWidgetToolStripMenuItem_Click;
             // 
             // FormPin
             // 
@@ -260,5 +268,6 @@
         private ToolStripMenuItem commandToolStripMenuItem;
         private ToolStripMenuItem selectAllToolStripMenuItem;
         private ToolStripMenuItem deselectAllToolStripMenuItem;
+        private ToolStripMenuItem createWidgetToolStripMenuItem;
     }
 }

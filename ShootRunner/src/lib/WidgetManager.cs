@@ -164,23 +164,31 @@ namespace ShootRunner
             }
         }
 
-        public void CreateWidget(string name = "", string type = "")
+        public void CreateWidget(string name = "", WidgetType type = null)
         {
 
             if (name.Trim() == "") {
                 return;
             }
 
-            
-            Directory.CreateDirectory(Path.Combine(Program.widgetsPath, name));
+            try
+            {
+                string widgetPath = Path.Combine(Program.widgetsPath, name);
+                string widgetHtmlPath = Path.Combine(widgetPath, "widget.html");
+                Directory.CreateDirectory(widgetPath);
+                File.WriteAllText(widgetHtmlPath, type.html);
+            }
+            catch (Exception)
+            {
 
-
+                
+            }
         }
 
         public  void ShowCreateWidgetForm()
         {
 
-            if (this.formWidgetCreate == null) {
+            if (this.formWidgetCreate == null || this.formWidgetCreate.IsDisposed) {
               this.formWidgetCreate = new FormWidgetCreate();
             }
 
