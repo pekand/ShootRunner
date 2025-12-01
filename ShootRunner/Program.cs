@@ -5,6 +5,7 @@ using System.Xml.Linq;
 
 #nullable disable
 
+#pragma warning disable IDE0079
 #pragma warning disable IDE0130
 
 

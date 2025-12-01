@@ -8,6 +8,7 @@ using System.Runtime.InteropServices;
 #pragma warning disable IDE0079
 #pragma warning disable CA1822
 #pragma warning disable IDE0130
+#pragma warning disable CA2211
 
 namespace ShootRunner
 {
@@ -15,6 +16,7 @@ namespace ShootRunner
     {
         // FILE WATCH
         private FileSystemWatcher watcher = null;
+        public static IntPtr _hookID = IntPtr.Zero;
 
         /*************************************************************************/
 
@@ -29,7 +31,7 @@ namespace ShootRunner
             Load += (s, e) => WinApi.WTSRegisterSessionNotification(this.Handle, WinApi.NOTIFY_FOR_THIS_SESSION);
             FormClosing += (s, e) => WinApi.WTSUnRegisterSessionNotification(this.Handle);
 
-            WinApi._hookID = SetHook(HookCallback);
+            _hookID = SetHook(HookCallback);
             this.RegisterCommandFileWatch();
         }
 
@@ -427,7 +429,7 @@ namespace ShootRunner
         {
             if (Program.pause)
             {
-                return WinApi.CallNextHookEx(WinApi._hookID, nCode, wParam, lParam);
+                return WinApi.CallNextHookEx(_hookID, nCode, wParam, lParam);
             }
 
             if (nCode >= 0 && (wParam == (IntPtr)WinApi.WM_KEYDOWN || wParam == (IntPtr)WinApi.WM_SYSKEYDOWN))
@@ -490,7 +492,7 @@ namespace ShootRunner
                     return (IntPtr)1;
                 }
 
-                return WinApi.CallNextHookEx(WinApi._hookID, nCode, wParam, lParam);
+                return WinApi.CallNextHookEx(_hookID, nCode, wParam, lParam);
             }
 
             if (nCode >= 0 && wParam == (IntPtr)WinApi.WM_KEYUP)
@@ -550,13 +552,13 @@ namespace ShootRunner
                 }
             }
 
-            return WinApi.CallNextHookEx(WinApi._hookID, nCode, wParam, lParam);
+            return WinApi.CallNextHookEx(_hookID, nCode, wParam, lParam);
         }
 
         // HOOK
         private void FormShootRunner_InputLanguageChanging(object sender, InputLanguageChangingEventArgs e)
         {
-            WinApi.UnhookWindowsHookEx(WinApi._hookID);
+            WinApi.UnhookWindowsHookEx(_hookID);
         }
 
         /*************************************************************************/
