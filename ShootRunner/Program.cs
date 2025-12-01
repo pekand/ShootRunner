@@ -61,11 +61,6 @@ namespace ShootRunner
         public static DateTime updatedTime = new();
         public static System.Timers.Timer timer;
 
-#if DEBUG
-        [DllImport("kernel32.dll")]
-        static extern bool AllocConsole();
-#endif
-
         // DEBUG
         public static bool IsDebug()
         {
@@ -79,11 +74,11 @@ namespace ShootRunner
         // DEBUG
         public static string GetDebugPrefix()
         {
-#if DEBUG
-            return "DEBUG.";
-#else
-            return "";
-#endif            
+            if (IsDebug()) {
+                return "DEBUG.";
+            } else {
+                return "";
+            }
         }
 
         // PATH
@@ -153,16 +148,14 @@ namespace ShootRunner
 
         // LOG
         public static void Debug(string message) {
-#if DEBUG
-            string unixTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
-            using (StreamWriter sw = new StreamWriter(errorLogPath, true))
-            {
+            if (IsDebug()) {
+                string unixTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+                using StreamWriter sw = new(errorLogPath, true);
                 string line = unixTime + " DEBUG: " + message;
                 sw.WriteLine(line); // file
-                Program.write(line); // console form
+                Program.Write(line); // console form
                 Console.WriteLine(line); // standard output
             }
-#endif
         }
 
         // LOG
@@ -174,9 +167,10 @@ namespace ShootRunner
             string line = unixTime + " INFO: " + message;
             sw.WriteLine(line);
             Program.Write(line);
-#if DEBUG
+            if (IsDebug())
+            {
                 Console.WriteLine(line);
-#endif
+            }
         }
 
         // LOG
@@ -187,9 +181,10 @@ namespace ShootRunner
             string line = unixTime + " ERROR: " + message;
             sw.WriteLine(line);
             Program.Write(line);
-#if DEBUG
+            if (IsDebug())
+            {
                 Console.WriteLine(line);
-#endif
+            }
         }
 
         // LOG
@@ -203,9 +198,10 @@ namespace ShootRunner
         // LOG
         public static void Message(string message)
         {
-#if DEBUG
-            Console.WriteLine(message);
-#endif
+            if (IsDebug())
+            {
+                Console.WriteLine(message);
+            }
         }
 
         // CONSOLE
@@ -628,9 +624,8 @@ namespace ShootRunner
         {
 
 #if DEBUG
-            AllocConsole();
+            WinApi.AllocConsole();
 #endif
-
 
             Program.Message("Application Start");
 

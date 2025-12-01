@@ -12,8 +12,6 @@ namespace ShootRunner
 {
     public class WinApi
     {
-        public const int SRCCOPY = 0x00CC0020;
-
         [StructLayout(LayoutKind.Sequential)] public struct RECT
         {
             public int Left;
@@ -48,6 +46,7 @@ namespace ShootRunner
         public const int MIN_ALL_UNDO = 0x1A0;
         public const int NOTIFY_FOR_THIS_SESSION = 0;
         public const int SB_BOTTOM = 7;
+        public const int SRCCOPY = 0x00CC0020;
         public const int SW_MINIMIZE = 6;
         public const int SW_RESTORE = 9;
         public const int SW_SHOW = 5;
@@ -95,10 +94,13 @@ namespace ShootRunner
         public const uint SWP_NOZORDER = 0x0004;
         public const uint WINEVENT_OUTOFCONTEXT = 0x0000;
 
-
         public delegate IntPtr LowLevelKeyboardProc(int nCode, IntPtr wParam, IntPtr lParam);
         public delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
         public delegate void WinEventDelegate(IntPtr hWinEventHook, uint eventType, IntPtr hwnd, int idObject, int idChild, uint dwEventThread, uint dwmsEventTime);
+
+#if DEBUG
+        [DllImport("kernel32.dll")] public static extern bool AllocConsole();
+#endif
 
         [DllImport("dwmapi.dll")] public static extern int DwmGetWindowAttribute(IntPtr hWnd, uint dwAttribute, out int pvAttribute, int cbAttribute);
         [DllImport("gdi32.dll")] public static extern int BitBlt(IntPtr hdcDest, int xDest, int yDest, int wDest, int hDest, IntPtr hdcSrc, int xSrc, int ySrc, int RasterOp);
@@ -112,11 +114,9 @@ namespace ShootRunner
         [DllImport("user32.dll")] public static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
         [DllImport("user32.dll")] public static extern bool IsZoomed(IntPtr hWnd);
         [DllImport("user32.dll")] public static extern bool PeekMessage(out MSG lpMsg, IntPtr hWnd, uint wMsgFilterMin, uint wMsgFilterMax, uint wRemoveMsg);
-        [DllImport("user32.dll")] public static extern bool PostThreadMessage(uint idThread, uint Msg, IntPtr wParam, IntPtr lParam);
-        [DllImport("user32.dll")] public static extern bool PrintWindow(IntPtr hWnd, IntPtr hdcBlt, uint nFlags);
+        [DllImport("user32.dll")] public static extern bool PostThreadMessage(uint idThread, uint Msg, IntPtr wParam, IntPtr lParam);        
         [DllImport("user32.dll")] public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
-        [DllImport("user32.dll")] public static extern bool UnhookWinEvent(IntPtr hWinEventHook);
-        [DllImport("user32.dll")] public static extern int GetMessage(out MSG lpMsg, IntPtr hWnd, uint wMsgFilterMin, uint wMsgFilterMax);
+        [DllImport("user32.dll")] public static extern bool UnhookWinEvent(IntPtr hWinEventHook);        
         [DllImport("user32.dll")] public static extern int ReleaseDC(IntPtr hWnd, IntPtr hdc);
         [DllImport("user32.dll")] public static extern IntPtr DispatchMessage(ref MSG lpmsg);
         [DllImport("user32.dll")] public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
@@ -126,11 +126,9 @@ namespace ShootRunner
         [DllImport("user32.dll")] public static extern IntPtr SendMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
         [DllImport("user32.dll")] public static extern IntPtr SetWinEventHook(uint eventMin, uint eventMax, IntPtr hmodWinEventProc, WinEventDelegate lpfnWinEventProc, uint idProcess, uint idThread, uint dwFlags);
         [DllImport("user32.dll")] public static extern IntPtr TranslateMessage(ref MSG lpmsg);
-        [DllImport("user32.dll")] public static extern short GetAsyncKeyState(int vKey);
-        [DllImport("user32.dll")] public static extern uint MsgWaitForMultipleObjects(uint nCount, IntPtr[] pHandles, bool bWaitAll, uint dwMilliseconds, uint dwWakeMask);
+        [DllImport("user32.dll")] public static extern short GetAsyncKeyState(int vKey);        
         [DllImport("user32.dll")] public static extern void mouse_event(uint dwFlags, int dx, int dy, uint dwData, UIntPtr dwExtraInfo);
-        [DllImport("user32.dll")][return: MarshalAs(UnmanagedType.Bool)] public static extern bool IsIconic(IntPtr hWnd);
-        [DllImport("user32.dll", CharSet = CharSet.Auto, ExactSpelling = true, CallingConvention = CallingConvention.Winapi)] public static extern short GetKeyState(int keyCode);
+        [DllImport("user32.dll")][return: MarshalAs(UnmanagedType.Bool)] public static extern bool IsIconic(IntPtr hWnd);       
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)] public static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)] public static extern IntPtr CallNextHookEx(IntPtr hhk, int nCode, IntPtr wParam, IntPtr lParam);
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)] public static extern IntPtr SetWindowsHookEx(int idHook, LowLevelKeyboardProc lpfn, IntPtr hMod, uint dwThreadId);
