@@ -1,15 +1,17 @@
 ﻿#nullable disable
 
+#pragma warning disable IDE0130
+
 namespace ShootRunner
 {
-    public class Window:IDisposable
+    public class Window(IntPtr? Handle = null) : IDisposable
     {
         public String Type = ""; // WINDOW, COMMAND 
 
         public String Title = "";
 
         // HANDLE
-        public IntPtr Handle = IntPtr.Zero;
+        public IntPtr Handle = Handle ?? IntPtr.Zero;
         public bool isDesktop = false;
         public bool isTaskbar = false;
 
@@ -37,11 +39,6 @@ namespace ShootRunner
         public bool hidden = false;
 
         private bool disposed = false;
-
-        public Window(IntPtr? Handle = null)
-        {
-            this.Handle = Handle ?? IntPtr.Zero;
-        }
 
         ~Window()
         {

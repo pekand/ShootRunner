@@ -5,58 +5,18 @@ using System.Runtime.InteropServices;
 
 #nullable disable
 
+#pragma warning disable IDE0079
+#pragma warning disable CA1822
+#pragma warning disable IDE0130
 
 namespace ShootRunner
 {
     public partial class FormShootRunner : Form
     {
-
-
-        // HOOK
-        [DllImport("user32.dll", CharSet = CharSet.Auto, ExactSpelling = true, CallingConvention = CallingConvention.Winapi)]
-        public static extern short GetKeyState(int keyCode);
-
-        // HOOK
-        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        private static extern IntPtr SetWindowsHookEx(int idHook, LowLevelKeyboardProc lpfn, IntPtr hMod, uint dwThreadId);
-
-        // HOOK
-        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool UnhookWindowsHookEx(IntPtr hhk);
-
-        // HOOK
-        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        private static extern IntPtr CallNextHookEx(IntPtr hhk, int nCode, IntPtr wParam, IntPtr lParam);
-
-        // HOOK
-        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        private static extern IntPtr GetModuleHandle(string lpModuleName);
-
-        // HOOK
-        private const int WH_KEYBOARD_LL = 13;
-        private const int WM_KEYDOWN = 0x0100;
-        private const int WM_SYSKEYDOWN = 0x0104;
-        private const int WM_KEYUP = 0x0101;
-        private const int VK_LWIN = 0x5B;
-        private const int VK_RWIN = 0x5C;
-        private const int VK_APPS = 0x5D;
-        private static IntPtr _hookID = IntPtr.Zero;
-        private delegate IntPtr LowLevelKeyboardProc(int nCode, IntPtr wParam, IntPtr lParam);
-        private static LowLevelKeyboardProc _proc = HookCallback;
-
         // FILE WATCH
         private FileSystemWatcher watcher = null;
 
-
-        private const int WM_WTSSESSION_CHANGE = 0x02B1;
-        private const int NOTIFY_FOR_THIS_SESSION = 0;
-
-        [DllImport("Wtsapi32.dll")]
-        private static extern bool WTSRegisterSessionNotification(IntPtr hWnd, [MarshalAs(UnmanagedType.U4)] int dwFlags);
-
-        [DllImport("Wtsapi32.dll")]
-        private static extern bool WTSUnRegisterSessionNotification(IntPtr hWnd);
+        /*************************************************************************/
 
         // CONSTRUCTOR
         public FormShootRunner()
@@ -66,43 +26,16 @@ namespace ShootRunner
             this.ShowInTaskbar = false;
             this.Visible = false;
 
-            Load += (s, e) => WTSRegisterSessionNotification(this.Handle, NOTIFY_FOR_THIS_SESSION);
-            FormClosing += (s, e) => WTSUnRegisterSessionNotification(this.Handle);
+            Load += (s, e) => WinApi.WTSRegisterSessionNotification(this.Handle, WinApi.NOTIFY_FOR_THIS_SESSION);
+            FormClosing += (s, e) => WinApi.WTSUnRegisterSessionNotification(this.Handle);
 
-            _hookID = SetHook(_proc);
+            WinApi._hookID = SetHook(HookCallback);
             this.RegisterCommandFileWatch();
         }
 
-        // LOAD
-        private void FormShootRunner_Load(object sender, EventArgs e)
-        {
-            if (Program.isDebug())
-            {
-                this.notifyIconShootRunner.Icon = Pictures.CreateCustomIcon();
-            }
-        }
+        /*************************************************************************/
 
-        protected override void WndProc(ref Message m)
-        {
-            if (m.Msg == WM_WTSSESSION_CHANGE)
-            {
-                int reason = m.WParam.ToInt32();
-                switch (reason)
-                {
-                    case 0x7: // WTS_SESSION_LOCK
-                        Program.pause = true;
-                        Program.info("System locked");
-                        break;
-                    case 0x8: // WTS_SESSION_UNLOCK;
-                        Program.pause = false;
-                        Program.info("System unlocked");
-                        break;
-                }
-            }
-
-            base.WndProc(ref m);
-        }
-
+        // MESAGES LOOP
         protected override CreateParams CreateParams
         {
             get
@@ -113,6 +46,206 @@ namespace ShootRunner
                 return cp;
             }
         }
+
+        // MESAGES LOOP
+        protected override void WndProc(ref Message m)
+        {
+            if (m.Msg == WinApi.WM_WTSSESSION_CHANGE)
+            {
+                int reason = m.WParam.ToInt32();
+                switch (reason)
+                {
+                    case 0x7: // WTS_SESSION_LOCK
+                        Program.pause = true;
+                        Program.Info("System locked");
+                        break;
+                    case 0x8: // WTS_SESSION_UNLOCK;
+                        Program.pause = false;
+                        Program.Info("System unlocked");
+                        break;
+                }
+            }
+
+            base.WndProc(ref m);
+        }
+
+        /*************************************************************************/
+
+        // EVENT FORM LOAD
+        private void FormShootRunner_Load(object sender, EventArgs e)
+        {
+            if (Program.IsDebug())
+            {
+                this.notifyIconShootRunner.Icon = Pictures.CreateCustomIcon();
+            }
+        }
+
+        // EVENT FORM DRAG ENTER
+        private void FormShootRunner_DragEnter(object sender, DragEventArgs e)
+        {
+            return;
+        }
+
+        // EVENT FORM VISIBILITY CHANGED
+        private void FormShootRunner_VisibleChanged(object sender, EventArgs e)
+        {
+
+            this.Visible = false;
+        }
+
+        // EVENT FORM CLOSED
+        private void FormShootRunner_FormClosed(object sender, FormClosedEventArgs e)
+        {
+
+        }
+
+        // EVENT FORM CLOSING
+        private void FormShootRunner_FormClosing(object sender, FormClosingEventArgs e)
+        {
+
+
+        }
+
+        /*************************************************************************/
+
+        // POPUP OPEN
+        private void ContextMenuStrip1_Opening(object sender, CancelEventArgs e)
+        {
+            Program.autorun = this.IsAutoRunSet(Program.AppName, Application.ExecutablePath);
+            autorunToolStripMenuItem.Checked = Program.autorun;
+        }
+
+        // POPUP APPLICATION ERRORLOG
+        private void ErrorLogToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                Process.Start(new ProcessStartInfo(Program.errorLogPath) { UseShellExecute = true });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("An error occurred: " + ex.Message);
+            }
+        }
+
+        // POPUP APPLICATION  CONSOLE
+        private void ConsoleToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Program.ShowConsole();
+        }
+
+        // POPUP APPLICATION  EXIT
+        private void ExitToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Program.Exit();
+        }
+
+        // POPUP COMMANDS EDIT
+        private void CommandsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                Process.Start(new ProcessStartInfo(Program.commandFielPath) { UseShellExecute = true });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("An error occurred: " + ex.Message);
+            }
+        }
+
+        // POPUP COMMANDS SHORTCUTFORM
+        private void ShortcutFormToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Program.ShowShortcutForm();
+
+        }
+
+        // POPUP PIN NEW
+        private void NewPinToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Program.AddEmptyPin();
+        }
+
+        // POPUP WIDGET NEW
+        private void NewWidgetToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Program.widgetManager.AddEmptyWidget();
+        }
+
+        // POPUP WIDGET CREATE
+        private void CreateWidgetToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Program.widgetManager.ShowCreateWidgetForm();
+        }
+
+        // POPUP WIDGET TASKBAR
+        private void TaskbarToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Program.widgetManager.ShowTaskbarWidget(null);
+        }
+
+        // POPUP OPTIONS
+        private void OptionsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        // POPUP OPTIONS AUTORUN
+        private void AutorunToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (this.IsAutoRunSet(Program.AppName, Application.ExecutablePath))
+            {
+                Program.autorun = false;
+                this.RemoveAutoRun(Program.AppName);
+            }
+            else
+            {
+                Program.autorun = true;
+                this.SetAutoRun(Program.AppName, Application.ExecutablePath);
+            }
+
+            autorunToolStripMenuItem.Checked = Program.autorun;
+
+            Program.Update();
+        }
+
+        // POPUP SELECTION HIDE ALL
+        private void HideAllToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Program.HideAllForms();
+            showAllToolStripMenuItem.Visible = true;
+            hideAllToolStripMenuItem.Visible = false;
+        }
+
+        // POPUP SELECTION SHOW ALL
+        private void ShowAllToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Program.ShowAllForms();
+            showAllToolStripMenuItem.Visible = false;
+            hideAllToolStripMenuItem.Visible = true;
+        }
+
+        /*************************************************************************/
+
+        // TIMER
+        private void Timer_Tick(object sender, EventArgs e)
+        {
+            Program.tick++;
+            if (Program.tick > 10)
+            {
+                Program.shortcut.ctrl = false;
+                Program.shortcut.alt = false;
+                Program.shortcut.shift = false;
+                Program.shortcut.lwin = false;
+                Program.shortcut.rwin = false;
+                Program.shortcut.win = false;
+                Program.shortcut.apps = false;
+                Program.shortcut.key = "";
+                Program.tick = 0;
+            }
+        }
+
+        /*************************************************************************/
 
         // COMMAND
         private bool RunPinCommand(Command command)
@@ -260,14 +393,33 @@ namespace ShootRunner
             return false;
         }
 
-        // HOOK
-        private static IntPtr SetHook(LowLevelKeyboardProc proc)
+        // COMMAND
+        private bool RunScript(Shortcut shortcut)
         {
-            using (Process curProcess = Process.GetCurrentProcess())
-            using (ProcessModule curModule = curProcess.MainModule)
+            bool foundOne = false;
+            foreach (var command in Program.commands)
             {
-                return SetWindowsHookEx(WH_KEYBOARD_LL, proc, GetModuleHandle(curModule.ModuleName), 0);
+                if (command.enabled && this.ParseShortcut(command.shortcut, shortcut))
+                {
+                    bool executed = this.RunPinCommand(command);
+                    if (executed)
+                    {
+                        foundOne = true;
+                    }
+                }
             }
+
+            return foundOne;
+        }
+
+        /*************************************************************************/
+
+        // HOOK
+        private static IntPtr SetHook(WinApi.LowLevelKeyboardProc proc)
+        {
+            using Process curProcess = Process.GetCurrentProcess();
+            using ProcessModule curModule = curProcess.MainModule;
+            return WinApi.SetWindowsHookEx(WinApi.WH_KEYBOARD_LL, proc, WinApi.GetModuleHandle(curModule.ModuleName), 0);
         }
 
         // HOOK
@@ -275,18 +427,15 @@ namespace ShootRunner
         {
             if (Program.pause)
             {
-                return CallNextHookEx(_hookID, nCode, wParam, lParam);
+                return WinApi.CallNextHookEx(WinApi._hookID, nCode, wParam, lParam);
             }
 
-            if (nCode >= 0 && (wParam == (IntPtr)WM_KEYDOWN || wParam == (IntPtr)WM_SYSKEYDOWN))
+            if (nCode >= 0 && (wParam == (IntPtr)WinApi.WM_KEYDOWN || wParam == (IntPtr)WinApi.WM_SYSKEYDOWN))
             {
                 Program.tick = 0;
 
                 int vkCode = Marshal.ReadInt32(lParam);
                 Keys key = (Keys)vkCode;
-
-                Keys ModifierKeys = Control.ModifierKeys;
-
 
                 Program.shortcut.key = key.ToString();
                 switch (Program.shortcut.key)
@@ -341,10 +490,10 @@ namespace ShootRunner
                     return (IntPtr)1;
                 }
 
-                return CallNextHookEx(_hookID, nCode, wParam, lParam);
+                return WinApi.CallNextHookEx(WinApi._hookID, nCode, wParam, lParam);
             }
 
-            if (nCode >= 0 && wParam == (IntPtr)WM_KEYUP)
+            if (nCode >= 0 && wParam == (IntPtr)WinApi.WM_KEYUP)
             {
                 Program.tick = 0;
 
@@ -401,66 +550,16 @@ namespace ShootRunner
                 }
             }
 
-            return CallNextHookEx(_hookID, nCode, wParam, lParam);
+            return WinApi.CallNextHookEx(WinApi._hookID, nCode, wParam, lParam);
         }
 
         // HOOK
         private void FormShootRunner_InputLanguageChanging(object sender, InputLanguageChangingEventArgs e)
         {
-            UnhookWindowsHookEx(_hookID);
+            WinApi.UnhookWindowsHookEx(WinApi._hookID);
         }
 
-        // SHORCUT LWIN
-        private static bool IsLWinPressed()
-        {
-            return (GetKeyState(VK_RWIN) & 0x8000) != 0;
-        }
-
-        // SHORCUT RWIN
-        private static bool IsRWinPressed()
-        {
-            return (GetKeyState(VK_LWIN) & 0x8000) != 0;
-        }
-
-        // SHORCUT APPS
-        private static bool IsAppsPressed()
-        {
-            return (GetKeyState(VK_APPS) & 0x8000) != 0;
-        }
-
-        // COMMAND
-        private bool TestRunScript(Shortcut shortcut)
-        {
-
-            foreach (var command in Program.commands)
-            {
-                if (this.ParseShortcut(command.shortcut, shortcut))
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        // COMMAND
-        private bool RunScript(Shortcut shortcut)
-        {
-            bool foundOne = false;
-            foreach (var command in Program.commands)
-            {
-                if (command.enabled && this.ParseShortcut(command.shortcut, shortcut))
-                {
-                    bool executed = this.RunPinCommand(command);
-                    if (executed)
-                    {
-                        foundOne = true;
-                    }
-                }
-            }
-
-            return foundOne;
-        }
+        /*************************************************************************/
 
         // SHORTCUT
         private bool ParseShortcut(string commandShortcut, Shortcut shortcut)
@@ -515,13 +614,15 @@ namespace ShootRunner
                 ((shortcut.shift && shift) || (!shortcut.shift && !shift)) &&
                 ((shortcut.win && win) || (!shortcut.win && !win)) &&
                 ((shortcut.apps && apps) || (!shortcut.apps && !apps)) &&
-                shortcut.key.ToUpper() == key)
+                shortcut.key.Equals(key, StringComparison.CurrentCultureIgnoreCase))
             {
                 return true;
             }
 
             return false;
         }
+
+        /*************************************************************************/
 
         // PIN
         private void CreatPin()
@@ -530,13 +631,17 @@ namespace ShootRunner
 
             if (Handle != IntPtr.Zero)
             {
-                Window window = new Window();
-                window.Handle = Handle;
+                Window window = new()
+                {
+                    Handle = Handle
+                };
                 ToolsWindow.SetWindowData(window);
                 Program.CreatePin(window);
             }
 
         }
+
+        /*************************************************************************/
 
         //AUTORUN
         public bool IsAutoRunSet(string appName, string appPath)
@@ -590,6 +695,8 @@ namespace ShootRunner
             registryKey.Close();
         }
 
+        /*************************************************************************/
+
         // FILE WATCH
         private void RegisterCommandFileWatch()
         {
@@ -602,10 +709,12 @@ namespace ShootRunner
             try
             {
 
-                watcher = new FileSystemWatcher();
-                watcher.Path = Program.configPath;
-                watcher.Filter = Program.commandFielName;
-                watcher.NotifyFilter = NotifyFilters.LastWrite;
+                watcher = new()
+                {
+                    Path = Program.configPath,
+                    Filter = Program.commandFielName,
+                    NotifyFilter = NotifyFilters.LastWrite
+                };
                 watcher.Changed += OnChanged;
                 watcher.Created += OnChanged;
                 watcher.Deleted += OnChanged;
@@ -614,7 +723,7 @@ namespace ShootRunner
             catch (Exception ex)
             {
 
-                Program.debug("FILE WATCH:" + ex.Message);
+                Program.Debug("FILE WATCH:" + ex.Message);
             }
 
 
@@ -628,165 +737,11 @@ namespace ShootRunner
                 DateTime currentModificationTime = File.GetLastWriteTime(Program.commandFielPath);
                 if (Program.commandFielPathLastChange != currentModificationTime)
                 {
-                    Program.loadCommands();
+                    Program.LoadCommands();
                 }
             }
         }
 
-        // TIMER
-        private void timer1_Tick(object sender, EventArgs e)
-        {
-            Program.tick = Program.tick + 1;
-            if (Program.tick > 10)
-            {
-                Program.shortcut.ctrl = false;
-                Program.shortcut.alt = false;
-                Program.shortcut.shift = false;
-                Program.shortcut.lwin = false;
-                Program.shortcut.rwin = false;
-                Program.shortcut.win = false;
-                Program.shortcut.apps = false;
-                Program.shortcut.key = "";
-                Program.tick = 0;
-            }
-        }
-
-        // POPUP OPEN
-        private void contextMenuStrip1_Opening(object sender, CancelEventArgs e)
-        {
-            Program.autorun = this.IsAutoRunSet(Program.AppName, Application.ExecutablePath);
-            autorunToolStripMenuItem.Checked = Program.autorun;
-        }
-
-        //POPUP COMMANDS
-        private void commandsToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                Process.Start(new ProcessStartInfo(Program.commandFielPath) { UseShellExecute = true });
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("An error occurred: " + ex.Message);
-            }
-        }
-
-        // POPUP ERRORLOG
-        private void errorLogToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                Process.Start(new ProcessStartInfo(Program.errorLogPath) { UseShellExecute = true });
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("An error occurred: " + ex.Message);
-            }
-        }
-
-        //POPUP OPTIONS
-        private void optionsToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        //POPUP AUTORUN
-        private void autorunToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (this.IsAutoRunSet(Program.AppName, Application.ExecutablePath))
-            {
-                Program.autorun = false;
-                this.RemoveAutoRun(Program.AppName);
-            }
-            else
-            {
-                Program.autorun = true;
-                this.SetAutoRun(Program.AppName, Application.ExecutablePath);
-            }
-
-            autorunToolStripMenuItem.Checked = Program.autorun;
-
-            Program.Update();
-        }
-
-        // POPUP EXIT
-        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            Program.Exit();
-        }
-
-        // POPUP SHORTCUTFORM
-        private void shortcutFormToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            Program.ShowShortcutForm();
-
-        }
-
-        // EVENT CLOSED
-        private void FormShootRunner_FormClosed(object sender, FormClosedEventArgs e)
-        {
-
-        }
-
-        private void FormShootRunner_FormClosing(object sender, FormClosingEventArgs e)
-        {
-
-
-        }
-
-        private void newPinToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            Program.AddEmptyPin();
-        }
-
-        private void newWidgetToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            Program.widgetManager.AddEmptyWidget();
-        }
-
-        private void taskbarToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            Program.widgetManager.ShowTaskbarWidget(null);
-        }
-
-        private void consoleToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            Program.ShowConsole();
-        }
-
-        private void hideAllToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            Program.HideAllForms();
-            showAllToolStripMenuItem.Visible = true;
-            hideAllToolStripMenuItem.Visible = false;
-        }
-
-        private void showAllToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            Program.ShowAllForms();
-            showAllToolStripMenuItem.Visible = false;
-            hideAllToolStripMenuItem.Visible = true;
-        }
-
-        private void createWidgetToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            Program.widgetManager.ShowCreateWidgetForm();
-        }
-
-        private void exitToolStripMenuItem1_Click(object sender, EventArgs e)
-        {
-            Application.Exit();
-        }
-
-        private void FormShootRunner_DragEnter(object sender, DragEventArgs e)
-        {
-            return;
-        }
-
-        private void FormShootRunner_VisibleChanged(object sender, EventArgs e)
-        {
-
-            this.Visible = false;
-        }
+        /*************************************************************************/
     }
 }

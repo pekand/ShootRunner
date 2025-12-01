@@ -1,15 +1,17 @@
 ﻿#nullable disable
 
+#pragma warning disable IDE0130
+
 namespace ShootRunner
 {
     public class JSMessage
     {
-        public string uid { get; set; }
-        public string parent { get; set; }
-        public string type { get; set; }
-        public string key { get; set; }
-        public string value { get; set; }
-        public string message { get; set; }
+        public string Uid { get; set; }
+        public string Parent { get; set; }
+        public string Type { get; set; }
+        public string Key { get; set; }
+        public string Value { get; set; }
+        public string Message { get; set; }
 
     }
 }

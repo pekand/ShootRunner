@@ -1,5 +1,7 @@
 ﻿#nullable disable
 
+#pragma warning disable IDE0130
+
 namespace ShootRunner
 {
     public static class ConvertTo
@@ -12,12 +14,10 @@ namespace ShootRunner
 
             try
             {
-                using (MemoryStream ms = new MemoryStream())
-                {
-                    icon.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
-                    byte[] bytes = ms.ToArray();
-                    return Convert.ToBase64String(bytes);
-                }
+                using MemoryStream ms = new();
+                icon.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
+                byte[] bytes = ms.ToArray();
+                return Convert.ToBase64String(bytes);
             }
             catch
             {
@@ -36,21 +36,19 @@ namespace ShootRunner
             try
             {
                 byte[] bytes = Convert.FromBase64String(base64String);
-                using (MemoryStream ms = new MemoryStream(bytes))
-                {
-                    return new Bitmap(ms);
-                }
+                using MemoryStream ms = new(bytes);
+                return new Bitmap(ms);
             }
             catch (Exception ex)
             {
-                Program.error(ex.Message);
+                Program.Error(ex.Message);
 
             }
 
             return null;
         }
 
-        public static string BoolToString(bool value, bool defaultValue = false)
+        public static string BoolToString(bool value)
         {
             return value.ToString();            
         }

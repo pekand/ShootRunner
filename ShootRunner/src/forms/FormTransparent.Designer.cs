@@ -1,4 +1,6 @@
-﻿namespace ShootRunner
+﻿#pragma warning disable IDE0130
+
+namespace ShootRunner
 {
     partial class FormTransparent
     {
@@ -42,7 +44,7 @@
             this.trackBar1.Size = new System.Drawing.Size(765, 45);
             this.trackBar1.TabIndex = 0;
             this.trackBar1.Value = 50;
-            this.trackBar1.Scroll += new System.EventHandler(this.trackBar1_Scroll);
+            this.trackBar1.Scroll += new System.EventHandler(this.TrackBar_Scroll);
             // 
             // FormTransparent
             // 

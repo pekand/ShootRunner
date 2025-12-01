@@ -1,4 +1,6 @@
-﻿namespace ShootRunner.src.forms
+﻿#pragma warning disable IDE0130
+
+namespace ShootRunner
 {
     partial class FormWidgetCreate
     {
@@ -66,7 +68,7 @@
             comboBox1.Name = "comboBox1";
             comboBox1.Size = new Size(489, 38);
             comboBox1.TabIndex = 2;
-            comboBox1.SelectedIndexChanged += comboBox1_SelectedIndexChanged;
+            comboBox1.SelectedIndexChanged += ComboBox1_SelectedIndexChanged;
             // 
             // label2
             // 
@@ -87,7 +89,7 @@
             button1.TabIndex = 4;
             button1.Text = "Delete";
             button1.UseVisualStyleBackColor = true;
-            button1.Click += button1_Click;
+            button1.Click += Button1_Click;
             // 
             // button2
             // 
@@ -98,7 +100,7 @@
             button2.TabIndex = 5;
             button2.Text = "Create";
             button2.UseVisualStyleBackColor = true;
-            button2.Click += button2_Click;
+            button2.Click += Button2_Click;
             // 
             // textBox2
             // 

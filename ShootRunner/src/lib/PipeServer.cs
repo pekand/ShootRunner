@@ -3,6 +3,9 @@ using System.Text;
 
 #nullable disable
 
+#pragma warning disable IDE0079
+#pragma warning disable IDE0130
+#pragma warning disable CA2211
 
 namespace ShootRunner
 {
@@ -16,7 +19,6 @@ namespace ShootRunner
         public static string PipeName = null;
 
         public static NamedPipeServerStream pipeServer = null;
-
 
         public static void SetPipeName(string name) {
             PipeName = name;
@@ -70,7 +72,7 @@ namespace ShootRunner
             catch (Exception ex)
             {
 
-                Program.error(ex.Message);
+                Program.Error(ex.Message);
             }
         }
 
@@ -90,7 +92,7 @@ namespace ShootRunner
                     int bytesRead;
 
                     // Continuously read from the pipe until the client disconnects
-                    while ((bytesRead = await pipeServer.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                    while ((bytesRead = await pipeServer.ReadAsync(buffer)) > 0)
                     {
                         string message = Encoding.UTF8.GetString(buffer, 0, bytesRead);
                         MessageReceived?.Invoke(message);
@@ -100,7 +102,7 @@ namespace ShootRunner
             catch (Exception ex)
             {
 
-                Program.error(ex.Message);
+                Program.Error(ex.Message);
             }
         }
 
@@ -129,17 +131,15 @@ namespace ShootRunner
 
             try
             {
-                using (var pipeClient = new NamedPipeClientStream(".", PipeName, PipeDirection.Out, PipeOptions.Asynchronous))
-                {
-                    await pipeClient.ConnectAsync();
-                    byte[] messageBytes = Encoding.UTF8.GetBytes(message);
-                    await pipeClient.WriteAsync(messageBytes, 0, messageBytes.Length);
-                }
+                using var pipeClient = new NamedPipeClientStream(".", PipeName, PipeDirection.Out, PipeOptions.Asynchronous);
+                await pipeClient.ConnectAsync();
+                byte[] messageBytes = Encoding.UTF8.GetBytes(message);
+                await pipeClient.WriteAsync(messageBytes);
             }
             catch (Exception ex)
             {
 
-                Program.error(ex.Message);
+                Program.Error(ex.Message);
             }
 
             

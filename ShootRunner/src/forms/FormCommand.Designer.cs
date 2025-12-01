@@ -1,4 +1,7 @@
-﻿namespace ShootRunner
+﻿
+#pragma warning disable IDE0130
+
+namespace ShootRunner
 {
     partial class FormCommand
     {
@@ -74,7 +77,7 @@
             textBoxScript.ScrollBars = ScrollBars.Vertical;
             textBoxScript.Size = new Size(1188, 521);
             textBoxScript.TabIndex = 0;
-            textBoxScript.TextChanged += textBox1_TextChanged;
+            textBoxScript.TextChanged += TextBox1_TextChanged;
             // 
             // buttonOK
             // 
@@ -85,7 +88,7 @@
             buttonOK.TabIndex = 1;
             buttonOK.Text = "ok";
             buttonOK.UseVisualStyleBackColor = true;
-            buttonOK.Click += buttonOK_Click;
+            buttonOK.Click += ButtonOK_Click;
             // 
             // checkBoxHideOutput
             // 
@@ -110,7 +113,7 @@
             checkMatchWindow.TabIndex = 3;
             checkMatchWindow.Text = "Match new window";
             checkMatchWindow.UseVisualStyleBackColor = true;
-            checkMatchWindow.CheckedChanged += checkMatchWindow_CheckedChanged;
+            checkMatchWindow.CheckedChanged += CheckMatchWindow_CheckedChanged;
             // 
             // checkBoxDoubleclick
             // 
@@ -123,7 +126,7 @@
             checkBoxDoubleclick.TabIndex = 4;
             checkBoxDoubleclick.Text = "Run with DoubleClick";
             checkBoxDoubleclick.UseVisualStyleBackColor = true;
-            checkBoxDoubleclick.CheckedChanged += checkBoxDoubleclick_CheckedChanged;
+            checkBoxDoubleclick.CheckedChanged += CheckBoxDoubleclick_CheckedChanged;
             // 
             // checkBoxUseWindow
             // 
@@ -136,7 +139,7 @@
             checkBoxUseWindow.TabIndex = 7;
             checkBoxUseWindow.Text = "Window";
             checkBoxUseWindow.UseVisualStyleBackColor = true;
-            checkBoxUseWindow.CheckedChanged += checkBoxUseWindow_CheckedChanged;
+            checkBoxUseWindow.CheckedChanged += CheckBoxUseWindow_CheckedChanged;
             // 
             // comboBoxWindow
             // 
@@ -150,7 +153,7 @@
             comboBoxWindow.Name = "comboBoxWindow";
             comboBoxWindow.Size = new Size(1186, 38);
             comboBoxWindow.TabIndex = 8;
-            comboBoxWindow.DrawItem += comboBoxWindow_DrawItem;
+            comboBoxWindow.DrawItem += ComboBoxWindow_DrawItem;
             // 
             // textBoxWorkdir
             // 
@@ -158,7 +161,7 @@
             textBoxWorkdir.Name = "textBoxWorkdir";
             textBoxWorkdir.Size = new Size(1186, 35);
             textBoxWorkdir.TabIndex = 10;
-            textBoxWorkdir.TextChanged += textBox1_TextChanged_1;
+            textBoxWorkdir.TextChanged += TextBox_TextChanged;
             // 
             // buttonSelectWorkDir
             // 
@@ -168,7 +171,7 @@
             buttonSelectWorkDir.TabIndex = 11;
             buttonSelectWorkDir.Text = "Select";
             buttonSelectWorkDir.UseVisualStyleBackColor = true;
-            buttonSelectWorkDir.Click += buttonSelectWorkDir_Click;
+            buttonSelectWorkDir.Click += ButtonSelectWorkDir_Click;
             // 
             // checkBoxFile
             // 
@@ -203,7 +206,7 @@
             textBoxHyperlink.Name = "textBoxHyperlink";
             textBoxHyperlink.Size = new Size(1186, 35);
             textBoxHyperlink.TabIndex = 15;
-            textBoxHyperlink.TextChanged += textBoxHyperlink_TextChanged;
+            textBoxHyperlink.TextChanged += TextBoxHyperlink_TextChanged;
             // 
             // buttonNoWindow
             // 
@@ -213,7 +216,7 @@
             buttonNoWindow.TabIndex = 16;
             buttonNoWindow.Text = "None";
             buttonNoWindow.UseVisualStyleBackColor = true;
-            buttonNoWindow.Click += buttonNoWindow_Click;
+            buttonNoWindow.Click += ButtonNoWindow_Click;
             // 
             // textBoxDirectory
             // 
@@ -240,7 +243,7 @@
             buttonSelectFile.TabIndex = 19;
             buttonSelectFile.Text = "Select";
             buttonSelectFile.UseVisualStyleBackColor = true;
-            buttonSelectFile.Click += buttonSelectFile_Click;
+            buttonSelectFile.Click += ButtonSelectFile_Click;
             // 
             // buttonSelectDirectory
             // 
@@ -250,7 +253,7 @@
             buttonSelectDirectory.TabIndex = 20;
             buttonSelectDirectory.Text = "Select";
             buttonSelectDirectory.UseVisualStyleBackColor = true;
-            buttonSelectDirectory.Click += buttonSelectDirectory_Click;
+            buttonSelectDirectory.Click += ButtonSelectDirectory_Click;
             // 
             // checkBoxCommand
             // 
@@ -281,7 +284,7 @@
             checkBoxPowerShell.TabIndex = 23;
             checkBoxPowerShell.Text = "Use PowerShell";
             checkBoxPowerShell.UseVisualStyleBackColor = true;
-            checkBoxPowerShell.CheckedChanged += checkBoxPowerShell_CheckedChanged;
+            checkBoxPowerShell.CheckedChanged += CheckBoxPowerShell_CheckedChanged;
             // 
             // checkBoxCmd
             // 
@@ -292,7 +295,7 @@
             checkBoxCmd.TabIndex = 24;
             checkBoxCmd.Text = "Use CMD";
             checkBoxCmd.UseVisualStyleBackColor = true;
-            checkBoxCmd.CheckedChanged += checkBoxCmd_CheckedChanged;
+            checkBoxCmd.CheckedChanged += CheckBoxCmd_CheckedChanged;
             // 
             // pictureBoxIcon
             // 
@@ -303,7 +306,7 @@
             pictureBoxIcon.SizeMode = PictureBoxSizeMode.StretchImage;
             pictureBoxIcon.TabIndex = 25;
             pictureBoxIcon.TabStop = false;
-            pictureBoxIcon.Click += pictureBoxIcon_Click;
+            pictureBoxIcon.Click += PictureBoxIcon_Click;
             // 
             // labelIcon
             // 
@@ -325,7 +328,7 @@
             buttonCancel.TextAlign = ContentAlignment.BottomCenter;
             buttonCancel.UseMnemonic = false;
             buttonCancel.UseVisualStyleBackColor = true;
-            buttonCancel.Click += buttonCancel_Click;
+            buttonCancel.Click += ButtonCancel_Click;
             // 
             // buttonRemoveCustomIcon
             // 
@@ -335,7 +338,7 @@
             buttonRemoveCustomIcon.TabIndex = 28;
             buttonRemoveCustomIcon.Text = "X";
             buttonRemoveCustomIcon.UseVisualStyleBackColor = true;
-            buttonRemoveCustomIcon.Click += buttonRemoveCustomIcon_Click;
+            buttonRemoveCustomIcon.Click += ButtonRemoveCustomIcon_Click;
             // 
             // checkBoxUseScript
             // 
@@ -363,8 +366,8 @@
             labelWindowApp.Size = new Size(1150, 28);
             labelWindowApp.TabIndex = 32;
             labelWindowApp.Text = "Window app";
-            labelWindowApp.TextChanged += labelWindowApp_TextChanged;
-            labelWindowApp.DoubleClick += labelWindowApp_DoubleClick;
+            labelWindowApp.TextChanged += LabelWindowApp_TextChanged;
+            labelWindowApp.DoubleClick += LabelWindowApp_DoubleClick;
             // 
             // webViewHelp
             // 
@@ -386,7 +389,7 @@
             buttonCopyWinApp.TabIndex = 34;
             buttonCopyWinApp.Text = "C";
             buttonCopyWinApp.UseVisualStyleBackColor = true;
-            buttonCopyWinApp.Click += buttonCopyWinApp_Click;
+            buttonCopyWinApp.Click += ButtonCopyWinApp_Click;
             // 
             // FormCommand
             // 

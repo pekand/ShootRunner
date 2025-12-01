@@ -1,17 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using static System.Net.Mime.MediaTypeNames;
+﻿using System.Text.RegularExpressions;
 
 #nullable disable
 
+#pragma warning disable IDE0079
+#pragma warning disable IDE0130
 
 namespace ShootRunner
 {
-    public class TextTools
+    public partial class TextTools
     {
         public static string NormalizeLineEndings(string text)
         {
@@ -22,6 +18,9 @@ namespace ShootRunner
             return text.Replace("\r\n", "\n").Replace("\r", "\n").Replace("\n", "\r\n");
         }
 
+        [GeneratedRegex(@"^(http|https)://[^ ]*$")]
+        private static partial Regex MatchHttps();
+
         public static bool IsURL(String url)
         {
             if (url == null)
@@ -29,7 +28,8 @@ namespace ShootRunner
                 return false;
             }
 
-            return (Regex.IsMatch(url, @"^(http|https)://[^ ]*$"));
+            return (MatchHttps().IsMatch(url));
         }
+
     }
 }

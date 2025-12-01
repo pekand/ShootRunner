@@ -1,4 +1,7 @@
-﻿namespace ShootRunner
+﻿
+#pragma warning disable IDE0130
+
+namespace ShootRunner
 {
     partial class FormConsole
     {
@@ -62,7 +65,7 @@
             textBox1.Name = "textBox1";
             textBox1.Size = new Size(821, 28);
             textBox1.TabIndex = 0;
-            textBox1.KeyDown += textBox1_KeyDown;
+            textBox1.KeyDown += TextBox_KeyDown;
             // 
             // textBox2
             // 

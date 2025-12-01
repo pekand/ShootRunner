@@ -1,5 +1,7 @@
 ﻿#nullable disable
 
+#pragma warning disable IDE0079
+#pragma warning disable IDE0130
 
 namespace ShootRunner
 {
@@ -20,7 +22,7 @@ namespace ShootRunner
 
         }
 
-        private void trackBar1_Scroll(object sender, EventArgs e)
+        private void TrackBar_Scroll(object sender, EventArgs e)
         {
             if (formWidget != null) {
                 formWidget.Opacity = trackBar1.Value / 100.0;

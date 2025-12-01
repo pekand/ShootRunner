@@ -1,21 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Timers;
-using System.Windows.Forms;
+﻿using System.Diagnostics;
 using System.Xml;
 using System.Xml.Linq;
-using Microsoft.Win32;
-using ShootRunner.src.forms;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 
 #nullable disable
+
+#pragma warning disable IDE0130
 
 
 namespace ShootRunner
@@ -47,27 +37,27 @@ namespace ShootRunner
 
         // COMMANDS
         public static DateTime commandFielPathLastChange;
-        public static Shortcut shortcut = new Shortcut();
+        public static Shortcut shortcut = new();
         public static int tick = 0;        
-        public static List<Command> commands = new List<Command>();
+        public static List<Command> commands = [];
         
         // FORMS
         public static FormShootRunner formShootRunner = null;
-        public static List<FormPin> pins = new List<FormPin>();
-        public static List<FormWindowInfo> windowInfoForms = new List<FormWindowInfo>();        
+        public static List<FormPin> pins = [];
+        public static List<FormWindowInfo> windowInfoForms = [];        
         public static FormConsole console = null;
         public static FormShortcut shortcutForm = null;
-        public static List<Form> selectedForms = new List<Form>();
+        public static List<Form> selectedForms = [];
 
         // WIDGETS
-        public static WidgetManager widgetManager = new WidgetManager();
+        public static WidgetManager widgetManager = new();
 
         // LOG
         public static string text = "";
         
         // AUTOSAVE
         public static bool updated = false;
-        public static DateTime updatedTime = new DateTime();
+        public static DateTime updatedTime = new();
         public static System.Timers.Timer timer;
 
 #if DEBUG
@@ -76,7 +66,7 @@ namespace ShootRunner
 #endif
 
         // DEBUG
-        public static bool isDebug()
+        public static bool IsDebug()
         {
 #if DEBUG
             return true;
@@ -118,10 +108,7 @@ namespace ShootRunner
         {
             powershell = ScriptsTools.IsCommandAvailable("pwsh.exe");
 
-            if (powershell == null)
-            {
-                powershell = ScriptsTools.IsCommandAvailable("powershell.exe");
-            }
+            powershell ??= ScriptsTools.IsCommandAvailable("powershell.exe");
         }
 
         // AUTOSAVE
@@ -154,7 +141,7 @@ namespace ShootRunner
         public static void ClearBigLog()
         {
 
-            FileInfo fileInfo = new FileInfo(errorLogPath);
+            FileInfo fileInfo = new(errorLogPath);
             long maxFileSize = 10 * 1024 * 1024;
 
             if (fileInfo.Exists && fileInfo.Length > maxFileSize)
@@ -164,7 +151,7 @@ namespace ShootRunner
         }
 
         // LOG
-        public static void debug(string message) {
+        public static void Debug(string message) {
 #if DEBUG
             string unixTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
             using (StreamWriter sw = new StreamWriter(errorLogPath, true))
@@ -178,48 +165,42 @@ namespace ShootRunner
         }
 
         // LOG
-        public static void info(string message)
+        public static void Info(string message)
         {
 
             string unixTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
-            using (StreamWriter sw = new StreamWriter(errorLogPath, true))
-            {
-                string line = unixTime + " INFO: " + message;
-                sw.WriteLine(line);
-                Program.write(line);
+            using StreamWriter sw = new(errorLogPath, true);
+            string line = unixTime + " INFO: " + message;
+            sw.WriteLine(line);
+            Program.Write(line);
 #if DEBUG
                 Console.WriteLine(line);
 #endif
-            }
         }
 
         // LOG
-        public static void error(string message)
+        public static void Error(string message)
         {
             string unixTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
-            using (StreamWriter sw = new StreamWriter(Program.errorLogPath, true))
-            {
-                string line = unixTime + " ERROR: " + message;
-                sw.WriteLine(line);
-                Program.write(line);
+            using StreamWriter sw = new(Program.errorLogPath, true);
+            string line = unixTime + " ERROR: " + message;
+            sw.WriteLine(line);
+            Program.Write(line);
 #if DEBUG
                 Console.WriteLine(line);
 #endif
-            }
         }
 
         // LOG
-        public static void write(string message)
+        public static void Write(string message)
         { 
             text += message+"\r\n";
 
-            if (Program.console != null) { 
-                Program.console.write(message);
-            }
+            Program.console?.Write(message);
         }
 
         // LOG
-        public static void message(string message)
+        public static void Message(string message)
         {
 #if DEBUG
             Console.WriteLine(message);
@@ -229,9 +210,7 @@ namespace ShootRunner
         // CONSOLE
         public static void ShowConsole()
         {
-            if (console == null) {
-                console = new FormConsole(Program.text);
-            }
+            console ??= new FormConsole(Program.text);
 
             console.Show();
             console.BringToFront();
@@ -244,7 +223,7 @@ namespace ShootRunner
         }
 
         // COMMANDS
-        public static void loadCommands()
+        public static void LoadCommands()
         {
             if (!File.Exists(Program.commandFielPath))
             {
@@ -264,7 +243,7 @@ namespace ShootRunner
                 catch (Exception ex)
                 {
 
-                    Program.error(ex.Message);
+                    Program.Error(ex.Message);
                 }
             }
 
@@ -290,41 +269,39 @@ namespace ShootRunner
 
                         try
                         {
-                            XmlReaderSettings xws = new XmlReaderSettings
+                            XmlReaderSettings xws = new()
                             {
                                 CheckCharacters = false
                             };
 
-                            using (XmlReader xr = XmlReader.Create(new StringReader(xml), xws))
+                            using XmlReader xr = XmlReader.Create(new StringReader(xml), xws);
+
+                            XElement root = XElement.Load(xr);
+
+                            foreach (XElement item in root.Elements())
                             {
-
-                                XElement root = XElement.Load(xr);
-
-                                foreach (XElement item in root.Elements())
+                                string name = item.Name.ToString();
+                                if (item.Name.ToString() == "commands")
                                 {
-                                    string name = item.Name.ToString();
-                                    if (item.Name.ToString() == "commands")
+
+                                    foreach (var commandElement in item.Elements())
                                     {
-
-                                        foreach (var commandElement in item.Elements())
+                                        if (commandElement.Name.ToString() == "command")
                                         {
-                                            if (commandElement.Name.ToString() == "command")
-                                            {
-                                                Command newCommand = new Command();
-                                                Program.commands.Add(newCommand);
+                                            Command newCommand = new();
+                                            Program.commands.Add(newCommand);
 
-                                                newCommand.enabled = commandElement.Element("enabled")?.Value == "1" ? true : false;
-                                                newCommand.shortcut = commandElement.Element("shortcut")?.Value;
-                                                newCommand.open = commandElement.Element("open")?.Value;
-                                                newCommand.command = commandElement.Element("command")?.Value;
-                                                newCommand.parameters = commandElement.Element("parameters")?.Value;
-                                                newCommand.window = commandElement.Element("window")?.Value;
-                                                newCommand.currentwindow = commandElement.Element("currentwindow")?.Value;
-                                                newCommand.workdir = commandElement.Element("workdir")?.Value;
-                                                newCommand.keypress = commandElement.Element("keypress")?.Value;
-                                                newCommand.action = commandElement.Element("action")?.Value;
-                                                newCommand.process = commandElement.Element("process")?.Value;
-                                            }
+                                            newCommand.enabled = commandElement.Element("enabled")?.Value == "1";
+                                            newCommand.shortcut = commandElement.Element("shortcut")?.Value;
+                                            newCommand.open = commandElement.Element("open")?.Value;
+                                            newCommand.command = commandElement.Element("command")?.Value;
+                                            newCommand.parameters = commandElement.Element("parameters")?.Value;
+                                            newCommand.window = commandElement.Element("window")?.Value;
+                                            newCommand.currentwindow = commandElement.Element("currentwindow")?.Value;
+                                            newCommand.workdir = commandElement.Element("workdir")?.Value;
+                                            newCommand.keypress = commandElement.Element("keypress")?.Value;
+                                            newCommand.action = commandElement.Element("action")?.Value;
+                                            newCommand.process = commandElement.Element("process")?.Value;
                                         }
                                     }
                                 }
@@ -332,7 +309,7 @@ namespace ShootRunner
                         }
                         catch (Exception ex)
                         {
-                            Program.error(ex.Message);
+                            Program.Error(ex.Message);
                         }
  
                     }
@@ -340,7 +317,7 @@ namespace ShootRunner
                     {
                         error = true;
                         Thread.Sleep(50);
-                        Program.error(ex.Message);
+                        Program.Error(ex.Message);
                     }
 
                     attemps--;
@@ -348,7 +325,7 @@ namespace ShootRunner
             }
             catch (Exception ex)
             {
-                Program.error(ex.Message);
+                Program.Error(ex.Message);
             }
 
         }
@@ -391,7 +368,7 @@ namespace ShootRunner
         // PIN FORM
         public static void CreatePin(Window window = null)
         {
-            FormPin pin = new FormPin(window, true);
+            FormPin pin = new(window, true);
             pins.Add(pin);
             pin.Show();
             pin.Center();
@@ -418,7 +395,7 @@ namespace ShootRunner
         // PIPE SERVER
         public static void OnMessageReceived(string message)
         {
-           Program.info("Message Received: " + message);
+           Program.Info("Message Received: " + message);
         }
 
         // PIPE SERVER
@@ -426,16 +403,16 @@ namespace ShootRunner
             PipeServer.MessageReceived += OnMessageReceived;
             PipeServer.SetPipeName(GetDebugPrefix() + Program.AppName);
             if (!PipeServer.StartServerAsync()) {
-                Program.info("Pipe server exists");
+                Program.Info("Pipe server exists");
             }
         }
 
         // FORMS 
         public static void HideAllForms()
         {
-            if (formShootRunner != null) formShootRunner.Hide();
-            if (console != null) console.Hide();
-            if (shortcutForm != null) shortcutForm.Hide();
+            formShootRunner?.Hide();
+            console?.Hide();
+            shortcutForm?.Hide();
 
             foreach (var pin in pins) { 
                 pin.Hide();
@@ -449,9 +426,9 @@ namespace ShootRunner
         // FORMS
         public static void ShowAllForms()
         {
-            if (formShootRunner != null) formShootRunner.Show();
-            if (console != null) console.Show();
-            if (shortcutForm != null) shortcutForm.Show();
+            formShootRunner?.Show();
+            console?.Show();
+            shortcutForm?.Show();
 
             foreach (var pin in pins)
             {
@@ -509,10 +486,7 @@ namespace ShootRunner
         // APPLICATION
         public static bool ChecKDuplicateRun()
         {
-            bool createdNew;
-
-
-            mutex = new Mutex(true, (isDebug() ? "DEBUG." : "") + Program.AppName, out createdNew);
+            mutex = new Mutex(true, (IsDebug() ? "DEBUG." : "") + Program.AppName, out bool createdNew);
 
             if (!createdNew)
             {
@@ -657,7 +631,7 @@ namespace ShootRunner
 #endif
 
 
-            Program.message("Application Start");
+            Program.Message("Application Start");
 
             AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
             {
@@ -677,7 +651,7 @@ namespace ShootRunner
                 Console.WriteLine($"Handles: {process.HandleCount}, Threads: {process.Threads.Count}, Memory: {process.PrivateMemorySize64}");
             };
 
-            Program.processId = Process.GetCurrentProcess().Id;
+            Program.processId = Environment.ProcessId;
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
@@ -691,7 +665,7 @@ namespace ShootRunner
 
                 if (ChecKDuplicateRun())
                 {
-                    Program.info("Duplicite run, app end");                
+                    Program.Info("Duplicite run, app end");                
                     return;
                 }
 
@@ -702,7 +676,7 @@ namespace ShootRunner
 
                 Program.FindPowershell();
 
-                Program.loadCommands();                
+                Program.LoadCommands();                
                 Program.OpenPins();
                 widgetManager.OpenWidgets();
 
@@ -714,12 +688,10 @@ namespace ShootRunner
             }
             catch (Exception ex)
             {
-                Program.error(ex.Message);
+                Program.Error(ex.Message);
             }
 
-            Program.message("Application End");
+            Program.Message("Application End");
         }
-
-        
     }
 }

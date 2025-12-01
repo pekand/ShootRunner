@@ -1,15 +1,12 @@
 ﻿#nullable disable
 
+#pragma warning disable IDE0130
+
 namespace ShootRunner
 {
-    public class WindowProperty
+    public class WindowProperty(string name = "", string value = "")
     {
-        public string name = "";
-        public string value = "";
-        public WindowProperty(string name = "", string value = "")
-        {
-            this.name = name;
-            this.value = value;
-        }
+        public string name = name;
+        public string value = value;
     }
 }

@@ -1,5 +1,8 @@
 ﻿using System.Runtime.InteropServices;
 
+#pragma warning disable IDE0079
+#pragma warning disable IDE0130
+
 namespace ShootRunner
 {
     public partial class FormConsole : Form
@@ -11,7 +14,7 @@ namespace ShootRunner
             textBox2.Text = text;
         }
 
-        public void write(string message)
+        public void Write(string message)
         {
             this.Invoke(new Action(() =>
             {
@@ -48,10 +51,10 @@ namespace ShootRunner
                 return;
             }
 
-            Program.write(message);
+            Program.Write(message);
         }
 
-        private void textBox1_KeyDown(object sender, KeyEventArgs e)
+        private void TextBox_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Enter)
             {
@@ -62,15 +65,9 @@ namespace ShootRunner
             }
         }
 
-        private const int WM_VSCROLL = 0x0115;
-        private const int SB_BOTTOM = 7;
-
-        [DllImport("user32.dll", CharSet = CharSet.Auto)]
-        private static extern int SendMessage(IntPtr hWnd, int msg, int wParam, int lParam);
-
         public void ScrollToBottom()
         {
-            SendMessage(this.textBox2.Handle, WM_VSCROLL, SB_BOTTOM, 0);
+            WinApi.SendMessage(this.textBox2.Handle, WinApi.WM_VSCROLL, WinApi.SB_BOTTOM, 0);
         }
     }
 }

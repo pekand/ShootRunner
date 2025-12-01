@@ -1,13 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+
+#pragma warning disable IDE0079
+#pragma warning disable IDE0130
 
 namespace ShootRunner
 {
-    public class Os
+    public partial class Os
     {
         public static void CopyOrMove(string sourcePath, string destDirectory, bool move = false)
         {
@@ -129,6 +128,9 @@ namespace ShootRunner
             return string.Concat(name.Where(c => !invalid.Contains(c))).Trim();
         }
 
+        [GeneratedRegex(@"<title>(.*?)</title>", RegexOptions.IgnoreCase | RegexOptions.Singleline, "en-US")]
+        private static partial Regex MatchTitle();
+
         public static async Task<string> GetPageTitleAsync(string url)
         {
             try
@@ -136,7 +138,7 @@ namespace ShootRunner
                 using var client = new HttpClient();
                 string html = await client.GetStringAsync(url);
 
-                var match = Regex.Match(html, @"<title>(.*?)</title>", RegexOptions.IgnoreCase | RegexOptions.Singleline);
+                var match = MatchTitle().Match(html);
                 if (match.Success)
                     return SanitizeFileName(match.Groups[1].Value.Trim());
             }
@@ -150,13 +152,13 @@ namespace ShootRunner
         public static string ExtractHtmlFragment(string html)
         {
 
-            var lines = html.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+            var lines = html.Split(["\r\n", "\n"], StringSplitOptions.None);
             int startIndex = 0;
 
             for (int i = 0; i < lines.Length; i++)
             {
                 string trimmedStart = lines[i].TrimStart();
-                if (trimmedStart.StartsWith("<"))
+                if (trimmedStart.StartsWith('<'))
                 {
                     startIndex = i;
                     break;

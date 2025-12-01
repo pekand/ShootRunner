@@ -1,30 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.Header;
+﻿#pragma warning disable IDE0079
+#pragma warning disable IDE0130
 
-namespace ShootRunner.src.forms
+namespace ShootRunner
 {
     public partial class FormWidgetCreate : Form
     {
-        List<Item> itemList = new List<Item>();
+        readonly List<Item> itemList = [];
 
         public FormWidgetCreate()
         {
             InitializeComponent();
         }
 
-        private void button2_Click(object sender, EventArgs e)
+        private void Button2_Click(object sender, EventArgs e)
         {
             string name = textBox1.Text;
-            Item item = comboBox1.SelectedItem as Item;
-            WidgetType type = item.Type;
+            Item? item = comboBox1.SelectedItem as Item;
+            WidgetType? type = item?.Type;
             Program.widgetManager.CreateWidget(name, type);
             this.Close();
         }
@@ -37,7 +29,7 @@ namespace ShootRunner.src.forms
             int pos = 0;
             foreach (WidgetType type in Program.widgetManager.widgeTypes)
             {
-                Item item = new Item
+                Item item = new()
                 {
                     Name = type.name,
                     Id = pos++,
@@ -51,10 +43,10 @@ namespace ShootRunner.src.forms
             comboBox1.DisplayMember = "Name";
             comboBox1.ValueMember = "Id";
 
-            comboBox1_SelectedIndexChanged(null, null);
+            ComboBox1_SelectedIndexChanged(null, null);
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void Button1_Click(object sender, EventArgs e)
         {
             DialogResult result = MessageBox.Show(
                 "Are you sure you want to permanently delete this item?\n" +
@@ -67,19 +59,18 @@ namespace ShootRunner.src.forms
             if (result == DialogResult.Yes)
             {
                 int indexToSelect = comboBox1.SelectedIndex;
-                Item item = comboBox1.SelectedItem as Item;
-                if (item != null)
+                if (comboBox1.SelectedItem is Item item)
                 {
-                    WidgetType type = item.Type;
-                    if (File.Exists(type.source))
+                    WidgetType? type = item.Type;
+                    if (File.Exists(type?.source))
                     {
-                        File.Move(type.source, type.source+".bak");
+                        File.Move(type.source, type.source + ".bak");
                     }
 
                     itemList.Remove(item);
                     comboBox1.DataSource = null;
                     comboBox1.DataSource = itemList;
-                    
+
 
                     if (itemList.Count == 0)
                     {
@@ -94,23 +85,23 @@ namespace ShootRunner.src.forms
                         comboBox1.SelectedIndex = indexToSelect;
                     }
 
-                    comboBox1_SelectedIndexChanged(null, null);
+                    ComboBox1_SelectedIndexChanged(null, null);
                 }
 
             }
         }
 
-        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        private void ComboBox1_SelectedIndexChanged(object? sender, EventArgs? e)
         {
             try
             {
-                Item item = comboBox1.SelectedItem as Item;
-                if (item != null)
+                if (comboBox1.SelectedItem is Item item)
                 {
-                    WidgetType type = item.Type;
+                    WidgetType? type = item.Type;
 
-                    textBox2.Text = type.html.Replace("\n", "\r\n").Replace("\r\r\n", "\r\n");
-                } else 
+                    textBox2.Text = type?.html.Replace("\n", "\r\n").Replace("\r\r\n", "\r\n");
+                }
+                else
                 {
                     textBox2.Text = "";
                 }
@@ -125,12 +116,12 @@ namespace ShootRunner.src.forms
 
     public class Item
     {
-        public string Name { get; set; }
+        public string? Name { get; set; }
         public int Id { get; set; }
 
-        public WidgetType Type { get; set; }
+        public WidgetType? Type { get; set; }
 
-        public override string ToString()
+        public override string? ToString()
         {
             return Name;
         }

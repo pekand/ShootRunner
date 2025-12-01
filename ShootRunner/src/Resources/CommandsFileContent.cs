@@ -1,4 +1,6 @@
-﻿namespace ShootRunner
+﻿#pragma warning disable IDE0130
+
+namespace ShootRunner
 {
     public class CommandsFileContent
     {

@@ -1,13 +1,10 @@
-﻿using Humanizer;
-using ShootRunner.src.forms;
-using System.ComponentModel;
-using System.Runtime.InteropServices;
-using System.Threading.Channels;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
-using System.Timers;
+﻿using System.ComponentModel;
 
 #nullable disable
 
+#pragma warning disable IDE0079
+#pragma warning disable IDE0130
+#pragma warning disable CA1822
 
 namespace ShootRunner
 {
@@ -15,10 +12,10 @@ namespace ShootRunner
     {
         public Widget widget = null;
 
-        public List<Window> taskbarWindows = new List<Window>();
-        public List<IntPtr> taskbarWindowsHandle = new List<IntPtr>();
+        public List<Window> taskbarWindows = [];
+        public List<IntPtr> taskbarWindowsHandle = [];
 
-        public WindowMonitor windowMonitor = new WindowMonitor();
+        public WindowMonitor windowMonitor = new();
 
         Window selectedWindow = null;
 
@@ -40,7 +37,7 @@ namespace ShootRunner
         public int mouseDownWindow = 0;
         private FormGhost ghostForm;
 
-        Window lastWindow = null;
+        public Window lastWindow = null;
 
         public FormTaskbar(Widget widget)
         {
@@ -116,7 +113,7 @@ namespace ShootRunner
             get
             {
                 CreateParams cp = base.CreateParams;
-                cp.ExStyle |= ToolsWindow.WS_EX_TOOLWINDOW; // Add the tool window style
+                cp.ExStyle |= WinApi.WS_EX_TOOLWINDOW; // Add the tool window style
                 return cp;
             }
         }
@@ -156,9 +153,11 @@ namespace ShootRunner
             taskbarWindowsHandle.Add(Handle);
 
             try
-            {                
-                Window window = new Window();
-                window.Handle = Handle;
+            {
+                Window window = new()
+                {
+                    Handle = Handle
+                };
                 ToolsWindow.SetWindowData(window);
 
                 if (this.widget.useScreenshots)
@@ -175,7 +174,7 @@ namespace ShootRunner
             }
             catch (Exception ex)
             {
-                Program.error(ex.Message);
+                Program.Error(ex.Message);
 
             }
         }
@@ -189,7 +188,7 @@ namespace ShootRunner
 
             taskbarWindowsHandle.Remove(Handle);
 
-            List<Window> toremove = new List<Window>();
+            List<Window> toremove = [];
 
             foreach (var win in taskbarWindows)
             {
@@ -212,7 +211,7 @@ namespace ShootRunner
 
         protected override void WndProc(ref Message m)
         {
-            if (!this.widget.locked && m.Msg == ToolsWindow.WM_NCHITTEST)
+            if (!this.widget.locked && m.Msg == WinApi.WM_NCHITTEST)
             {
                 Point pos = PointToClient(Cursor.Position);
                 Size size = this.ClientSize;
@@ -220,25 +219,25 @@ namespace ShootRunner
                 // RESIZE WITH CORNER
                 if (size.Width - 10 <= pos.X && size.Height - 10 <= pos.Y)
                 {
-                    m.Result = (IntPtr)ToolsWindow.HTBOTTOMRIGHT;
+                    m.Result = (IntPtr)WinApi.HTBOTTOMRIGHT;
                     return;
                 }
 
                 if (pos.X <= 10 && pos.Y <= 10)
                 {
-                    m.Result = (IntPtr)ToolsWindow.HTTOPLEFT;
+                    m.Result = (IntPtr)WinApi.HTTOPLEFT;
                     return;
                 }
 
                 if (size.Width - 10 <= pos.X && pos.Y <= 10)
                 {
-                    m.Result = (IntPtr)ToolsWindow.HTTOPRIGHT;
+                    m.Result = (IntPtr)WinApi.HTTOPRIGHT;
                     return;
                 }
 
                 if (pos.X <= 10 && size.Height - 10 <= pos.Y)
                 {
-                    m.Result = (IntPtr)ToolsWindow.HTBOTTOMLEFT;
+                    m.Result = (IntPtr)WinApi.HTBOTTOMLEFT;
                     return;
                 }
             }
@@ -262,8 +261,6 @@ namespace ShootRunner
         /////////////////////////////////////////////////////////////////////////////////////////////
         private void FormTaskbar_Paint(object sender, PaintEventArgs e)
         {
-            Graphics g = e.Graphics;
-
             int X = StartX;
             int Y = StartY;
             int W = IconWidth;
@@ -308,7 +305,7 @@ namespace ShootRunner
             catch (Exception ex)
             {
 
-                Program.error(ex.Message);
+                Program.Error(ex.Message);
             }
 
         }
@@ -499,10 +496,7 @@ namespace ShootRunner
                 if (draggingWindow != null)
                 {
                     Bitmap pic = draggingWindow.screenshot;
-                    if (pic == null)
-                    {
-                        pic = draggingWindow.icon;
-                    }
+                    pic ??= draggingWindow.icon;
 
                     if (pic != null)
                     {
@@ -588,7 +582,7 @@ namespace ShootRunner
 
         /////////////////////////////////////////////////////////////////////////////////////////////
 
-        private void contextMenuStrip1_Opening(object sender, CancelEventArgs e)
+        private void ContextMenuStrip1_Opening(object sender, CancelEventArgs e)
         {
             mostTopToolStripMenuItem.Checked = this.TopMost;
             lockToolStripMenuItem.Checked = this.widget.locked;
@@ -596,7 +590,7 @@ namespace ShootRunner
             useBigIconsToolStripMenuItem.Checked = widget.useBigIcons;
         }
 
-        private void mostTopToolStripMenuItem_Click(object sender, EventArgs e)
+        private void MostTopToolStripMenuItem_Click(object sender, EventArgs e)
         {
 
             this.TopMost = !this.TopMost;
@@ -604,29 +598,29 @@ namespace ShootRunner
             this.widget.mosttop = this.TopMost;
         }
 
-        private void lockToolStripMenuItem_Click(object sender, EventArgs e)
+        private void LockToolStripMenuItem_Click(object sender, EventArgs e)
         {
             this.widget.locked = !this.widget.locked;
             lockToolStripMenuItem.Checked = this.widget.locked;
         }
 
-        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
+        private void ExitToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Program.Exit();
         }
 
-        private void removeToolStripMenuItem_Click(object sender, EventArgs e)
+        private void RemoveToolStripMenuItem_Click(object sender, EventArgs e)
         {
             this.CloseForm();
             this.Close();
         }
 
-        private void windowToolStripMenuItem_Click(object sender, EventArgs e)
+        private void WindowToolStripMenuItem_Click(object sender, EventArgs e)
         {
 
         }
 
-        private void minimalizeToolStripMenuItem_Click(object sender, EventArgs e)
+        private void MinimalizeToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (this.selectedWindow != null)
             {
@@ -634,7 +628,7 @@ namespace ShootRunner
             }
         }
 
-        private void closeToolStripMenuItem_Click(object sender, EventArgs e)
+        private void CloseToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (this.selectedWindow != null)
             {
@@ -642,7 +636,7 @@ namespace ShootRunner
             }
         }
 
-        private void useScreenshotsToolStripMenuItem_Click(object sender, EventArgs e)
+        private void UseScreenshotsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             widget.useScreenshots = !widget.useScreenshots;
             useScreenshotsToolStripMenuItem.Checked = widget.useScreenshots;
@@ -650,7 +644,7 @@ namespace ShootRunner
             this.Refresh();
         }
 
-        private void useBigIconsToolStripMenuItem_Click(object sender, EventArgs e)
+        private void UseBigIconsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             widget.useBigIcons = !widget.useBigIcons;
             useBigIconsToolStripMenuItem.Checked = widget.useScreenshots;
@@ -658,26 +652,24 @@ namespace ShootRunner
             this.Refresh();
         }
 
-        private void backgroundColorToolStripMenuItem_Click(object sender, EventArgs e)
+        private void BackgroundColorToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            using (ColorDialog colorDialog = new ColorDialog())
+            using ColorDialog colorDialog = new();
+            if (colorDialog.ShowDialog() == DialogResult.OK)
             {
-                if (colorDialog.ShowDialog() == DialogResult.OK)
-                {
-                    Color selectedColor = colorDialog.Color;
-                    this.widget.backgroundColor = selectedColor;
-                    this.BackColor = selectedColor;
-                    this.Refresh();
-                }
+                Color selectedColor = colorDialog.Color;
+                this.widget.backgroundColor = selectedColor;
+                this.BackColor = selectedColor;
+                this.Refresh();
             }
         }
 
-        private void showDesktopToolStripMenuItem_Click(object sender, EventArgs e)
+        private void ShowDesktopToolStripMenuItem_Click(object sender, EventArgs e)
         {
             ToolsWindow.ShowDesktop();
         }
 
-        private void hiddeToolStripMenuItem_Click(object sender, EventArgs e)
+        private void HiddeToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (this.selectedWindow != null)
             {
@@ -708,7 +700,7 @@ namespace ShootRunner
             window.isCurentWindowScreensot = false;
         }
 
-        private void showAllHiddenToolStripMenuItem_Click(object sender, EventArgs e)
+        private void ShowAllHiddenToolStripMenuItem_Click(object sender, EventArgs e)
         {
             foreach (Window window in taskbarWindows)
             {
@@ -721,17 +713,17 @@ namespace ShootRunner
             this.Refresh();
         }
 
-        private void infoToolStripMenuItem_Click(object sender, EventArgs e)
+        private void InfoToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (this.selectedWindow != null)
             {
-                FormWindowInfo windowInfoForm = new FormWindowInfo(this.selectedWindow);
+                FormWindowInfo windowInfoForm = new(this.selectedWindow);
                 Program.windowInfoForms.Add(windowInfoForm);
                 windowInfoForm.Show();
             }
         }
 
-        private void consoleToolStripMenuItem_Click(object sender, EventArgs e)
+        private void ConsoleToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Program.ShowConsole();
         }

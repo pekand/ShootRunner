@@ -1,13 +1,11 @@
 ﻿#nullable disable
 
+#pragma warning disable IDE0130
+
 namespace ShootRunner
 {
-    public class PipeMessage
+    public class PipeMessage(string message = "")
     {
-        public string message = "";
-
-        public PipeMessage(string message = "") {
-            this.message = message;
-        }
+        public string message = message;
     }
 }

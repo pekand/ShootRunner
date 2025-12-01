@@ -1,10 +1,11 @@
 ﻿using Microsoft.Web.WebView2.Core;
 using System.ComponentModel;
-using System.Runtime.InteropServices;
 using System.Text.Json;
 
 #nullable disable
 
+#pragma warning disable IDE0079
+#pragma warning disable IDE0130
 
 namespace ShootRunner
 {
@@ -44,7 +45,7 @@ namespace ShootRunner
             get
             {
                 CreateParams cp = base.CreateParams;
-                cp.ExStyle |= ToolsWindow.WS_EX_TOOLWINDOW; // Add the tool window style
+                cp.ExStyle |= WinApi.WS_EX_TOOLWINDOW; // Add the tool window style
                 return cp;
             }
         }
@@ -54,7 +55,7 @@ namespace ShootRunner
 
             foreach (var widgeType in Program.widgetManager.widgeTypes)
             {
-                ToolStripMenuItem item = new ToolStripMenuItem(widgeType.name);
+                ToolStripMenuItem item = new(widgeType.name);
                 item.Click += (sender, e) => SelectType(widgeType);
                 typeToolStripMenuItem.DropDownItems.Add(item);
             }
@@ -103,8 +104,10 @@ namespace ShootRunner
 
             try
             {
-                webView = new Microsoft.Web.WebView2.WinForms.WebView2();
-                webView.Dock = DockStyle.Fill;
+                webView = new Microsoft.Web.WebView2.WinForms.WebView2
+                {
+                    Dock = DockStyle.Fill
+                };
 
                 this.Controls.Add(webView);
 
@@ -218,7 +221,7 @@ namespace ShootRunner
             catch (Exception ex)
             {
 
-                Program.error(ex.Message);
+                Program.Error(ex.Message);
             }
 
         }
@@ -234,7 +237,7 @@ namespace ShootRunner
             catch (Exception ex)
             {
 
-                Program.error(ex.Message);
+                Program.Error(ex.Message);
             }
         }
 
@@ -243,38 +246,40 @@ namespace ShootRunner
         private void WebView_WebMessageReceived(object sender, CoreWebView2WebMessageReceivedEventArgs e)
         {
             string json = e.WebMessageAsJson;
-            Program.debug($"JS: {json}");
+            Program.Debug($"JS: {json}");
 
             try
             {
                 JSMessage request = JsonSerializer.Deserialize<JSMessage>(json);
 
-                if (request.type == "log")
+                if (request.Type == "log")
                 {
-                    Program.debug("JS: " + request.message);
+                    Program.Debug("JS: " + request.Message);
 
                 }
 
-                if (request.type == "error")
+                if (request.Type == "error")
                 {
-                    Program.debug("JS ERROR: " + request.message);
+                    Program.Debug("JS ERROR: " + request.Message);
 
                 }
 
-                if (request.type == "setData" && request.key != "")
+                if (request.Type == "setData" && request.Key != "")
                 {
-                    this.widget.data[request.key] = request.value;
+                    this.widget.data[request.Key] = request.Value;
                     Program.Update();
                 }
 
-                if (request.type == "getData")
+                if (request.Type == "getData")
                 {
-                    JSMessage response = new JSMessage();
-                    response.uid = Generator.uid();
-                    response.parent = request.uid;
-                    response.key = request.key;
-                    response.value = this.widget.data.ContainsKey(request.key) ? this.widget.data[request.key] : "";
-                    response.message = "";
+                    JSMessage response = new()
+                    {
+                        Uid = Generator.Uid(),
+                        Parent = request.Uid,
+                        Key = request.Key,
+                        Value = this.widget.data.TryGetValue(request.Key, out string value) ? value : "",
+                        Message = ""
+                    };
                     string responseJson = System.Text.Json.JsonSerializer.Serialize(response);
                     webView.CoreWebView2.PostWebMessageAsJson(responseJson);
                 }
@@ -297,7 +302,7 @@ namespace ShootRunner
         protected override void WndProc(ref Message m)
         {
 
-            if (this.widget.locked && (m.Msg == ToolsWindow.WM_NCLBUTTONDOWN && m.WParam.ToInt32() == ToolsWindow.HTCAPTION))
+            if (this.widget.locked && (m.Msg == WinApi.WM_NCLBUTTONDOWN && m.WParam.ToInt32() == WinApi.HTCAPTION))
             {
                 return;
             }
@@ -338,53 +343,53 @@ namespace ShootRunner
 
         /////////////////////////////////////////////////////////////////////////////////////////////
 
-        private void contextMenuStrip1_Opening(object sender, CancelEventArgs e)
+        private void ContextMenuStrip1_Opening(object sender, CancelEventArgs e)
         {
             mostTopToolStripMenuItem.Checked = this.TopMost;
             lockedToolStripMenuItem.Checked = this.widget.locked;
         }
 
-        private void transparentToolStripMenuItem_Click(object sender, EventArgs e)
+        private void TransparentToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            FormTransparent form = new FormTransparent(this, null);
+            FormTransparent form = new(this, null);
             form.trackBar1.Value = (int)(this.Opacity * 100);
             form.Show();
             this.widget.transparent = this.Opacity;
         }
 
-        private void removeWidgetToolStripMenuItem_Click(object sender, EventArgs e)
+        private void RemoveWidgetToolStripMenuItem_Click(object sender, EventArgs e)
         {
             this.Close();
         }
 
-        private void newWidgetToolStripMenuItem_Click(object sender, EventArgs e)
+        private void NewWidgetToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Program.widgetManager.AddEmptyWidget();
         }
 
-        private void mostTopToolStripMenuItem_Click(object sender, EventArgs e)
+        private void MostTopToolStripMenuItem_Click(object sender, EventArgs e)
         {
             this.TopMost = !this.TopMost;
             mostTopToolStripMenuItem.Checked = this.TopMost;
         }
 
-        private void lockedToolStripMenuItem_Click(object sender, EventArgs e)
+        private void LockedToolStripMenuItem_Click(object sender, EventArgs e)
         {
             this.widget.locked = !this.widget.locked;
             lockedToolStripMenuItem.Checked = this.widget.locked;
         }
 
-        private void typeToolStripMenuItem_Click(object sender, EventArgs e)
+        private void TypeToolStripMenuItem_Click(object sender, EventArgs e)
         {
 
         }
 
-        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
+        private void ExitToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Program.Exit();
         }
 
-        private void reloadToolStripMenuItem_Click(object sender, EventArgs e)
+        private void ReloadToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (widget == null || widget.widgetType == null)
             {
@@ -403,7 +408,7 @@ namespace ShootRunner
             }
         }
 
-        private void editToolStripMenuItem_Click(object sender, EventArgs e)
+        private void EditToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (widget == null || widget.widgetType == null || !File.Exists(widget.widgetType.source))
             {
@@ -420,7 +425,7 @@ namespace ShootRunner
             }
             catch (Exception ex)
             {
-                Program.error(ex.Message);
+                Program.Error(ex.Message);
             }
         }
 
@@ -448,12 +453,12 @@ namespace ShootRunner
             this.Refresh();
         }
 
-        private void createWidgetToolStripMenuItem_Click(object sender, EventArgs e)
+        private void CreateWidgetToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Program.widgetManager.ShowCreateWidgetForm();
         }
 
-        private void consoleToolStripMenuItem_Click(object sender, EventArgs e)
+        private void ConsoleToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Program.ShowConsole();
         }

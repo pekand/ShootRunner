@@ -1,4 +1,6 @@
-﻿namespace ShootRunner.src.forms
+﻿#pragma warning disable IDE0130
+
+namespace ShootRunner
 {
     partial class FormWindowInfo
     {
@@ -107,7 +109,7 @@
             button1.TabIndex = 4;
             button1.Text = "OK";
             button1.UseVisualStyleBackColor = true;
-            button1.Click += button1_Click;
+            button1.Click += Button_Click;
             // 
             // label3
             // 
@@ -297,7 +299,7 @@
             // 
             timer.Enabled = true;
             timer.Interval = 1000;
-            timer.Tick += timer_Tick;
+            timer.Tick += Timer_Tick;
             // 
             // FormWindowInfo
             // 

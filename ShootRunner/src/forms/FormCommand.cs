@@ -1,7 +1,9 @@
-﻿#nullable disable
+﻿using System.Windows.Forms;
 
+#nullable disable
 
-using System.Windows.Forms;
+#pragma warning disable IDE0079
+#pragma warning disable IDE0130
 
 namespace ShootRunner
 {
@@ -33,7 +35,7 @@ namespace ShootRunner
         }
 
         // BUTTON OK CLICK
-        private void buttonOK_Click(object sender, EventArgs e)
+        private void ButtonOK_Click(object sender, EventArgs e)
         {
 
             this.pin.useWindow = this.checkBoxUseWindow.Checked;
@@ -64,21 +66,15 @@ namespace ShootRunner
 
             if (selectedWindow != this.pin.window)
             {
-                if (this.pin.window != null)
-                {
-                    this.pin.window.Dispose();
-                }
+                this.pin.window?.Dispose();
                 this.pin.window = selectedWindow;
             }
 
             if (this.pin.customicon != customicon)
             {
-                if (this.pin.customicon != null)
-                {
-                    this.pin.customicon.Dispose();
-                }
+                this.pin.customicon?.Dispose();
                 this.pin.customicon = customicon;
-                this.pinForm.RefreshIcon();
+                this.pinForm.RedrawPin();
             }
 
             Program.Update();
@@ -101,14 +97,14 @@ namespace ShootRunner
             this.textBoxHyperlink.Text = this.pin.hyperlink;
             this.checkBoxHyperlink.Checked = this.pin.useHyperlink;
 
-            this.checkBoxUseScript.Checked = this.pin.useScript;
-            this.textBoxScript.Text = this.pin.script;
-
             this.checkBoxCommand.Checked = this.pin.useCommand;
             this.textBoxCommand.Text = this.pin.command;
-            this.textBoxScript.Text = TextTools.NormalizeLineEndings(pin.command);
+
+            this.checkBoxUseScript.Checked = this.pin.useScript;
+            this.textBoxScript.Text = TextTools.NormalizeLineEndings(pin.script);
             this.textBoxScript.SelectionStart = textBoxScript.Text.Length;
             this.textBoxScript.SelectionLength = 0;
+
             this.ActiveControl = null;
 
             this.checkBoxWorkdir.Checked = this.pin.useWorkdir;
@@ -141,17 +137,7 @@ namespace ShootRunner
             <html><body>
             <style>
             h1{font-size:16px;}</style>
-            <h1>Help 1</h1>
-            <p>Toto je pod nadpisom.</p>
-            <h2>Odstavec a zoznam</h2>
-            <ol>
-                <li>Prvý bod</li>
-                <li>Druhý bod</li>
-            </ol>
-            <ul>
-                <li>Odrážka 1</li>
-                <li>Odrážka 2</li>
-            </ul>
+            <h1>Help</h1>
             </body></html>");
             });
         }
@@ -167,9 +153,11 @@ namespace ShootRunner
             int Index = 0;
             int SelectedIndex = 0;
 
-            ActionItem emptyItem = new ActionItem();
-            emptyItem.Text = "None";
-            emptyItem.Icon = null;
+            ActionItem emptyItem = new()
+            {
+                Text = "None",
+                Icon = null
+            };
             emptyItem.Callback += () => SelectType(null);
             comboBoxWindow.Items.Add(emptyItem);
 
@@ -177,12 +165,16 @@ namespace ShootRunner
             {
                 Index++;
 
-                Window window = new Window();
-                window.Handle = Handle;
+                Window window = new()
+                {
+                    Handle = Handle
+                };
                 ToolsWindow.SetWindowData(window);
-                ActionItem item = new ActionItem();
-                item.Icon = window.icon;
-                item.Text = window.Title;
+                ActionItem item = new()
+                {
+                    Icon = window.icon,
+                    Text = window.Title
+                };
                 item.Callback += () => SelectType(window);
                 comboBoxWindow.Items.Add(item);
 
@@ -196,7 +188,7 @@ namespace ShootRunner
             {
                 comboBoxWindow.SelectedIndex = SelectedIndex;
             }
-            comboBoxWindow.SelectedIndexChanged += comboBoxWindow_SelectedIndexChanged;
+            comboBoxWindow.SelectedIndexChanged += ComboBoxWindow_SelectedIndexChanged;
         }
 
         public void SelectType(Window selectedWindowIncombobox)
@@ -220,77 +212,71 @@ namespace ShootRunner
             }
         }
 
-        private void textBox1_TextChanged(object sender, EventArgs e)
+        private void TextBox1_TextChanged(object sender, EventArgs e)
         {
 
         }
 
-        private void checkMatchWindow_CheckedChanged(object sender, EventArgs e)
+        private void CheckMatchWindow_CheckedChanged(object sender, EventArgs e)
         {
             this.pin.matchNewWindow = !this.pin.matchNewWindow;
         }
 
-        private void checkBoxDoubleclick_CheckedChanged(object sender, EventArgs e)
+        private void CheckBoxDoubleclick_CheckedChanged(object sender, EventArgs e)
         {
             this.pin.doubleClickCommand = !this.pin.doubleClickCommand;
         }
 
-        private void textBox1_TextChanged_1(object sender, EventArgs e)
+        private void TextBox_TextChanged(object sender, EventArgs e)
         {
 
         }
 
         // UNSELECT WINDOW
-        private void buttonNoWindow_Click(object sender, EventArgs e)
+        private void ButtonNoWindow_Click(object sender, EventArgs e)
         {
             comboBoxWindow.SelectedIndex = 0;
             checkBoxUseWindow.Checked = false;
         }
 
         // SELECT FILE
-        private void buttonSelectFile_Click(object sender, EventArgs e)
+        private void ButtonSelectFile_Click(object sender, EventArgs e)
         {
-            using (var dialog = new OpenFileDialog())
+            using OpenFileDialog dialog = new();
+            dialog.Title = "Select a file";
+            dialog.Filter = "All files (*.*)|*.*";
+            if (dialog.ShowDialog() == DialogResult.OK)
             {
-                dialog.Title = "Select a file";
-                dialog.Filter = "All files (*.*)|*.*";
-                if (dialog.ShowDialog() == DialogResult.OK)
-                {
-                    textBoxFile.Text = dialog.FileName;
-                    checkBoxFile.Checked = true;
-                }
+                textBoxFile.Text = dialog.FileName;
+                checkBoxFile.Checked = true;
             }
 
         }
 
         // SELECT DIRECTORY
-        private void buttonSelectDirectory_Click(object sender, EventArgs e)
+        private void ButtonSelectDirectory_Click(object sender, EventArgs e)
         {
-            using (var dialog = new FolderBrowserDialog())
+            using FolderBrowserDialog dialog = new();
+            dialog.Description = "Select a folder";
+            if (dialog.ShowDialog() == DialogResult.OK)
             {
-                dialog.Description = "Select a folder";
-                if (dialog.ShowDialog() == DialogResult.OK)
-                {
-                    textBoxDirectory.Text = dialog.SelectedPath;
-                    checkBoxDirectory.Checked = true;
-                }
+                textBoxDirectory.Text = dialog.SelectedPath;
+                checkBoxDirectory.Checked = true;
             }
         }
 
-        private void buttonSelectWorkDir_Click(object sender, EventArgs e)
+        private void ButtonSelectWorkDir_Click(object sender, EventArgs e)
         {
-            using (var dialog = new FolderBrowserDialog())
+            using FolderBrowserDialog dialog = new();
+            dialog.Description = "Select a workdir";
+            if (dialog.ShowDialog() == DialogResult.OK)
             {
-                dialog.Description = "Select a workdir";
-                if (dialog.ShowDialog() == DialogResult.OK)
-                {
-                    textBoxWorkdir.Text = dialog.SelectedPath;
-                    checkBoxWorkdir.Checked = true;
-                }
+                textBoxWorkdir.Text = dialog.SelectedPath;
+                checkBoxWorkdir.Checked = true;
             }
         }
 
-        private void checkBoxPowerShell_CheckedChanged(object sender, EventArgs e)
+        private void CheckBoxPowerShell_CheckedChanged(object sender, EventArgs e)
         {
             if (checkBoxPowerShell.Checked)
             {
@@ -298,7 +284,7 @@ namespace ShootRunner
             }
         }
 
-        private void checkBoxCmd_CheckedChanged(object sender, EventArgs e)
+        private void CheckBoxCmd_CheckedChanged(object sender, EventArgs e)
         {
             if (checkBoxCmd.Checked)
             {
@@ -306,7 +292,7 @@ namespace ShootRunner
             }
         }
 
-        private void textBoxHyperlink_TextChanged(object sender, EventArgs e)
+        private void TextBoxHyperlink_TextChanged(object sender, EventArgs e)
         {
             if (textBoxHyperlink.Text.Trim() != "")
             {
@@ -314,13 +300,13 @@ namespace ShootRunner
             }
         }
 
-        private void comboBoxWindow_SelectedIndexChanged(object sender, EventArgs e)
+        private void ComboBoxWindow_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (comboBoxWindow.SelectedItem is ActionItem ai && ai.Callback != null)
                 ai.Callback();
         }
 
-        private void comboBoxWindow_DrawItem(object sender, DrawItemEventArgs e)
+        private void ComboBoxWindow_DrawItem(object sender, DrawItemEventArgs e)
         {
             if (e.Index < 0) return;
             e.DrawBackground();
@@ -344,44 +330,37 @@ namespace ShootRunner
             e.DrawFocusRectangle();
         }
 
-        private void pictureBoxIcon_Click(object sender, EventArgs e)
+        private void PictureBoxIcon_Click(object sender, EventArgs e)
         {
-            using (var dialog = new OpenFileDialog())
-            {
-                dialog.Title = "Select an image";
-                dialog.Filter = "Image Files|*.ico;*.png;*.jpg;*.jpeg;*.bmp;*.gif|All Files|*.*";
+            using OpenFileDialog dialog = new();
+            dialog.Title = "Select an image";
+            dialog.Filter = "Image Files|*.ico;*.png;*.jpg;*.jpeg;*.bmp;*.gif|All Files|*.*";
 
-                if (dialog.ShowDialog() == DialogResult.OK)
+            if (dialog.ShowDialog() == DialogResult.OK)
+            {
+                try
                 {
-                    try
-                    {
-                        string selectedFilePath = dialog.FileName;
-                        using (var image = Image.FromFile(selectedFilePath))
-                        {
-                            if (customicon != null)
-                            {
-                                customicon.Dispose();
-                            }
-                            customicon = new Bitmap(image);
-                            this.pictureBoxIcon.Image = customicon;
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Program.error("Open image from file error: " + ex.Message);
-                    }
+                    string selectedFilePath = dialog.FileName;
+                    using Image image = Image.FromFile(selectedFilePath);
+                    customicon?.Dispose();
+                    customicon = new Bitmap(image);
+                    this.pictureBoxIcon.Image = customicon;
+                }
+                catch (Exception ex)
+                {
+                    Program.Error("Open image from file error: " + ex.Message);
                 }
             }
 
 
         }
 
-        private void buttonCancel_Click(object sender, EventArgs e)
+        private void ButtonCancel_Click(object sender, EventArgs e)
         {
             this.Close();
         }
 
-        private void buttonRemoveCustomIcon_Click(object sender, EventArgs e)
+        private void ButtonRemoveCustomIcon_Click(object sender, EventArgs e)
         {
             this.pictureBoxIcon.Image = null;
 
@@ -398,22 +377,22 @@ namespace ShootRunner
 
         }
 
-        private void checkBoxUseWindow_CheckedChanged(object sender, EventArgs e)
+        private void CheckBoxUseWindow_CheckedChanged(object sender, EventArgs e)
         {
 
         }
 
-        private void labelWindowApp_TextChanged(object sender, EventArgs e)
+        private void LabelWindowApp_TextChanged(object sender, EventArgs e)
         {
 
         }
 
-        private void labelWindowApp_DoubleClick(object sender, EventArgs e)
+        private void LabelWindowApp_DoubleClick(object sender, EventArgs e)
         {
             Clipboard.SetText(labelWindowApp.Text);
         }
 
-        private void buttonCopyWinApp_Click(object sender, EventArgs e)
+        private void ButtonCopyWinApp_Click(object sender, EventArgs e)
         {
             Clipboard.SetText(labelWindowApp.Text);
         }

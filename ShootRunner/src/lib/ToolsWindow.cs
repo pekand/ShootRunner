@@ -1,170 +1,21 @@
 ﻿using System.Diagnostics;
-using System.Reflection.Metadata;
-using System.Reflection.Metadata.Ecma335;
 using System.Runtime.InteropServices;
 using System.Text;
 
 #nullable disable
 
+#pragma warning disable IDE0079
+#pragma warning disable IDE0130
+#pragma warning disable CA2211
 
 namespace ShootRunner
 {
     public class ToolsWindow
     {
-
-        public const uint PROCESS_QUERY_INFORMATION = 0x0400;
-        public const uint PROCESS_VM_READ = 0x0010;
-
-        public const uint MOUSEEVENTF_MOVE = 0x0001;
-
-        public const uint SWP_NOZORDER = 0x0004;
-        public const uint SWP_NOSIZE = 0x0001;
-
-        public const int SW_SHOW = 5;
-        public const int SW_MINIMIZE = 6;
-        public const int SW_RESTORE = 9;
-        public const int SW_SHOWMINIMIZED = 2;
-
-        public const int ICON_SMALL = 0;
-        public const int ICON_BIG = 1;
-        public const int ICON_SMALL2 = 2;
-
-        public const int WM_GETICON = 0x7F;
-        public const int WM_CLOSE = 0x0010;
-        public const int WM_COMMAND = 0x0111;
-        public const int WM_NCLBUTTONDOWN = 0xA1;
-        public const int WM_NCHITTEST = 0x84;
-        
-
-        public const int GWL_EXSTYLE = -20;
-        public const int GWL_STYLE = -16;
-
-        public const int WS_EX_TOOLWINDOW = 0x00000080;
-        public const long WS_POPUP = 0x80000000L;
-        public const int WS_CAPTION = 0x00C00000;
-        public const int WS_EX_NOREDIRECTIONBITMAP = 0x00200000;
-        public const int WS_VISIBLE = 0x10000000;
-        public const int WS_DISABLED = 0x08000000;
-
-        public const int MIN_ALL = 0x1A3;
-        public const int MIN_ALL_UNDO = 0x1A0;
-
-        public const int HTCAPTION = 0x2;
-        public const int HTBOTTOMRIGHT = 17;
-        public const int HTTOPLEFT = 13;
-        public const int HTTOPRIGHT = 14;
-        public const int HTBOTTOMLEFT = 16;
-
-        private const uint DWMWA_CLOAKED = 14;
-
-        [StructLayout(LayoutKind.Sequential)]
-        private struct RECT
-        {
-            public int Left;
-            public int Top;
-            public int Right;
-            public int Bottom;
-        }
-
         public static IntPtr shellWindow = IntPtr.Zero;
 
-        public static List<IntPtr> excludedWindows = new List<IntPtr>();
-        public static List<IntPtr> includedWindows = new List<IntPtr>();
-
-        /**********************************************************************/
-
-        [DllImport("kernel32.dll", SetLastError = true)]
-        static extern IntPtr OpenProcess(uint processAccess, bool bInheritHandle, uint processId);
-
-        [DllImport("kernel32.dll", SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        static extern bool CloseHandle(IntPtr hObject);
-
-        [DllImport("kernel32.dll")]
-        private static extern bool ProcessIdToSessionId(uint processId, out uint sessionId);
-
-        [DllImport("psapi.dll", SetLastError = true, CharSet = CharSet.Auto)]
-        static extern uint GetModuleFileNameEx(IntPtr hProcess, IntPtr hModule, [Out] StringBuilder lpBaseName, int nSize);
-
-        [DllImport("dwmapi.dll")]
-        private static extern int DwmGetWindowAttribute(IntPtr hWnd, uint dwAttribute, out int pvAttribute, int cbAttribute);        
-
-        [DllImport("user32.dll")]
-        private static extern IntPtr SendMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
-
-        // FOCUS WINDOW
-        [DllImport("user32.dll", SetLastError = true)]
-        private static extern bool SetForegroundWindow(IntPtr hWnd);
-
-        // FOCUS WINDOW
-        [DllImport("user32.dll")]
-        private static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
-
-        // FOCUS WINDOW
-        [DllImport("user32.dll")]
-        private static extern bool EnumWindows(EnumWindowsProc lpEnumFunc, IntPtr lParam);
-
-        // FOCUS WINDOW
-        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        private static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
-
-        // FOCUS WINDOW
-        private delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
-
-        // FOCUS WINDOW
-        [DllImport("user32.dll")]
-        static extern void mouse_event(uint dwFlags, int dx, int dy, uint dwData, UIntPtr dwExtraInfo);
-
-        // RESTORE WINDOW
-        [DllImport("user32.dll")]
-        private static extern IntPtr GetForegroundWindow();
-
-        // RESTORE WINDOW
-        [DllImport("user32.dll")]
-        private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
-
-        [DllImport("user32.dll", SetLastError = true)]
-        public static extern bool IsWindow(IntPtr hWnd);
-
-        [DllImport("user32.dll", SetLastError = true)]
-        public static extern IntPtr SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
-
-        [DllImport("user32.dll", SetLastError = true)]
-        public static extern bool DestroyIcon(IntPtr hIcon);
-
-        [DllImport("user32.dll", SetLastError = true)]
-        static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint processId);
-
-        [DllImport("user32.dll")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool IsIconic(IntPtr hWnd);
-
-        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
-        private static extern int GetClassName(IntPtr hWnd, StringBuilder lpClassName, int nMaxCount);
-
-        [DllImport("user32.dll", SetLastError = true)]
-        public static extern bool IsWindowVisible(IntPtr hWnd);
-
-        [DllImport("user32.dll", SetLastError = true)]
-        private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
-
-        [DllImport("user32.dll")]
-        private static extern IntPtr GetShellWindow();
-
-        [DllImport("user32.dll", EntryPoint = "GetWindowLong")]
-        static extern IntPtr GetWindowLongPtr(IntPtr hWnd, int nIndex);
-
-        [DllImport("user32.dll", SetLastError = true)]
-        private static extern int GetWindowLong(IntPtr hWnd, int nIndex);
-
-        [DllImport("user32.dll", SetLastError = true)]
-        private static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
-
-        [DllImport("user32.dll")]
-        private static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
-
-        [DllImport("user32.dll")]
-        private static extern bool IsZoomed(IntPtr hWnd);
+        public static List<IntPtr> excludedWindows = [];
+        public static List<IntPtr> includedWindows = [];
 
         /**********************************************************************/
 
@@ -191,9 +42,7 @@ namespace ShootRunner
                         }
                     }
                     //window.command = window.app;
-                    if (window.className == null) {
-                        window.className = ToolsWindow.GetWindowClassName(window);
-                    }
+                    window.className ??= ToolsWindow.GetWindowClassName(window);
 
                     if (window.icon == null)
                     {
@@ -225,7 +74,7 @@ namespace ShootRunner
                 }
                 catch (Exception ex)
                 {
-                    Program.error(ex.Message);
+                    Program.Error(ex.Message);
                 }
 
             }
@@ -235,11 +84,11 @@ namespace ShootRunner
 
         public static List<IntPtr> GetAlWindows()
         {
-            List<IntPtr> windows = new List<IntPtr>();
+            List<IntPtr> windows = [];
 
             try
             {
-                EnumWindows((hWnd, lParam) =>
+                WinApi.EnumWindows((hWnd, lParam) =>
                 {
                     try
                     {
@@ -253,7 +102,7 @@ namespace ShootRunner
                     catch (Exception ex)
                     {
 
-                        Program.error(ex.Message);
+                        Program.Error(ex.Message);
                     }
 
                     return true;
@@ -262,7 +111,7 @@ namespace ShootRunner
             catch (Exception ex)
             {
 
-                Program.error(ex.Message);
+                Program.Error(ex.Message);
             }
 
             return windows;
@@ -270,7 +119,7 @@ namespace ShootRunner
 
         public static IntPtr GetShellWindowHandle() {
             if (shellWindow == IntPtr.Zero) {
-                shellWindow = GetShellWindow();
+                shellWindow = WinApi.GetShellWindow();
             }
 
             return shellWindow;
@@ -278,7 +127,7 @@ namespace ShootRunner
 
         public static List<IntPtr> GetTaskbarWindows(bool allowExclude = false)
         {
-            List<IntPtr> taskbarWindows = new List<IntPtr>();
+            List<IntPtr> taskbarWindows = [];
 
             try
             {
@@ -296,7 +145,7 @@ namespace ShootRunner
                             continue;
                         }
 
-                        if (!IsWindowVisible(Handle))
+                        if (!WinApi.IsWindowVisible(Handle))
                         {
                             if(allowExclude) excludedWindows.Add(Handle);
                             continue;
@@ -365,7 +214,7 @@ namespace ShootRunner
                     catch (Exception ex)
                     {
                         excludedWindows.Add(Handle);
-                        Program.error(ex.Message);
+                        Program.Error(ex.Message);
                     }
 
                 }
@@ -373,7 +222,7 @@ namespace ShootRunner
             catch (Exception ex)
             {
 
-                Program.error(ex.Message);
+                Program.Error(ex.Message);
             }
 
 
@@ -389,8 +238,8 @@ namespace ShootRunner
         {
             try
             {
-                StringBuilder className = new StringBuilder(256);
-                GetClassName(Handle, className, className.Capacity);
+                StringBuilder className = new(256);
+                int result = WinApi.GetClassName(Handle, className, className.Capacity);
                 return className.ToString();
             }
             catch (Exception)
@@ -403,7 +252,7 @@ namespace ShootRunner
 
         public static IntPtr GetCurrentWindow()
         {
-            IntPtr activeWindowHandle = ToolsWindow.GetForegroundWindow();
+            IntPtr activeWindowHandle = WinApi.GetForegroundWindow();
 
             if (activeWindowHandle == IntPtr.Zero)
             {
@@ -414,8 +263,8 @@ namespace ShootRunner
 
         static void SimulateMouseInput()
         {
-            mouse_event(MOUSEEVENTF_MOVE, 0, 1, 0, UIntPtr.Zero);
-            mouse_event(MOUSEEVENTF_MOVE, 0, -1, 0, UIntPtr.Zero);
+            WinApi.mouse_event(WinApi.MOUSEEVENTF_MOVE, 0, 1, 0, UIntPtr.Zero);
+            WinApi.mouse_event(WinApi.MOUSEEVENTF_MOVE, 0, -1, 0, UIntPtr.Zero);
 
         }
 
@@ -423,15 +272,15 @@ namespace ShootRunner
         {
             IntPtr foundWindow = IntPtr.Zero;
 
-            EnumWindows((hWnd, lParam) =>
+            WinApi.EnumWindows((hWnd, lParam) =>
             {
 
-                StringBuilder windowText = new StringBuilder(256);
-                GetWindowText(hWnd, windowText, windowText.Capacity);
+                StringBuilder windowText = new(256);
+                int result = WinApi.GetWindowText(hWnd, windowText, windowText.Capacity);
 
-                Program.debug(windowText.ToString());
+                Program.Debug(windowText.ToString());
 
-                if (windowText.ToString().ToUpper().Contains(partialName.ToUpper()))
+                if (windowText.ToString().Contains(partialName, StringComparison.CurrentCultureIgnoreCase))
                 {
                     foundWindow = hWnd;
                     return false;
@@ -459,15 +308,15 @@ namespace ShootRunner
 
         public static void CascadeWindows(int offsetX = 100, int offsetY = 100)
         {
-            List<IntPtr> windowHandles = new List<IntPtr>();
+            List<IntPtr> windowHandles = [];
 
             // EnumWindows callback function to collect window handles
-            EnumWindows((hWnd, lParam) =>
+            WinApi.EnumWindows((hWnd, lParam) =>
             {
-                if (IsWindowVisible(hWnd))
+                if (WinApi.IsWindowVisible(hWnd))
                 {
-                    System.Text.StringBuilder windowText = new System.Text.StringBuilder(256);
-                    GetWindowText(hWnd, windowText, windowText.Capacity);
+                    StringBuilder windowText = new(256);
+                    int result = WinApi.GetWindowText(hWnd, windowText, windowText.Capacity);
 
                     if (!string.IsNullOrWhiteSpace(windowText.ToString())) // Filter empty window titles
                     {
@@ -481,7 +330,7 @@ namespace ShootRunner
             int x = 0, y = 0;
             foreach (IntPtr hWnd in windowHandles)
             {
-                SetWindowPos(hWnd, IntPtr.Zero, x, y, 600, 600, SWP_NOZORDER);
+                WinApi.SetWindowPos(hWnd, IntPtr.Zero, x, y, 600, 600, WinApi.SWP_NOZORDER);
                 x += offsetX;
                 y += offsetY;
             }
@@ -494,21 +343,21 @@ namespace ShootRunner
 
         public static string GetApplicationPathFromWindow(IntPtr Handle)
         {
-            GetWindowThreadProcessId(Handle,out uint processId);
+            uint result = WinApi.GetWindowThreadProcessId(Handle,out uint processId);
 
-            IntPtr hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, false, processId);
+            IntPtr hProcess = WinApi.OpenProcess(WinApi.PROCESS_QUERY_INFORMATION | WinApi.PROCESS_VM_READ, false, processId);
 
             if (hProcess != IntPtr.Zero)
             {
-                StringBuilder filePath = new StringBuilder(1024);
+                StringBuilder filePath = new(1024);
 
-                if (GetModuleFileNameEx(hProcess, IntPtr.Zero, filePath, filePath.Capacity) > 0)
+                if (WinApi.GetModuleFileNameEx(hProcess, IntPtr.Zero, filePath, filePath.Capacity) > 0)
                 {
-                    CloseHandle(hProcess);
+                    WinApi.CloseHandle(hProcess);
                     return filePath.ToString();
                 }
 
-                CloseHandle(hProcess);
+                WinApi.CloseHandle(hProcess);
             }
 
             return null;
@@ -516,21 +365,21 @@ namespace ShootRunner
 
         public static bool IsWindowValid(Window window)
         {
-            return IsWindow(window.Handle);
+            return WinApi.IsWindow(window.Handle);
         }
 
         public static Bitmap GetWindowIcon(Window window)
         {
-            IntPtr hIcon = SendMessage(window.Handle, WM_GETICON, ICON_BIG, 0);
+            IntPtr hIcon = WinApi.SendMessage(window.Handle, WinApi.WM_GETICON, WinApi.ICON_BIG, 0);
 
             if (hIcon == IntPtr.Zero)
             {
-                hIcon = SendMessage(window.Handle, WM_GETICON, ICON_SMALL, 0);
+                hIcon = WinApi.SendMessage(window.Handle, WinApi.WM_GETICON, WinApi.ICON_SMALL, 0);
             }
 
             if (hIcon == IntPtr.Zero)
             {
-                hIcon = SendMessage(window.Handle, WM_GETICON, ICON_SMALL2, 0);
+                hIcon = WinApi.SendMessage(window.Handle, WinApi.WM_GETICON, WinApi.ICON_SMALL2, 0);
             }
 
             if (hIcon != IntPtr.Zero)
@@ -539,7 +388,7 @@ namespace ShootRunner
 
                 Bitmap clonedIcon = ((Icon)icon.Clone()).ToBitmap(); ;
 
-                DestroyIcon(hIcon);
+                WinApi.DestroyIcon(hIcon);
 
                 return clonedIcon;
             }
@@ -549,7 +398,7 @@ namespace ShootRunner
 
         public static bool IsMaximalized(IntPtr hWnd)
         {
-            if (IsZoomed(hWnd))
+            if (WinApi.IsZoomed(hWnd))
             {
                 return true;
             }
@@ -564,18 +413,18 @@ namespace ShootRunner
                 return false;
             }
 
-            bool isMinimized = IsIconic(window.Handle);
+            bool isMinimized = WinApi.IsIconic(window.Handle);
             return isMinimized;
         }
 
         public static bool IsDesktopWindow(Window window)
         {
             // Class names for the desktop window
-            string[] desktopClasses = { "Progman", "WorkerW" };
-            StringBuilder className = new StringBuilder(256);
+            string[] desktopClasses = ["Progman", "WorkerW"];
+            StringBuilder className = new(256);
 
             // Get the class name of the window handle
-            if (GetClassName(window.Handle, className, className.Capacity) > 0)
+            if (WinApi.GetClassName(window.Handle, className, className.Capacity) > 0)
             {
                 // Check if the class name matches the desktop window classes
                 foreach (var desktopClass in desktopClasses)
@@ -592,37 +441,36 @@ namespace ShootRunner
 
         public static bool IsTaskbarWindow(Window window)
         {
-            IntPtr foregroundWindow = GetForegroundWindow();
-            StringBuilder className = new StringBuilder(256);
-            GetClassName(window.Handle, className, className.Capacity);
+            StringBuilder className = new(256);
+            int result = WinApi.GetClassName(window.Handle, className, className.Capacity);
             return className.ToString() == "Shell_TrayWnd";
         }
 
         public static bool IsWindowPopup(IntPtr hHandle)
         {
             const long WS_POPUP = 0x80000000L;
-            long style = (long)GetWindowLongPtr(hHandle, -16);
+            long style = (long)WinApi.GetWindowLongPtr(hHandle, -16);
             bool isPopup = ((style & WS_POPUP) != 0);
             return isPopup;
         }
 
         public static bool IsToolWindow(IntPtr hWnd)
         {
-            IntPtr exStyle = GetWindowLongPtr(hWnd, GWL_EXSTYLE);
-            return (exStyle.ToInt64() & WS_EX_TOOLWINDOW) == WS_EX_TOOLWINDOW;
+            IntPtr exStyle = WinApi.GetWindowLongPtr(hWnd, WinApi.GWL_EXSTYLE);
+            return (exStyle.ToInt64() & WinApi.WS_EX_TOOLWINDOW) == WinApi.WS_EX_TOOLWINDOW;
         }
 
         public static void SetAsWindowPopup(Window window)
         {
             try
             {
-                int style = GetWindowLong(window.Handle, GWL_STYLE);
-                SetWindowLong(window.Handle, GWL_STYLE, (int)(style | WS_POPUP));
+                int style = WinApi.GetWindowLong(window.Handle, WinApi.GWL_STYLE);
+                int result = WinApi.SetWindowLong(window.Handle, WinApi.GWL_STYLE, (int)(style | WinApi.WS_POPUP));
             }
             catch (Exception ex)
             {
 
-                Program.error(ex.Message);
+                Program.Error(ex.Message);
             }
         }
 
@@ -630,13 +478,13 @@ namespace ShootRunner
         {
             try
             {
-                int style = GetWindowLong(window.Handle, GWL_EXSTYLE);
-                SetWindowLong(window.Handle, GWL_EXSTYLE, style | WS_EX_TOOLWINDOW);
+                int style = WinApi.GetWindowLong(window.Handle, WinApi.GWL_EXSTYLE);
+                int result = WinApi.SetWindowLong(window.Handle, WinApi.GWL_EXSTYLE, style | WinApi.WS_EX_TOOLWINDOW);
             }
             catch (Exception ex)
             {
 
-                Program.error(ex.Message);
+                Program.Error(ex.Message);
             }
         }        
 
@@ -644,7 +492,7 @@ namespace ShootRunner
         {
             if (window.Handle != IntPtr.Zero && ToolsWindow.IsWindowValid(window))
             {
-                ShowWindow(window.Handle, SW_MINIMIZE);
+                WinApi.ShowWindow(window.Handle, WinApi.SW_MINIMIZE);
             }
         }
 
@@ -655,9 +503,9 @@ namespace ShootRunner
                 SimulateMouseInput();
                 if (ToolsWindow.IsMinimalized(window))
                 {
-                    ShowWindow(window.Handle, SW_RESTORE);
+                    WinApi.ShowWindow(window.Handle, WinApi.SW_RESTORE);
                 }
-                SetForegroundWindow(window.Handle);
+                WinApi.SetForegroundWindow(window.Handle);
                 SimulateMouseInput();
                 return true;
             }
@@ -674,11 +522,11 @@ namespace ShootRunner
             if (hWnd != IntPtr.Zero)
             {
                 SimulateMouseInput();
-                if (IsIconic(hWnd))
+                if (WinApi.IsIconic(hWnd))
                 {
-                    ShowWindow(hWnd, SW_RESTORE);
+                    WinApi.ShowWindow(hWnd, WinApi.SW_RESTORE);
                 }
-                SetForegroundWindow(hWnd);
+                WinApi.SetForegroundWindow(hWnd);
                 SimulateMouseInput();
                 return true;
             }
@@ -689,39 +537,39 @@ namespace ShootRunner
 
         public static string GetWindowTitle(Window window)
         {
-            StringBuilder windowText = new StringBuilder(256);
-            GetWindowText(window.Handle, windowText, windowText.Capacity);
+            StringBuilder windowText = new(256);
+            int result = WinApi.GetWindowText(window.Handle, windowText, windowText.Capacity);
             return windowText.ToString();
         }
 
         public static string GetWindowTitle(IntPtr Handle)
         {            
-            StringBuilder windowText = new StringBuilder(256);
-            GetWindowText(Handle, windowText, windowText.Capacity);
+            StringBuilder windowText = new(256);
+            int result = WinApi.GetWindowText(Handle, windowText, windowText.Capacity);
             return windowText.ToString();
         }
 
         public static void CloseWindow(Window window)
         {
-            SendMessage(window.Handle, WM_CLOSE, (int)IntPtr.Zero, (int)IntPtr.Zero);
+            WinApi.SendMessage(window.Handle, WinApi.WM_CLOSE, (int)IntPtr.Zero, (int)IntPtr.Zero);
         }
 
         public static void ShowDesktop(bool undo = false)
         {
 
-            IntPtr hWnd = FindWindow("Shell_TrayWnd", null);
+            IntPtr hWnd = WinApi.FindWindow("Shell_TrayWnd", null);
             if (hWnd != IntPtr.Zero)
             {
                 if (undo)
                 {
 
-                    SendMessage(hWnd, WM_COMMAND, (IntPtr)MIN_ALL_UNDO, IntPtr.Zero);
+                    WinApi.SendMessage(hWnd, WinApi.WM_COMMAND, (IntPtr)WinApi.MIN_ALL_UNDO, IntPtr.Zero);
 
                 }
                 else
                 {
 
-                    SendMessage(hWnd, WM_COMMAND, (IntPtr)MIN_ALL, IntPtr.Zero);
+                    WinApi.SendMessage(hWnd, WinApi.WM_COMMAND, (IntPtr)WinApi.MIN_ALL, IntPtr.Zero);
 
                 }
             }
@@ -734,9 +582,9 @@ namespace ShootRunner
 
             try
             {
-                EnumWindows((hWnd, lParam) =>
+                WinApi.EnumWindows((hWnd, lParam) =>
                 {
-                    if (IsWindowVisible(hWnd) && !IsIconic(hWnd))
+                    if (WinApi.IsWindowVisible(hWnd) && !WinApi.IsIconic(hWnd))
                     {
                         allMinimized = false;
                         return false; 
@@ -747,7 +595,7 @@ namespace ShootRunner
             catch (Exception ex)
             {
 
-                Program.error(ex.Message);
+                Program.Error(ex.Message);
             }
 
             return allMinimized;
@@ -755,39 +603,39 @@ namespace ShootRunner
 
         public static void RemoveTitleBar(IntPtr hWnd)
         {
-            int style = GetWindowLong(hWnd, GWL_STYLE);
-            SetWindowLong(hWnd, GWL_STYLE, style & ~WS_CAPTION);
+            int style = WinApi.GetWindowLong(hWnd, WinApi.GWL_STYLE);
+            int result = WinApi.SetWindowLong(hWnd, WinApi.GWL_STYLE, style & ~WinApi.WS_CAPTION);
         }
 
         public static void AddTitleBar(IntPtr hWnd)
         {
-            int style = GetWindowLong(hWnd, GWL_STYLE);
-            SetWindowLong(hWnd, GWL_STYLE, style | WS_CAPTION);
+            int style = WinApi.GetWindowLong(hWnd, WinApi.GWL_STYLE);
+            int result = WinApi.SetWindowLong(hWnd, WinApi.GWL_STYLE, style | WinApi.WS_CAPTION);
         }
 
         public static List<Window> FindWindowByProcessId(uint processId)
         {
-            List<Window> windows = new List<Window>();
+            List<Window> windows = [];
 
             try
             {
 
-                EnumWindows((hWnd, lParam) =>
+                WinApi.EnumWindows((hWnd, lParam) =>
                 {
                     try
                     {
-                        GetWindowThreadProcessId(hWnd, out uint windowProcessId);
+                        uint result = WinApi.GetWindowThreadProcessId(hWnd, out uint windowProcessId);
                         if (windowProcessId == processId)
                         {
-                            StringBuilder windowText = new StringBuilder(256);
-                            GetWindowText(hWnd, windowText, 256);
+                            StringBuilder windowText = new(256);
+                            int result2 = WinApi.GetWindowText(hWnd, windowText, 256);
 
                             if (string.IsNullOrWhiteSpace(windowText.ToString()))
                             {
                                 return true;
                             }
 
-                            if (!IsWindowVisible(hWnd))
+                            if (!WinApi.IsWindowVisible(hWnd))
                                 return true;
 
                             if (IsWindowPopup(hWnd))
@@ -800,15 +648,17 @@ namespace ShootRunner
                                 return true;
                             }
 
-                            Window window = new Window();
-                            window.Handle = hWnd;
-                            window.Title = windowText.ToString();
+                            Window window = new()
+                            {
+                                Handle = hWnd,
+                                Title = windowText.ToString()
+                            };
                             windows.Add(window);
                         }
                     }
                     catch (Exception ex)
                     {
-                        Program.error(ex.Message);
+                        Program.Error(ex.Message);
                     }
 
                     return true;
@@ -817,7 +667,7 @@ namespace ShootRunner
             catch (Exception ex)
             {
 
-                Program.error(ex.Message);
+                Program.Error(ex.Message);
             }
 
             return windows;
@@ -832,13 +682,13 @@ namespace ShootRunner
 
             try
             {
-                GetWindowThreadProcessId(Handle, out uint processId);
+                uint result = WinApi.GetWindowThreadProcessId(Handle, out uint processId);
                 return processId;
             }
             catch (Exception ex)
             {
 
-                Program.error(ex.Message);
+                Program.Error(ex.Message);
             }
             return 0;
         }
@@ -862,7 +712,7 @@ namespace ShootRunner
             }
             catch (Exception ex)
             {
-                Program.error(ex.Message);
+                Program.Error(ex.Message);
             }
 
             return false;
@@ -872,12 +722,12 @@ namespace ShootRunner
         {
             try
             {
-                IntPtr style = GetWindowLongPtr(window.Handle, GWL_EXSTYLE);
-                return (style.ToInt64() & WS_EX_NOREDIRECTIONBITMAP) != 0;
+                IntPtr style = WinApi.GetWindowLongPtr(window.Handle, WinApi.GWL_EXSTYLE);
+                return (style.ToInt64() & WinApi.WS_EX_NOREDIRECTIONBITMAP) != 0;
             }
             catch (Exception ex)
             {
-                Program.error(ex.Message);
+                Program.Error(ex.Message);
             }
 
             return false;
@@ -890,7 +740,7 @@ namespace ShootRunner
 
         public static Rectangle? GetWindowPosition(IntPtr hWnd)
         {
-            if (GetWindowRect(hWnd, out RECT rect))
+            if (WinApi.GetWindowRect(hWnd, out WinApi.RECT rect))
             {
                 return new Rectangle(rect.Left, rect.Top, rect.Right - rect.Left, rect.Bottom - rect.Top);
             }
@@ -899,7 +749,7 @@ namespace ShootRunner
 
         public static bool WindowHasPosition(IntPtr hWnd)
         {
-            if (GetWindowRect(hWnd, out RECT rect))
+            if (WinApi.GetWindowRect(hWnd, out WinApi.RECT rect))
             {
                 if (rect.Left >= 0 &&
                     rect.Top >= 0 &&
@@ -916,7 +766,7 @@ namespace ShootRunner
 
         public static bool IsWindowCloaked(IntPtr hWnd)
         {
-            if (DwmGetWindowAttribute(hWnd, DWMWA_CLOAKED, out int isCloaked, Marshal.SizeOf(typeof(int))) == 0)
+            if (WinApi.DwmGetWindowAttribute(hWnd, WinApi.DWMWA_CLOAKED, out int isCloaked, Marshal.SizeOf(typeof(int))) == 0)
             {
                 return isCloaked != 0;
             }
@@ -930,8 +780,8 @@ namespace ShootRunner
 
         public static bool IsWindowVisible2(IntPtr hWnd)
         {
-            int style = GetWindowLong(hWnd, GWL_STYLE);
-            return ((style & WS_VISIBLE) != 0) || ((style & WS_DISABLED) != 0);
+            int style = WinApi.GetWindowLong(hWnd, WinApi.GWL_STYLE);
+            return ((style & WinApi.WS_VISIBLE) != 0) || ((style & WinApi.WS_DISABLED) != 0);
         }
 
         public static uint GetWindowSessionId(IntPtr hWnd)
@@ -939,13 +789,13 @@ namespace ShootRunner
             try
             {
 
-                if (GetWindowThreadProcessId(hWnd, out uint processId) == 0)
+                if (WinApi.GetWindowThreadProcessId(hWnd, out uint processId) == 0)
                 {
                     return 0;
                 }
 
 
-                if (!ProcessIdToSessionId(processId, out uint sessionId))
+                if (!WinApi.ProcessIdToSessionId(processId, out uint sessionId))
                 {
                     return 0;
                 }
@@ -961,18 +811,14 @@ namespace ShootRunner
 
         private const long WS_CHILD = 0x40000000;
         public static bool IsChild(IntPtr Handle) {
-            long style = GetWindowLongPtr(Handle, GWL_STYLE).ToInt64();
+            long style = WinApi.GetWindowLongPtr(Handle, WinApi.GWL_STYLE).ToInt64();
             if ((style & WS_CHILD) == WS_CHILD) return true;
 
             return false;
         }
 
-        [DllImport("user32.dll", SetLastError = true)]
-        private static extern IntPtr GetParent(IntPtr hWnd);
-
-
         public static bool HaveParent(IntPtr Handle) {
-            return ToolsWindow.GetParent(Handle) != IntPtr.Zero;
+            return WinApi.GetParent(Handle) != IntPtr.Zero;
         }
     }
 

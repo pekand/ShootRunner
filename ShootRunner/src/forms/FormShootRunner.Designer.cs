@@ -1,4 +1,7 @@
-﻿namespace ShootRunner
+﻿
+#pragma warning disable IDE0130
+
+namespace ShootRunner
 {
     partial class FormShootRunner
     {
@@ -65,7 +68,7 @@
             contextMenuStrip.Items.AddRange(new ToolStripItem[] { applicationToolStripMenuItem, commandsToolStripMenuItem1, pinsToolStripMenuItem, widgetsToolStripMenuItem, optionsToolStripMenuItem, hideAllToolStripMenuItem, showAllToolStripMenuItem });
             contextMenuStrip.Name = "contextMenuStrip1";
             contextMenuStrip.Size = new Size(156, 172);
-            contextMenuStrip.Opening += contextMenuStrip1_Opening;
+            contextMenuStrip.Opening += ContextMenuStrip1_Opening;
             // 
             // applicationToolStripMenuItem
             // 
@@ -79,21 +82,21 @@
             errorLogToolStripMenuItem.Name = "errorLogToolStripMenuItem";
             errorLogToolStripMenuItem.Size = new Size(136, 24);
             errorLogToolStripMenuItem.Text = "Error log";
-            errorLogToolStripMenuItem.Click += errorLogToolStripMenuItem_Click;
+            errorLogToolStripMenuItem.Click += ErrorLogToolStripMenuItem_Click;
             // 
             // consoleToolStripMenuItem
             // 
             consoleToolStripMenuItem.Name = "consoleToolStripMenuItem";
             consoleToolStripMenuItem.Size = new Size(136, 24);
             consoleToolStripMenuItem.Text = "Console";
-            consoleToolStripMenuItem.Click += consoleToolStripMenuItem_Click;
+            consoleToolStripMenuItem.Click += ConsoleToolStripMenuItem_Click;
             // 
             // exitToolStripMenuItem
             // 
             exitToolStripMenuItem.Name = "exitToolStripMenuItem";
             exitToolStripMenuItem.Size = new Size(136, 24);
             exitToolStripMenuItem.Text = "Exit";
-            exitToolStripMenuItem.Click += exitToolStripMenuItem_Click;
+            exitToolStripMenuItem.Click += ExitToolStripMenuItem_Click;
             // 
             // commandsToolStripMenuItem1
             // 
@@ -107,14 +110,14 @@
             editCommandsToolStripMenuItem.Name = "editCommandsToolStripMenuItem";
             editCommandsToolStripMenuItem.Size = new Size(181, 24);
             editCommandsToolStripMenuItem.Text = "Edit commands";
-            editCommandsToolStripMenuItem.Click += commandsToolStripMenuItem_Click;
+            editCommandsToolStripMenuItem.Click += CommandsToolStripMenuItem_Click;
             // 
             // shortcutFormToolStripMenuItem
             // 
             shortcutFormToolStripMenuItem.Name = "shortcutFormToolStripMenuItem";
             shortcutFormToolStripMenuItem.Size = new Size(181, 24);
             shortcutFormToolStripMenuItem.Text = "Shortcut form";
-            shortcutFormToolStripMenuItem.Click += shortcutFormToolStripMenuItem_Click;
+            shortcutFormToolStripMenuItem.Click += ShortcutFormToolStripMenuItem_Click;
             // 
             // pinsToolStripMenuItem
             // 
@@ -128,7 +131,7 @@
             newPinToolStripMenuItem.Name = "newPinToolStripMenuItem";
             newPinToolStripMenuItem.Size = new Size(133, 24);
             newPinToolStripMenuItem.Text = "New pin";
-            newPinToolStripMenuItem.Click += newPinToolStripMenuItem_Click;
+            newPinToolStripMenuItem.Click += NewPinToolStripMenuItem_Click;
             // 
             // widgetsToolStripMenuItem
             // 
@@ -142,21 +145,21 @@
             newWidgetToolStripMenuItem.Name = "newWidgetToolStripMenuItem";
             newWidgetToolStripMenuItem.Size = new Size(171, 24);
             newWidgetToolStripMenuItem.Text = "New widget";
-            newWidgetToolStripMenuItem.Click += newWidgetToolStripMenuItem_Click;
+            newWidgetToolStripMenuItem.Click += NewWidgetToolStripMenuItem_Click;
             // 
             // createWidgetToolStripMenuItem
             // 
             createWidgetToolStripMenuItem.Name = "createWidgetToolStripMenuItem";
             createWidgetToolStripMenuItem.Size = new Size(171, 24);
             createWidgetToolStripMenuItem.Text = "Create widget";
-            createWidgetToolStripMenuItem.Click += createWidgetToolStripMenuItem_Click;
+            createWidgetToolStripMenuItem.Click += CreateWidgetToolStripMenuItem_Click;
             // 
             // taskbarToolStripMenuItem1
             // 
             taskbarToolStripMenuItem1.Name = "taskbarToolStripMenuItem1";
             taskbarToolStripMenuItem1.Size = new Size(171, 24);
             taskbarToolStripMenuItem1.Text = "Taskbar";
-            taskbarToolStripMenuItem1.Click += taskbarToolStripMenuItem_Click;
+            taskbarToolStripMenuItem1.Click += TaskbarToolStripMenuItem_Click;
             // 
             // optionsToolStripMenuItem
             // 
@@ -164,21 +167,21 @@
             optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
             optionsToolStripMenuItem.Size = new Size(155, 24);
             optionsToolStripMenuItem.Text = "Options";
-            optionsToolStripMenuItem.Click += optionsToolStripMenuItem_Click;
+            optionsToolStripMenuItem.Click += OptionsToolStripMenuItem_Click;
             // 
             // autorunToolStripMenuItem
             // 
             autorunToolStripMenuItem.Name = "autorunToolStripMenuItem";
             autorunToolStripMenuItem.Size = new Size(131, 24);
             autorunToolStripMenuItem.Text = "Autorun";
-            autorunToolStripMenuItem.Click += autorunToolStripMenuItem_Click;
+            autorunToolStripMenuItem.Click += AutorunToolStripMenuItem_Click;
             // 
             // hideAllToolStripMenuItem
             // 
             hideAllToolStripMenuItem.Name = "hideAllToolStripMenuItem";
             hideAllToolStripMenuItem.Size = new Size(155, 24);
             hideAllToolStripMenuItem.Text = "Hide all";
-            hideAllToolStripMenuItem.Click += hideAllToolStripMenuItem_Click;
+            hideAllToolStripMenuItem.Click += HideAllToolStripMenuItem_Click;
             // 
             // showAllToolStripMenuItem
             // 
@@ -186,13 +189,13 @@
             showAllToolStripMenuItem.Size = new Size(155, 24);
             showAllToolStripMenuItem.Text = "Show all";
             showAllToolStripMenuItem.Visible = false;
-            showAllToolStripMenuItem.Click += showAllToolStripMenuItem_Click;
+            showAllToolStripMenuItem.Click += ShowAllToolStripMenuItem_Click;
             // 
             // timer
             // 
             timer.Enabled = true;
             timer.Interval = 1000;
-            timer.Tick += timer1_Tick;
+            timer.Tick += Timer_Tick;
             // 
             // FormShootRunner
             // 

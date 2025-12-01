@@ -1,10 +1,12 @@
 ﻿#nullable disable
 
+#pragma warning disable IDE0130
+
 namespace ShootRunner
 {
     public class Widget
     {
-        public WidgetType widgetType = new WidgetType();
+        public WidgetType widgetType = new();
         public FormWidget widgetForm = null;
         public string type = "";
         public string uid = "";
@@ -15,7 +17,7 @@ namespace ShootRunner
         public bool locked = false;
         public double transparent = 1.0;
         public bool mosttop = false;
-        public Dictionary<string, string> data = new Dictionary<string, string>();
+        public Dictionary<string, string> data = [];
 
         // TASKBAR
         public bool useScreenshots = true;

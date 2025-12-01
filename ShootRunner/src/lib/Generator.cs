@@ -1,19 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Text;
+
+#pragma warning disable IDE0130
 
 namespace ShootRunner
 {
     public class Generator
     {
         private static readonly string Characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        private static readonly Random Random = new Random();
+        private static readonly Random Random = new();
 
-        public static string uid(int length = 32)
+        public static string Uid(int length = 32)
         {
-            StringBuilder result = new StringBuilder(length);
+            StringBuilder result = new(length);
             int charactersLength = Characters.Length;
 
             for (int i = 0; i < length; i++)

@@ -3,6 +3,9 @@ using System.Timers;
 
 #nullable disable
 
+#pragma warning disable IDE0079
+#pragma warning disable IDE0130
+#pragma warning disable CA2211
 
 namespace ShootRunner
 {
@@ -11,9 +14,9 @@ namespace ShootRunner
     public class Job //UID8736422044
     {
 
-        public static List<BackgroundJob> backgroundJob = new List<BackgroundJob>();
+        public static List<BackgroundJob> backgroundJob = [];
 
-        private static System.Timers.Timer timer = null;
+        public static System.Timers.Timer timer = null;
 
         /// <summary>
         /// run task in thread </summary>
@@ -47,7 +50,7 @@ namespace ShootRunner
           
             try
             {
-                BackgroundJob job = new BackgroundJob();
+                BackgroundJob job = new();
                 backgroundJob.Add(job);
 
                 job.cts = new CancellationTokenSource();
@@ -56,11 +59,11 @@ namespace ShootRunner
                 
                 job.maxEcecutionTime = maxEcecutionTime;
                 job.starttime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-                job.bw = new BackgroundWorker
+                job.bw = new()
                 {
-                    WorkerSupportsCancellation = true
+                    WorkerSupportsCancellation = true,
+                    WorkerReportsProgress = true
                 };
-                job.bw.WorkerReportsProgress = true;
                 job.bw.DoWork += doJob;
                 job.bw.RunWorkerCompleted += afterJob;
                 job.bw.RunWorkerCompleted += CompleteJob;
@@ -69,7 +72,7 @@ namespace ShootRunner
             }
             catch (Exception ex)
             {
-                Program.error("get link name error: " + ex.Message);
+                Program.Error("get link name error: " + ex.Message);
             }
         }
 
@@ -95,14 +98,14 @@ namespace ShootRunner
             catch (Exception ex)
             {
 
-                Program.error(ex.Message);
+                Program.Error(ex.Message);
             }
 
         }
 
         private static void TimerElapsed(object sender, ElapsedEventArgs e)
         {
-            List<BackgroundJob> backgroundJobToRemove = new List<BackgroundJob>();
+            List<BackgroundJob> backgroundJobToRemove = [];
 
             long time = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 

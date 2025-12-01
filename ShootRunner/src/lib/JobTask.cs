@@ -2,10 +2,10 @@
 using System.Diagnostics;
 using System.Management.Automation;
 using System.Text;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 #nullable disable
 
+#pragma warning disable IDE0130
 
 namespace ShootRunner
 {
@@ -55,8 +55,8 @@ namespace ShootRunner
                             try
                             {
 
-                                Process process = new Process();
-                                ProcessStartInfo startInfo = new ProcessStartInfo();
+                                Process process = new();
+                                ProcessStartInfo startInfo = new();
 
                                 if (silent)
                                 {
@@ -76,7 +76,7 @@ namespace ShootRunner
                             }
                             catch (Exception ex)
                             {
-                                Program.error("exception: " + ex.Message);
+                                Program.Error("exception: " + ex.Message);
                             }
                         }
 
@@ -93,7 +93,7 @@ namespace ShootRunner
 
         public static string EscapeString(string input)
         {
-            StringBuilder escaped = new StringBuilder();
+            StringBuilder escaped = new();
             foreach (char c in input)
             {
                 switch (c)
@@ -124,7 +124,7 @@ namespace ShootRunner
         public static void RunPowerShellCommand(string cmd, string workdir = null, bool silent = false) //b39d265706
         {
             if (Program.powershell == null) {
-                Program.error("Powershell not available. Install powershell.");
+                Program.Error("Powershell not available. Install powershell.");
                 return;
             }
 
@@ -141,48 +141,46 @@ namespace ShootRunner
                             {
                                 try
                                 {
-                                    using (PowerShell ps = PowerShell.Create())
+                                    using PowerShell ps = PowerShell.Create();
+                                    if (workdir != null && Directory.Exists(workdir))
                                     {
-                                        if (workdir != null && Directory.Exists(workdir))
-                                        {
-                                            ps.AddScript($"Set-Location -Path \"{workdir}\"");
-                                        }
+                                        ps.AddScript($"Set-Location -Path \"{workdir}\"");
+                                    }
 
-                                        ps.AddScript(cmd);
+                                    ps.AddScript(cmd);
 
-                                        try
+                                    try
+                                    {
+                                        var result = ps.BeginInvoke();
+                                        Program.Write(result.ToString());
+                                        while (!result.IsCompleted)
                                         {
-                                            var result = ps.BeginInvoke();
-                                            Program.write(result.ToString());
-                                            while (!result.IsCompleted)
+                                            if (job.token.IsCancellationRequested)
                                             {
-                                                if (job.token.IsCancellationRequested)
-                                                {
-                                                    ps.Stop();
-                                                    job.token.ThrowIfCancellationRequested();
-                                                }
-                                            }                                                
+                                                ps.Stop();
+                                                job.token.ThrowIfCancellationRequested();
+                                            }
+                                        }
 
-                                        }
-                                        catch (Exception ex)
-                                        {
-                                            Program.error(ex.Message);
-                                        }
-                                            
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        Program.Error(ex.Message);
                                     }
                                 }
                                 catch (Exception ex)
                                 {
 
-                                    Program.error(ex.Message);
+                                    Program.Error(ex.Message);
                                 }
                                     
                             }
                             else {
-                                Process process = new Process();
-                                ProcessStartInfo startInfo = new ProcessStartInfo();
-
-                                startInfo.FileName = Program.powershell;
+                                Process process = new();
+                                ProcessStartInfo startInfo = new()
+                                {
+                                    FileName = Program.powershell
+                                };
                                 string escapedCmd = EscapeString(cmd);
                                 if (silent)
                                 {
@@ -209,7 +207,7 @@ namespace ShootRunner
                         }
                         catch (Exception ex)
                         {
-                            Program.error("exception: " + ex.Message);
+                            Program.Error("exception: " + ex.Message);
                         }
 
                     }
@@ -231,13 +229,13 @@ namespace ShootRunner
             }
             catch (Exception ex)
             {
-                Program.debug("An error occurred: " + ex.Message);
+                Program.Debug("An error occurred: " + ex.Message);
             }
         }
 
         public static List<Process> FindProcess(string path)
         {
-            List<Process> list = new List<Process>();
+            List<Process> list = [];
 
             var processes = Process.GetProcesses();
 
@@ -268,8 +266,8 @@ namespace ShootRunner
                     taskbarWindows1 = ToolsWindow.GetTaskbarWindows();
                 }
 
-                var process = new Process();
-                ProcessStartInfo startInfo = new ProcessStartInfo();
+                Process process = new();
+                ProcessStartInfo startInfo = new();
                 process.StartInfo = startInfo;
                 startInfo.FileName = cmd;
                 startInfo.Arguments = parameters;
@@ -294,8 +292,10 @@ namespace ShootRunner
                 //  check if process have main window
                 if (process.MainWindowHandle != IntPtr.Zero)
                 {
-                    Window window = new Window();
-                    window.Handle = process.MainWindowHandle;
+                    Window window = new()
+                    {
+                        Handle = process.MainWindowHandle
+                    };
                     return window;
                 }
 
@@ -303,8 +303,10 @@ namespace ShootRunner
                 List<Window> processWindows = ToolsWindow.FindWindowByProcessId((uint)process.Id);
                 if (processWindows.Count == 1)
                 {
-                    Window window = new Window();
-                    window.Handle = processWindows[0].Handle;
+                    Window window = new()
+                    {
+                        Handle = processWindows[0].Handle
+                    };
                     return window;
 
                 }
@@ -315,7 +317,7 @@ namespace ShootRunner
 
                     // calculate diff between opened windows
                     List<IntPtr> taskbarWindows2 = ToolsWindow.GetTaskbarWindows();
-                    List<IntPtr> foundWindows = new List<IntPtr>();
+                    List<IntPtr> foundWindows = [];
                     foreach (IntPtr win2 in taskbarWindows2)
                     {
                         bool found = false;
@@ -340,8 +342,10 @@ namespace ShootRunner
                         string path = ToolsWindow.GetApplicationPathFromWindow(win3);
                         if (path == cmd)
                         {
-                            Window window = new Window();
-                            window.Handle = win3;
+                            Window window = new()
+                            {
+                                Handle = win3
+                            };
                             return window;
                         }
                     }
@@ -352,8 +356,10 @@ namespace ShootRunner
                         string path = ToolsWindow.GetApplicationPathFromWindow(win4);
                         if (path == cmd)
                         {
-                            Window window = new Window();
-                            window.Handle = win4;
+                            Window window = new()
+                            {
+                                Handle = win4
+                            };
                             return window;
                         }
                     }
@@ -362,7 +368,7 @@ namespace ShootRunner
             catch (Exception ex)
             {
 
-                Program.error(ex.Message);
+                Program.Error(ex.Message);
             }
 
             return null;
@@ -372,7 +378,7 @@ namespace ShootRunner
         {
             if (Program.powershell == null)
             {
-                Program.error("Powershell not available. Install powershell.");
+                Program.Error("Powershell not available. Install powershell.");
                 return;
             }
 
@@ -397,49 +403,47 @@ namespace ShootRunner
                                 {
                                     try
                                     {
-                                        using (PowerShell ps = PowerShell.Create())
+                                        using PowerShell ps = PowerShell.Create();
+                                        if (pin.useWorkdir && pin.workdir != null && Directory.Exists(pin.workdir))
                                         {
-                                            if (pin.useWorkdir && pin.workdir != null && Directory.Exists(pin.workdir))
-                                            {
-                                                ps.AddScript($"Set-Location -Path \"{pin.workdir}\"");
-                                            }
+                                            ps.AddScript($"Set-Location -Path \"{pin.workdir}\"");
+                                        }
 
-                                            ps.AddScript(pin.command);
+                                        ps.AddScript(pin.command);
 
-                                            try
+                                        try
+                                        {
+                                            var result = ps.BeginInvoke();
+                                            Program.Write(result.ToString());
+                                            while (!result.IsCompleted)
                                             {
-                                                var result = ps.BeginInvoke();
-                                                Program.write(result.ToString());
-                                                while (!result.IsCompleted)
+                                                if (job.token.IsCancellationRequested)
                                                 {
-                                                    if (job.token.IsCancellationRequested)
-                                                    {
-                                                        ps.Stop();
-                                                        job.token.ThrowIfCancellationRequested();
-                                                    }
+                                                    ps.Stop();
+                                                    job.token.ThrowIfCancellationRequested();
                                                 }
-
-                                            }
-                                            catch (Exception ex)
-                                            {
-                                                Program.error(ex.Message);
                                             }
 
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            Program.Error(ex.Message);
                                         }
                                     }
                                     catch (Exception ex)
                                     {
 
-                                        Program.error(ex.Message);
+                                        Program.Error(ex.Message);
                                     }
 
                                 }
                                 else
                                 {
-                                    Process process = new Process();
-                                    ProcessStartInfo startInfo = new ProcessStartInfo();
-
-                                    startInfo.FileName = Program.powershell;
+                                    Process process = new();
+                                    ProcessStartInfo startInfo = new()
+                                    {
+                                        FileName = Program.powershell
+                                    };
                                     string escapedCmd = EscapeString(pin.command);
                                     if (pin.silentCommand)
                                     {
@@ -476,7 +480,7 @@ namespace ShootRunner
                                     Thread.Sleep(1500);
 
                                     List<IntPtr> taskbarWindows2 = ToolsWindow.GetTaskbarWindows();
-                                    List<IntPtr> foundWindows = new List<IntPtr>();
+                                    List<IntPtr> foundWindows = [];
 
                                     foreach (IntPtr win2 in taskbarWindows2)
                                     {
@@ -507,7 +511,7 @@ namespace ShootRunner
                             }
                             catch (Exception ex)
                             {
-                                Program.error("exception: " + ex.Message);
+                                Program.Error("exception: " + ex.Message);
                             }
                         }
                     ),
@@ -541,47 +545,45 @@ namespace ShootRunner
                                 {
                                     try
                                     {
-                                        using (PowerShell ps = PowerShell.Create())
+                                        using PowerShell ps = PowerShell.Create();
+                                        ps.AddScript(pin.command);
+
+                                        // string workingDirectory = @"C:\Your\Desired\Path";
+                                        // ps.AddScript($"Set-Location -Path \"{workingDirectory}\"");
+
+                                        try
                                         {
-                                            ps.AddScript(pin.command);
-
-                                            // string workingDirectory = @"C:\Your\Desired\Path";
-                                            // ps.AddScript($"Set-Location -Path \"{workingDirectory}\"");
-
-                                            try
+                                            var result = ps.BeginInvoke();
+                                            Program.Write(result.ToString());
+                                            while (!result.IsCompleted)
                                             {
-                                                var result = ps.BeginInvoke();
-                                                Program.write(result.ToString());
-                                                while (!result.IsCompleted)
+                                                if (job.token.IsCancellationRequested)
                                                 {
-                                                    if (job.token.IsCancellationRequested)
-                                                    {
-                                                        ps.Stop();
-                                                        job.token.ThrowIfCancellationRequested();
-                                                    }
+                                                    ps.Stop();
+                                                    job.token.ThrowIfCancellationRequested();
                                                 }
-
-                                            }
-                                            catch (Exception ex)
-                                            {
-                                                Program.error(ex.Message);
                                             }
 
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            Program.Error(ex.Message);
                                         }
                                     }
                                     catch (Exception ex)
                                     {
 
-                                        Program.error(ex.Message);
+                                        Program.Error(ex.Message);
                                     }
 
                                 }
                                 else
                                 {
-                                    Process process = new Process();
-                                    ProcessStartInfo startInfo = new ProcessStartInfo();
-
-                                    startInfo.FileName = Program.powershell;
+                                    Process process = new();
+                                    ProcessStartInfo startInfo = new()
+                                    {
+                                        FileName = Program.powershell
+                                    };
                                     string escapedCmd = EscapeString(pin.command);
                                     if (pin.silentCommand)
                                     {
@@ -611,7 +613,7 @@ namespace ShootRunner
                                     Thread.Sleep(1500);
 
                                     List<IntPtr> taskbarWindows2 = ToolsWindow.GetTaskbarWindows();
-                                    List<IntPtr> foundWindows = new List<IntPtr>();
+                                    List<IntPtr> foundWindows = [];
 
                                     foreach (IntPtr win2 in taskbarWindows2)
                                     {
@@ -642,7 +644,7 @@ namespace ShootRunner
                             }
                             catch (Exception ex)
                             {
-                                Program.error("exception: " + ex.Message);
+                                Program.Error("exception: " + ex.Message);
                             }
                         }
                     ),

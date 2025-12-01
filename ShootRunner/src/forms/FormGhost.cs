@@ -2,6 +2,9 @@
 
 #nullable disable
 
+#pragma warning disable IDE0079
+#pragma warning disable IDE0130
+
 namespace ShootRunner
 {
     public partial class FormGhost : Form
@@ -26,7 +29,7 @@ namespace ShootRunner
             this.TransparencyKey = Color.Magenta;         
             this.Opacity = 0.8;
             
-            PictureBox pictureBox = new PictureBox
+            PictureBox pictureBox = new()
             {
                 Image = this.pic,
                 Size = this.Size,

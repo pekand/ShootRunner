@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿#pragma warning disable IDE0130
 
 namespace ShootRunner
 {
     public class WidgetTemplate
     {
-        public string BasicTemplate() {
+        public static string BasicTemplate() {
             return @"<!DOCTYPE html>
 <html lang=""en"">
     <meta charset=""utf-8"">

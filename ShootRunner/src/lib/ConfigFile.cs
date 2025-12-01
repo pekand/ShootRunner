@@ -1,19 +1,20 @@
-﻿using System.Text;
-using System.Xml.Linq;
+﻿using System.Diagnostics.Metrics;
+using System.Reflection.Metadata;
+using System.Text;
 using System.Xml;
+using System.Xml.Linq;
 
 #nullable disable
 
+#pragma warning disable IDE0079
+#pragma warning disable IDE0130
+#pragma warning disable CA1822
 
 namespace ShootRunner
 {
-    public class ConfigFile
+    public class ConfigFile(Config config)
     {
-        Config config = null;
-
-        public ConfigFile(Config config) { 
-            this.config = config;
-        }
+        readonly Config config = config;
 
         public void Load() {
 
@@ -21,7 +22,7 @@ namespace ShootRunner
                 return;
             }
 
-            XmlReaderSettings xws = new XmlReaderSettings
+            XmlReaderSettings xws = new()
             {
                 CheckCharacters = false
             };
@@ -31,23 +32,21 @@ namespace ShootRunner
 
             try
             {
-                using (XmlReader xr = XmlReader.Create(new StringReader(xml), xws))
-                {
+                using XmlReader xr = XmlReader.Create(new StringReader(xml), xws);
 
-                    XElement root = XElement.Load(xr);
-                    this.LoadInnerXmlCommands(root);
-                }
+                XElement root = XElement.Load(xr);
+                this.LoadInnerXmlCommands(root);
             }
             catch (Exception ex)
             {
-                Program.error(ex.Message);
+                Program.Error(ex.Message);
             }
         }
 
         public void Save()
         {
-            StringBuilder sb = new StringBuilder();
-            XmlWriterSettings xws = new XmlWriterSettings
+            StringBuilder sb = new();
+            XmlWriterSettings xws = new()
             {
                 OmitXmlDeclaration = true,
                 CheckCharacters = false,
@@ -55,13 +54,13 @@ namespace ShootRunner
             };
 
 
-            XElement root = new XElement("config");
-            XElement items = new XElement("pins");
+            XElement root = new("config");
+            XElement items = new("pins");
             root.Add(items);
 
             foreach (FormPin pinForm in Program.pins)
             {
-                XElement item = new XElement("pin");
+                XElement item = new("pin");
                 items.Add(item);
 
                 if (pinForm.pin.window != null) {
@@ -107,7 +106,7 @@ namespace ShootRunner
                 item.Add(new XElement("transparent", ConvertTo.DoubleToString(pinForm.pin.transparent)));
             }
 
-            XElement widgets = new XElement("widgets");
+            XElement widgets = new("widgets");
             root.Add(widgets);
 
             foreach (Widget w in Program.widgetManager.widgets)
@@ -117,7 +116,7 @@ namespace ShootRunner
                     continue;
                 }
 
-                XElement widget = new XElement("widget");
+                XElement widget = new("widget");
                 widgets.Add(widget);
                 widget.Add(new XElement("type", w.type));
                 if (w.widgetForm != null)
@@ -137,14 +136,14 @@ namespace ShootRunner
                 widget.Add(new XElement("useScreenshots", ConvertTo.BoolToString(w.useScreenshots)));
 
 
-                XElement data = new XElement("data");
+                XElement data = new("data");
                 widget.Add(data);
 
                 foreach (KeyValuePair<string, string> entry in w.data)
                 {
                     string key = entry.Key;
                     string value = entry.Value;
-                    XElement item = new XElement("item");
+                    XElement item = new("item");
                     data.Add(item);
                     item.Add(new XAttribute("key", key));
                     item.Value = value;
@@ -152,7 +151,7 @@ namespace ShootRunner
             }
 
             if (Program.widgetManager.formTaskbar != null) {
-                XElement widget = new XElement("widget");
+                XElement widget = new("widget");
                 widgets.Add(widget);
                 FormTaskbar formTaskbar = Program.widgetManager.formTaskbar;
                 Widget taskbarWidget = formTaskbar.widget;
@@ -177,32 +176,30 @@ namespace ShootRunner
             try
             {
 
-                using (XmlWriter xw = XmlWriter.Create(sb, xws))
-                {
-                    root.WriteTo(xw);
-                }
+                using XmlWriter xw = XmlWriter.Create(sb, xws);
+                root.WriteTo(xw);
 
             }
             catch (Exception ex)
             {
-                Program.error(ex.Message);
+                Program.Error(ex.Message);
             }
 
 
             try
             {
-                System.IO.StreamWriter file = new System.IO.StreamWriter(Program.configFielPath);
+                using StreamWriter file = new(Program.configFielPath);
                 file.Write(sb.ToString());
                 file.Close();
 
             }
             catch (System.IO.IOException ex)
             {
-                Program.error(ex.Message);
+                Program.Error(ex.Message);
             }
             catch (Exception ex)
             {
-                Program.error(ex.Message);
+                Program.Error(ex.Message);
             }
 
         }
@@ -219,8 +216,8 @@ namespace ShootRunner
 
                             if (pin.Name.ToString() == "pin")
                             {
-                                Window window = new Window();
-                                FormPin formPin = new FormPin(window);
+                                Window window = new();
+                                FormPin formPin = new(window);
                                 Program.pins.Add(formPin);
 
                                 foreach (XElement el in pin.Elements())
@@ -295,7 +292,7 @@ namespace ShootRunner
 
                                         if (el.Name.ToString() == "command")
                                         {
-                                            window.command = TextTools.NormalizeLineEndings(el.Value);
+                                            formPin.pin.command = TextTools.NormalizeLineEndings(el.Value);
                                         }
 
                                         if (el.Name.ToString() == "useworkdir")
@@ -375,7 +372,7 @@ namespace ShootRunner
 
                                         if (el.Name.ToString() == "mosttop")
                                         {
-                                            window.mosttop = ConvertTo.StringToBool(el.Value);
+                                            formPin.pin.mosttop = ConvertTo.StringToBool(el.Value);
                                         }
 
                                         if (el.Name.ToString() == "locked")
@@ -391,7 +388,7 @@ namespace ShootRunner
                                     }
                                     catch (Exception ex)
                                     {
-                                        Program.error(ex.Message);
+                                        Program.Error(ex.Message);
                                     }
                                 }
 
@@ -407,7 +404,7 @@ namespace ShootRunner
                             if (widgetEl.Name.ToString() == "widget")
                             {
 
-                                Widget widget = new Widget();
+                                Widget widget = new();
                                 Program.widgetManager.widgets.Add(widget);
 
                                 foreach (XElement el in widgetEl.Elements())
@@ -485,7 +482,7 @@ namespace ShootRunner
                                     }
                                     catch (Exception ex)
                                     {
-                                        Program.error(ex.Message);
+                                        Program.Error(ex.Message);
                                     }
                                 }
 
@@ -496,7 +493,7 @@ namespace ShootRunner
             }
             catch (Exception ex)
             {
-                Program.error(ex.Message);
+                Program.Error(ex.Message);
             }
         }
 

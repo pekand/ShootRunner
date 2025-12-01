@@ -1,8 +1,8 @@
-﻿using ShootRunner.src.forms;
-using System.Text;
+﻿#nullable disable
 
-#nullable disable
-
+#pragma warning disable IDE0079
+#pragma warning disable IDE0130
+#pragma warning disable CA1822
 
 namespace ShootRunner
 {
@@ -11,9 +11,9 @@ namespace ShootRunner
 
         public FormTaskbar formTaskbar = null;
 
-        public List<Widget> widgets = new List<Widget>();
-        public List<FormWidget> widgetForms = new List<FormWidget>();
-        public List<WidgetType> widgeTypes = new List<WidgetType>();
+        public List<Widget> widgets = [];
+        public List<FormWidget> widgetForms = [];
+        public List<WidgetType> widgeTypes = [];
         public FormWidgetCreate formWidgetCreate = null;
 
         public void LoadWidgetTypes()
@@ -27,9 +27,9 @@ namespace ShootRunner
                     try
                     {
                         string htmlPath = Path.Combine(directory, "widget.html");
-                        if (File.Exists(htmlPath)) { 
-                            WidgetType widgetType = new WidgetType();
-                            widgetType.name = Path.GetFileName(directory); ;
+                        if (File.Exists(htmlPath)) {
+                            WidgetType widgetType = new() { name = Path.GetFileName(directory) };
+                            ;
                             widgetType.path = directory;
                             widgetType.source = htmlPath;
                             widgetType.html = File.ReadAllText(htmlPath);
@@ -40,12 +40,12 @@ namespace ShootRunner
                     }
                     catch (Exception ex)
                     {
-                        Program.error(ex.Message);
+                        Program.Error(ex.Message);
                     }
                 }
 
             } catch (Exception ex) {
-                Program.error(ex.Message);
+                Program.Error(ex.Message);
             }
         }
 
@@ -56,8 +56,8 @@ namespace ShootRunner
 
         public void AddEmptyWidget()
         {
-            Widget widget = new Widget();
-            FormWidget widgeForm = new FormWidget(widget);
+            Widget widget = new();
+            FormWidget widgeForm = new(widget);
             widgets.Add(widget);
             widgetForms.Add(widgeForm);
             widgeForm.TopMost = true;
@@ -74,7 +74,7 @@ namespace ShootRunner
                 this.ShowTaskbarWidget(widget);
             } else {
                 widget.widgetType = this.FindWidgetType(widget.type);
-                FormWidget widgeForm = new FormWidget(widget);
+                FormWidget widgeForm = new(widget);
                 widget.widgetForm = widgeForm;
                 widgetForms.Add(widgeForm);
                 widgeForm.TopMost = widget.mosttop;
@@ -94,8 +94,10 @@ namespace ShootRunner
         {
             if (widget == null)
             {
-                widget = new Widget();
-                widget.type = "taskbar";
+                widget = new Widget
+                {
+                    type = "taskbar"
+                };
                 widgets.Add(widget);
             }
 
@@ -141,10 +143,7 @@ namespace ShootRunner
             {
                 foreach (var widget in widgets)
                 {
-                    if (widget.widgetForm != null)
-                    {
-                        widget.widgetForm.Hide();
-                    }                    
+                    widget.widgetForm?.Hide();                    
                 }
             }
             
@@ -156,10 +155,7 @@ namespace ShootRunner
             {
                 foreach (var widget in widgets)
                 {
-                    if (widget.widgetForm != null)
-                    {
-                        widget.widgetForm.Show();
-                    }
+                    widget.widgetForm?.Show();
                 }
             }
         }

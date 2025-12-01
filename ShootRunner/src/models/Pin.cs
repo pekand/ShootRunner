@@ -1,5 +1,7 @@
 ﻿#nullable disable
 
+#pragma warning disable IDE0130
+
 namespace ShootRunner
 {
     public class Pin : IDisposable
@@ -41,7 +43,7 @@ namespace ShootRunner
         // PROPERTIES
         public bool locked = false;
         public double transparent = 1.0;
-        public bool mosttop = false;
+        public bool mosttop = true;
         public bool hidden = false;
 
         private bool disposed = false;
