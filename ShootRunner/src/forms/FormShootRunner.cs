@@ -343,12 +343,12 @@ namespace ShootRunner
 
                 if (command.open != null && command.open != "") // OPEN APP IF NOT WINDOW FOUND
                 {
-                    JobTask.OpenFileInSystem(command.open);
+                    SystemTools.OpenFileInSystem(command.open);
                     return true;
                 }
                 else if (command.command != null && command.command != "") // RUN COMMAND IF NOT WINDOW FOUND
                 {
-                    JobTask.RunCommand(command.command, command.parameters, command.workdir);
+                    SystemTools.RunCommand(command.command, command.parameters, command.workdir);
                     return true;
                 }
 
@@ -362,13 +362,13 @@ namespace ShootRunner
                     string title = ToolsWindow.GetWindowTitle(Handle);
                     if (title.Contains(command.currentwindow))
                     {
-                        JobTask.OpenFileInSystem(command.open);
+                        SystemTools.OpenFileInSystem(command.open);
                         return true;
                     }
                 }
                 else // JUST OPEN FILE
                 {
-                    JobTask.OpenFileInSystem(command.open);
+                    SystemTools.OpenFileInSystem(command.open);
                     return true;
                 }
             }
@@ -380,13 +380,13 @@ namespace ShootRunner
                     string title = ToolsWindow.GetWindowTitle(Handle);
                     if (title.Contains(command.currentwindow))
                     {
-                        JobTask.RunCommand(command.command, command.parameters, command.workdir);
+                        SystemTools.RunCommand(command.command, command.parameters, command.workdir);
                         return true;
                     }
                 }
                 else // RUN COMMAND AS PROCESS WITH PARAMETERS
                 {
-                    JobTask.RunCommand(command.command, command.parameters, command.workdir);
+                    SystemTools.RunCommand(command.command, command.parameters, command.workdir);
                     return true;
                 }
 

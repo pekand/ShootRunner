@@ -509,14 +509,14 @@ namespace ShootRunner
         {
             if (this.pin.useCommand)
             {
-                JobTask.RunPowerShellCommand(this.pin.command, null, this.pin.silentCommand);
+                SystemTools.RunPowerShellCommand(this.pin.command, null, this.pin.silentCommand);
             }
 
             if (this.pin.useWindow)
             {
                 if (this.pin.window.app != null && this.pin.window.app.Trim() != "")
                 {
-                    Window window = await JobTask.StartProcessAndGetWindowHandleAsync(this.pin.window.app, null, null, this.pin.silentCommand);
+                    Window window = await SystemTools.StartProcessAndGetWindowHandleAsync(this.pin.window.app, null, null, this.pin.silentCommand);
 
                     if (window != null && window.Handle != IntPtr.Zero)
                     {
@@ -735,7 +735,7 @@ namespace ShootRunner
                 }
                 else if (this.pin.window.app != null && this.pin.window.app.Trim() != "")
                 {
-                    Window window = await JobTask.StartProcessAndGetWindowHandleAsync(this.pin.window.app, null, null, false, true);
+                    Window window = await SystemTools.StartProcessAndGetWindowHandleAsync(this.pin.window.app, null, null, false, true);
 
                     if (window != null && window.Handle != IntPtr.Zero)
                     {
