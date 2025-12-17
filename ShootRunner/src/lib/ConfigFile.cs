@@ -104,6 +104,7 @@ namespace ShootRunner
                 item.Add(new XElement("mosttop", ConvertTo.BoolToString(pinForm.pin.mosttop)));
                 item.Add(new XElement("locked", ConvertTo.BoolToString(pinForm.pin.locked)));
                 item.Add(new XElement("transparent", ConvertTo.DoubleToString(pinForm.pin.transparent)));
+                item.Add(new XElement("opacity", ConvertTo.DoubleToString(pinForm.pin.opacity)));
             }
 
             XElement widgets = new("widgets");
@@ -163,7 +164,7 @@ namespace ShootRunner
                 widget.Add(new XElement("width", taskbarWidget.StartWidth.ToString()));
                 widget.Add(new XElement("height", taskbarWidget.StartHeight.ToString()));
                 widget.Add(new XElement("mosttop", ConvertTo.BoolToString(formTaskbar.TopMost)));
-
+                widget.Add(new XElement("opacity", ConvertTo.DoubleToString(formTaskbar.Opacity)));
 
                 widget.Add(new XElement("locked", ConvertTo.BoolToString(taskbarWidget.locked)));
                 widget.Add(new XElement("transparent", ConvertTo.DoubleToString(taskbarWidget.transparent)));
@@ -385,6 +386,12 @@ namespace ShootRunner
                                             window.transparent = ConvertTo.StringToDouble(el.Value);
                                         }
 
+                                        if (el.Name.ToString() == "opacity")
+                                        {
+                                            formPin.pin.opacity = ConvertTo.StringToDouble(el.Value);
+                                        }
+
+
                                     }
                                     catch (Exception ex)
                                     {
@@ -440,6 +447,11 @@ namespace ShootRunner
                                         if (el.Name.ToString() == "mosttop")
                                         {
                                             widget.mosttop = ConvertTo.StringToBool(el.Value);
+                                        }
+
+                                        if (el.Name.ToString() == "opacity")
+                                        {
+                                            widget.opacity = ConvertTo.StringToDouble(el.Value);
                                         }
 
                                         if (el.Name.ToString() == "locked")

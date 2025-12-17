@@ -17,6 +17,7 @@ namespace ShootRunner
         public bool locked = false;
         public double transparent = 1.0;
         public bool mosttop = false;
+        public double opacity = 1.0;
         public Dictionary<string, string> data = [];
 
         // TASKBAR

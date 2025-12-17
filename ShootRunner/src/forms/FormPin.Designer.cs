@@ -46,6 +46,18 @@ namespace ShootRunner
             setIconToolStripMenuItem1 = new ToolStripMenuItem();
             dobleClickToActivateToolStripMenuItem = new ToolStripMenuItem();
             transparentToolStripMenuItem = new ToolStripMenuItem();
+            topMostToolStripMenuItem = new ToolStripMenuItem();
+            opacityToolStripMenuItem = new ToolStripMenuItem();
+            toolStripMenuItem3 = new ToolStripMenuItem();
+            toolStripMenuItem4 = new ToolStripMenuItem();
+            toolStripMenuItem11 = new ToolStripMenuItem();
+            toolStripMenuItem5 = new ToolStripMenuItem();
+            toolStripMenuItem6 = new ToolStripMenuItem();
+            toolStripMenuItem7 = new ToolStripMenuItem();
+            toolStripMenuItem12 = new ToolStripMenuItem();
+            toolStripMenuItem8 = new ToolStripMenuItem();
+            toolStripMenuItem9 = new ToolStripMenuItem();
+            toolStripMenuItem10 = new ToolStripMenuItem();
             toolStripMenuItem1 = new ToolStripSeparator();
             widgetToolStripMenuItem = new ToolStripMenuItem();
             newWidgetToolStripMenuItem = new ToolStripMenuItem();
@@ -56,7 +68,6 @@ namespace ShootRunner
             closeToolStripMenuItem1 = new ToolStripMenuItem();
             openFileDialog = new OpenFileDialog();
             timer = new System.Windows.Forms.Timer(components);
-            topMostToolStripMenuItem = new ToolStripMenuItem();
             contextMenuStrip.SuspendLayout();
             SuspendLayout();
             // 
@@ -64,14 +75,14 @@ namespace ShootRunner
             // 
             contextMenuStrip.Items.AddRange(new ToolStripItem[] { pinToolStripMenuItem, optionsToolStripMenuItem, toolStripMenuItem1, widgetToolStripMenuItem, applicationToolStripMenuItem });
             contextMenuStrip.Name = "contextMenuStrip1";
-            contextMenuStrip.Size = new Size(181, 128);
+            contextMenuStrip.Size = new Size(156, 106);
             contextMenuStrip.Opening += ContextMenuStrip1_Opening;
             // 
             // pinToolStripMenuItem
             // 
             pinToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { selectToolStripMenuItem, commandToolStripMenuItem, newPinToolStripMenuItem, runToolStripMenuItem, minimalizeToolStripMenuItem, removeToolStripMenuItem, selectAllToolStripMenuItem, deselectAllToolStripMenuItem });
             pinToolStripMenuItem.Name = "pinToolStripMenuItem";
-            pinToolStripMenuItem.Size = new Size(180, 24);
+            pinToolStripMenuItem.Size = new Size(155, 24);
             pinToolStripMenuItem.Text = "Pin";
             // 
             // selectToolStripMenuItem
@@ -132,9 +143,9 @@ namespace ShootRunner
             // 
             // optionsToolStripMenuItem
             // 
-            optionsToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { setIconToolStripMenuItem1, dobleClickToActivateToolStripMenuItem, transparentToolStripMenuItem, topMostToolStripMenuItem });
+            optionsToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { setIconToolStripMenuItem1, dobleClickToActivateToolStripMenuItem, transparentToolStripMenuItem, topMostToolStripMenuItem, opacityToolStripMenuItem });
             optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
-            optionsToolStripMenuItem.Size = new Size(180, 24);
+            optionsToolStripMenuItem.Size = new Size(155, 24);
             optionsToolStripMenuItem.Text = "Options";
             // 
             // setIconToolStripMenuItem1
@@ -158,16 +169,101 @@ namespace ShootRunner
             transparentToolStripMenuItem.Text = "Transparent";
             transparentToolStripMenuItem.Click += TransparentToolStripMenuItem_Click;
             // 
+            // topMostToolStripMenuItem
+            // 
+            topMostToolStripMenuItem.Name = "topMostToolStripMenuItem";
+            topMostToolStripMenuItem.Size = new Size(226, 24);
+            topMostToolStripMenuItem.Text = "Top most";
+            topMostToolStripMenuItem.Click += TopMostToolStripMenuItem_Click;
+            // 
+            // opacityToolStripMenuItem
+            // 
+            opacityToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { toolStripMenuItem3, toolStripMenuItem4, toolStripMenuItem11, toolStripMenuItem5, toolStripMenuItem6, toolStripMenuItem7, toolStripMenuItem12, toolStripMenuItem8, toolStripMenuItem9, toolStripMenuItem10 });
+            opacityToolStripMenuItem.Name = "opacityToolStripMenuItem";
+            opacityToolStripMenuItem.Size = new Size(226, 24);
+            opacityToolStripMenuItem.Text = "Opacity";
+            opacityToolStripMenuItem.DropDownOpening += opacityToolStripMenuItem_DropDownOpening;
+            // 
+            // toolStripMenuItem3
+            // 
+            toolStripMenuItem3.Name = "toolStripMenuItem3";
+            toolStripMenuItem3.Size = new Size(180, 24);
+            toolStripMenuItem3.Text = "10%";
+            toolStripMenuItem3.Click += toolStripMenuItem3_Click;
+            // 
+            // toolStripMenuItem4
+            // 
+            toolStripMenuItem4.Name = "toolStripMenuItem4";
+            toolStripMenuItem4.Size = new Size(180, 24);
+            toolStripMenuItem4.Text = "20%";
+            toolStripMenuItem4.Click += toolStripMenuItem4_Click;
+            // 
+            // toolStripMenuItem11
+            // 
+            toolStripMenuItem11.Name = "toolStripMenuItem11";
+            toolStripMenuItem11.Size = new Size(180, 24);
+            toolStripMenuItem11.Text = "30%";
+            toolStripMenuItem11.Click += toolStripMenuItem11_Click;
+            // 
+            // toolStripMenuItem5
+            // 
+            toolStripMenuItem5.Name = "toolStripMenuItem5";
+            toolStripMenuItem5.Size = new Size(180, 24);
+            toolStripMenuItem5.Text = "40%";
+            toolStripMenuItem5.Click += toolStripMenuItem5_Click;
+            // 
+            // toolStripMenuItem6
+            // 
+            toolStripMenuItem6.Name = "toolStripMenuItem6";
+            toolStripMenuItem6.Size = new Size(180, 24);
+            toolStripMenuItem6.Text = "50%";
+            toolStripMenuItem6.Click += toolStripMenuItem6_Click;
+            // 
+            // toolStripMenuItem7
+            // 
+            toolStripMenuItem7.Name = "toolStripMenuItem7";
+            toolStripMenuItem7.Size = new Size(180, 24);
+            toolStripMenuItem7.Text = "60%";
+            toolStripMenuItem7.Click += toolStripMenuItem7_Click;
+            // 
+            // toolStripMenuItem12
+            // 
+            toolStripMenuItem12.Name = "toolStripMenuItem12";
+            toolStripMenuItem12.Size = new Size(180, 24);
+            toolStripMenuItem12.Text = "70%";
+            toolStripMenuItem12.Click += toolStripMenuItem12_Click;
+            // 
+            // toolStripMenuItem8
+            // 
+            toolStripMenuItem8.Name = "toolStripMenuItem8";
+            toolStripMenuItem8.Size = new Size(180, 24);
+            toolStripMenuItem8.Text = "80%";
+            toolStripMenuItem8.Click += toolStripMenuItem8_Click;
+            // 
+            // toolStripMenuItem9
+            // 
+            toolStripMenuItem9.Name = "toolStripMenuItem9";
+            toolStripMenuItem9.Size = new Size(180, 24);
+            toolStripMenuItem9.Text = "90%";
+            toolStripMenuItem9.Click += toolStripMenuItem9_Click;
+            // 
+            // toolStripMenuItem10
+            // 
+            toolStripMenuItem10.Name = "toolStripMenuItem10";
+            toolStripMenuItem10.Size = new Size(180, 24);
+            toolStripMenuItem10.Text = "100%";
+            toolStripMenuItem10.Click += toolStripMenuItem10_Click;
+            // 
             // toolStripMenuItem1
             // 
             toolStripMenuItem1.Name = "toolStripMenuItem1";
-            toolStripMenuItem1.Size = new Size(177, 6);
+            toolStripMenuItem1.Size = new Size(152, 6);
             // 
             // widgetToolStripMenuItem
             // 
             widgetToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { newWidgetToolStripMenuItem, createWidgetToolStripMenuItem, taskbarToolStripMenuItem });
             widgetToolStripMenuItem.Name = "widgetToolStripMenuItem";
-            widgetToolStripMenuItem.Size = new Size(180, 24);
+            widgetToolStripMenuItem.Size = new Size(155, 24);
             widgetToolStripMenuItem.Text = "Widget";
             // 
             // newWidgetToolStripMenuItem
@@ -195,7 +291,7 @@ namespace ShootRunner
             // 
             applicationToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { consoleToolStripMenuItem, closeToolStripMenuItem1 });
             applicationToolStripMenuItem.Name = "applicationToolStripMenuItem";
-            applicationToolStripMenuItem.Size = new Size(180, 24);
+            applicationToolStripMenuItem.Size = new Size(155, 24);
             applicationToolStripMenuItem.Text = "Application";
             // 
             // consoleToolStripMenuItem
@@ -218,19 +314,12 @@ namespace ShootRunner
             openFileDialog.Filter = "Image Files|*.ico;*.bmp;*.jpg;*.jpeg;*.png;";
             openFileDialog.Title = "Select icon";
             // 
-            // topMostToolStripMenuItem
-            // 
-            topMostToolStripMenuItem.Name = "topMostToolStripMenuItem";
-            topMostToolStripMenuItem.Size = new Size(226, 24);
-            topMostToolStripMenuItem.Text = "Top most";
-            topMostToolStripMenuItem.Click += TopMostToolStripMenuItem_Click;
-            // 
             // FormPin
             // 
             AllowDrop = true;
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1067, 693);
+            ClientSize = new Size(191, 166);
             ContextMenuStrip = contextMenuStrip;
             Icon = (Icon)resources.GetObject("$this.Icon");
             Margin = new Padding(4);
@@ -282,5 +371,16 @@ namespace ShootRunner
         private ToolStripMenuItem deselectAllToolStripMenuItem;
         private ToolStripMenuItem createWidgetToolStripMenuItem;
         private ToolStripMenuItem topMostToolStripMenuItem;
+        private ToolStripMenuItem opacityToolStripMenuItem;
+        private ToolStripMenuItem toolStripMenuItem3;
+        private ToolStripMenuItem toolStripMenuItem4;
+        private ToolStripMenuItem toolStripMenuItem11;
+        private ToolStripMenuItem toolStripMenuItem5;
+        private ToolStripMenuItem toolStripMenuItem6;
+        private ToolStripMenuItem toolStripMenuItem7;
+        private ToolStripMenuItem toolStripMenuItem12;
+        private ToolStripMenuItem toolStripMenuItem8;
+        private ToolStripMenuItem toolStripMenuItem9;
+        private ToolStripMenuItem toolStripMenuItem10;
     }
 }

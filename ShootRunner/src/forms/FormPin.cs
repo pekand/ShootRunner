@@ -38,6 +38,7 @@ namespace ShootRunner
             this.MinimumSize = new Size(32, 32);
             this.BackColor = Color.White;
             this.TopMost = this.pin.mosttop;
+            this.Opacity = this.pin.opacity;
 
             this.BackColor = System.Drawing.Color.Black;
 
@@ -93,7 +94,7 @@ namespace ShootRunner
             this.MakeRoundy();
             if (this.pin.window != null)
             {
-                this.Opacity = this.pin.window.transparent < 0.2 ? 0.2 : this.pin.window.transparent;
+                this.Opacity = this.pin.opacity;
             }
             dobleClickToActivateToolStripMenuItem.Checked = this.pin.doubleClickCommand;
             FindPinWindow();
@@ -612,6 +613,91 @@ namespace ShootRunner
             this.TopMost = this.pin.mosttop;
         }
 
+        // CONTEXTMENU OPACITY
+        private void opacityToolStripMenuItem_DropDownOpening(object sender, EventArgs e)
+        {
+            toolStripMenuItem3.Checked = this.Opacity == 0.1;
+            toolStripMenuItem4.Checked = this.Opacity == 0.2;
+            toolStripMenuItem11.Checked = this.Opacity == 0.3;
+            toolStripMenuItem5.Checked = this.Opacity == 0.4;
+            toolStripMenuItem6.Checked = this.Opacity == 0.5;
+            toolStripMenuItem7.Checked = this.Opacity == 0.6;
+            toolStripMenuItem12.Checked = this.Opacity == 0.7;
+            toolStripMenuItem8.Checked = this.Opacity == 0.8;
+            toolStripMenuItem9.Checked = this.Opacity == 0.9;
+            toolStripMenuItem10.Checked = this.Opacity == 1.0;
+        }
+
+        // CONTEXTMENU OPACITY
+        private void toolStripMenuItem3_Click(object sender, EventArgs e)
+        {
+            this.Opacity = 0.1;
+            this.pin.opacity = this.Opacity;
+        }
+
+        // CONTEXTMENU OPACITY
+        private void toolStripMenuItem4_Click(object sender, EventArgs e)
+        {
+            this.Opacity = 0.2;
+            this.pin.opacity = this.Opacity;
+        }
+
+        // CONTEXTMENU OPACITY
+        private void toolStripMenuItem11_Click(object sender, EventArgs e)
+        {
+            this.Opacity = 0.3;
+            this.pin.opacity = this.Opacity;
+        }
+
+        // CONTEXTMENU OPACITY
+        private void toolStripMenuItem5_Click(object sender, EventArgs e)
+        {
+            this.Opacity = 0.4;
+            this.pin.opacity = this.Opacity;
+        }
+
+        // CONTEXTMENU OPACITY
+        private void toolStripMenuItem6_Click(object sender, EventArgs e)
+        {
+            this.Opacity = 0.5;
+            this.pin.opacity = this.Opacity;
+        }
+
+        // CONTEXTMENU OPACITY
+        private void toolStripMenuItem7_Click(object sender, EventArgs e)
+        {
+            this.Opacity = 0.6;
+            this.pin.opacity = this.Opacity;
+        }
+
+        // CONTEXTMENU OPACITY
+        private void toolStripMenuItem12_Click(object sender, EventArgs e)
+        {
+            this.Opacity = 0.7;
+            this.pin.opacity = this.Opacity;
+        }
+
+        // CONTEXTMENU OPACITY
+        private void toolStripMenuItem8_Click(object sender, EventArgs e)
+        {
+            this.Opacity = 0.8;
+            this.pin.opacity = this.Opacity;
+        }
+
+        // CONTEXTMENU OPACITY
+        private void toolStripMenuItem9_Click(object sender, EventArgs e)
+        {
+            this.Opacity = 0.9;
+            this.pin.opacity = this.Opacity;
+        }
+
+        // CONTEXTMENU OPACITY
+        private void toolStripMenuItem10_Click(object sender, EventArgs e)
+        {
+            this.Opacity = 1.0;
+            this.pin.opacity = this.Opacity;
+        }
+
         // CONTEXTMENU WIDGET
         private void NewWidgetToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -722,7 +808,7 @@ namespace ShootRunner
                     }
                     if (this.pin.useCmdshell)
                     {
-                        await SystemTools.RunScriptWithTimeoutAsync(this.pin.command, wordir,this.pin.silentCommand);
+                        await SystemTools.RunScriptWithTimeoutAsync(this.pin.command, wordir, this.pin.silentCommand);
                     }
                 }
             }

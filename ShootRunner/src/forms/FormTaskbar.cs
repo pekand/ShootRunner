@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 #nullable disable
 
@@ -50,7 +51,7 @@ namespace ShootRunner
         {
             Visible = false;
             this.TopMost = this.widget.mosttop;
-            this.Opacity = this.widget.transparent < 0.2 ? 0.2 : this.widget.transparent;
+            this.Opacity = this.widget.opacity;
             this.ShowInTaskbar = false;
             this.BackColor = this.widget.backgroundColor;
 
@@ -66,7 +67,8 @@ namespace ShootRunner
             windowMonitor.Register();
         }
 
-        public void ScreenshotCreated() {
+        public void ScreenshotCreated()
+        {
             this.Invoke(new Action(() =>
             {
                 this.Refresh();
@@ -204,8 +206,9 @@ namespace ShootRunner
                 DisposeWindowResources(win);
                 taskbarWindows.Remove(win);
             }
-            if (toremove.Count > 0) {
-                this.Invoke(()=>this.Refresh());
+            if (toremove.Count > 0)
+            {
+                this.Invoke(() => this.Refresh());
             }
         }
 
@@ -468,8 +471,10 @@ namespace ShootRunner
                     draggingItem = true;
                     mouseDownPos = GetSpaceOnposition(e.X, e.Y);
                 }
-                else {
-                    if (!this.widget.locked) {
+                else
+                {
+                    if (!this.widget.locked)
+                    {
                         dragging = true;
                         dragCursorPoint = Cursor.Position;
                         dragFormPoint = this.Location;
@@ -551,7 +556,7 @@ namespace ShootRunner
 
                 if (!draggingItem && e.Button == MouseButtons.Left)
                 {
-                    ToolsWindow.BringWindowToFront(selectedWindow);                    
+                    ToolsWindow.BringWindowToFront(selectedWindow);
                     WindowScreenshot.CaptureWindow3Task(selectedWindow, 256, 256, 300, this.ScreenshotCreated);
                 }
 
@@ -636,6 +641,14 @@ namespace ShootRunner
             }
         }
 
+        private void createPinToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (this.selectedWindow != null)
+            {
+                Program.CreatePin(this.selectedWindow);
+            }
+        }
+
         private void UseScreenshotsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             widget.useScreenshots = !widget.useScreenshots;
@@ -663,6 +676,81 @@ namespace ShootRunner
                 this.Refresh();
             }
         }
+        private void opacityToolStripMenuItem_DropDownOpening(object sender, EventArgs e)
+        {
+            toolStripMenuItem3.Checked = false;
+            toolStripMenuItem4.Checked = false;
+            toolStripMenuItem5.Checked = false;
+            toolStripMenuItem6.Checked = false;
+            toolStripMenuItem7.Checked = false;
+            toolStripMenuItem8.Checked = false;
+
+            if (this.Opacity == 0.1)
+            {
+                toolStripMenuItem3.Checked = true;
+            }
+
+            if (this.Opacity == 0.2)
+            {
+                toolStripMenuItem4.Checked = true;
+            }
+
+            if (this.Opacity == 0.4)
+            {
+                toolStripMenuItem5.Checked = true;
+            }
+
+            if (this.Opacity == 0.6)
+            {
+                toolStripMenuItem6.Checked = true;
+            }
+
+            if (this.Opacity == 0.8)
+            {
+                toolStripMenuItem7.Checked = true;
+            }
+
+            if (this.Opacity == 1.0)
+            {
+                toolStripMenuItem8.Checked = true;
+            }
+        }
+
+        private void toolStripMenuItem3_Click(object sender, EventArgs e)
+        {
+            toolStripMenuItem3.Checked = true;
+            this.Opacity = 0.1;
+        }
+
+        private void toolStripMenuItem4_Click(object sender, EventArgs e)
+        {
+            toolStripMenuItem4.Checked = true;
+            this.Opacity = 0.2;
+        }
+
+        private void toolStripMenuItem5_Click(object sender, EventArgs e)
+        {
+            toolStripMenuItem5.Checked = true;
+            this.Opacity = 0.4;
+        }
+
+        private void toolStripMenuItem6_Click(object sender, EventArgs e)
+        {
+            toolStripMenuItem6.Checked = true;
+            this.Opacity = 0.6;
+        }
+
+        private void toolStripMenuItem7_Click(object sender, EventArgs e)
+        {
+            toolStripMenuItem7.Checked = true;
+            this.Opacity = 0.8;
+        }
+
+        private void toolStripMenuItem8_Click(object sender, EventArgs e)
+        {
+            toolStripMenuItem8.Checked = true;
+            this.Opacity = 1.0;
+        }
 
         private void ShowDesktopToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -676,28 +764,6 @@ namespace ShootRunner
                 this.selectedWindow.hidden = true;
                 this.Refresh();
             }
-        }
-
-        public void DisposeWindowResources(Window window)
-        {
-            if (window == null)
-            {
-                return;
-            }
-
-            if (window.icon != null)
-            {
-                window.icon.Dispose();
-                window.icon = null;
-            }
-
-            if (window.screenshot != null)
-            {
-                window.screenshot.Dispose();
-                window.screenshot = null;
-            }
-
-            window.isCurentWindowScreensot = false;
         }
 
         private void ShowAllHiddenToolStripMenuItem_Click(object sender, EventArgs e)
@@ -727,5 +793,30 @@ namespace ShootRunner
         {
             Program.ShowConsole();
         }
+
+        /////////////////////////////////////////////////////////////////////////////////////////////
+
+        public void DisposeWindowResources(Window window)
+        {
+            if (window == null)
+            {
+                return;
+            }
+
+            if (window.icon != null)
+            {
+                window.icon.Dispose();
+                window.icon = null;
+            }
+
+            if (window.screenshot != null)
+            {
+                window.screenshot.Dispose();
+                window.screenshot = null;
+            }
+
+            window.isCurentWindowScreensot = false;
+        }
+
     }
 }

@@ -43,6 +43,7 @@ namespace ShootRunner
         // PROPERTIES
         public bool locked = false;
         public double transparent = 1.0;
+        public double opacity = 1.0;
         public bool mosttop = true;
         public bool hidden = false;
 
