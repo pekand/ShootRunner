@@ -1,5 +1,9 @@
 ﻿using System.ComponentModel;
 using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
+using System.IO;
+using System.Management.Automation.Runspaces;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 #nullable disable
 
@@ -36,11 +40,8 @@ namespace ShootRunner
             this.DoubleBuffered = true;
             this.FormBorderStyle = FormBorderStyle.None;
             this.MinimumSize = new Size(32, 32);
-            this.BackColor = Color.White;
             this.TopMost = this.pin.mosttop;
             this.Opacity = this.pin.opacity;
-
-            this.BackColor = System.Drawing.Color.Black;
 
             this.pin.window = window;
             if (this.pin.window != null && newPin)
@@ -77,9 +78,9 @@ namespace ShootRunner
                 Size size = this.ClientSize;
 
                 // RESIZE RIGHT BOTTOM CORNER
-                if (pos.X >= size.Width - 10 && pos.Y >= size.Height - 10)
+                if (size.Width - (size.Width/4) <= pos.X && size.Height - (size.Height/4) <= pos.Y )
                 {
-                    this.MakeSquery();
+                    //this.MakeSquery();
                     m.Result = (IntPtr)WinApi.HTBOTTOMRIGHT;
                     return;
                 }
@@ -87,11 +88,49 @@ namespace ShootRunner
             base.WndProc(ref m);
         }
 
+        /*protected override void WndProc(ref Message m)
+        {
+            const int WM_NCHITTEST = 0x84;
+            const int HTCLIENT = 1;
+            const int HTLEFT = 10;
+            const int HTRIGHT = 11;
+            const int HTTOP = 12;
+            const int HTTOPLEFT = 13;
+            const int HTTOPRIGHT = 14;
+            const int HTBOTTOM = 15;
+            const int HTBOTTOMLEFT = 16;
+            const int HTBOTTOMRIGHT = 17;
+
+            if (m.Msg == WM_NCHITTEST)
+            {
+                base.WndProc(ref m);
+
+                if ((int)m.Result == HTCLIENT)
+                {
+                    Point p = PointToClient(Cursor.Position);
+                    int grip = 8;
+
+                    if (p.X < grip && p.Y < grip) m.Result = (IntPtr)HTTOPLEFT;
+                    else if (p.X > ClientSize.Width - grip && p.Y < grip) m.Result = (IntPtr)HTTOPRIGHT;
+                    else if (p.X < grip && p.Y > ClientSize.Height - grip) m.Result = (IntPtr)HTBOTTOMLEFT;
+                    else if (p.X > ClientSize.Width - grip && p.Y > ClientSize.Height - grip) m.Result = (IntPtr)HTBOTTOMRIGHT;
+                    else if (p.X < grip) m.Result = (IntPtr)HTLEFT;
+                    else if (p.X > ClientSize.Width - grip) m.Result = (IntPtr)HTRIGHT;
+                    else if (p.Y < grip) m.Result = (IntPtr)HTTOP;
+                    else if (p.Y > ClientSize.Height - grip) m.Result = (IntPtr)HTBOTTOM;
+                }
+
+                return;
+            }
+
+            base.WndProc(ref m);
+        }*/
+
+
         // FORM LOAD
         private void FormPin_Load(object sender, EventArgs e)
         {
             this.SetStartPosition();
-            this.MakeRoundy();
             if (this.pin.window != null)
             {
                 this.Opacity = this.pin.opacity;
@@ -107,6 +146,9 @@ namespace ShootRunner
             {
                 this.TopMost = this.pin.mosttop;
             }
+
+            this.MakeRoundy();
+            this.UpdateRegion();
         }
 
         // FORM
@@ -254,7 +296,6 @@ namespace ShootRunner
             using (LinearGradientBrush brush = new(rect, startColor, endColor, LinearGradientMode.Vertical))
             {
                 g.FillRectangle(brush, rect);
-
             }
 
             if (this.pin.customicon != null)
@@ -269,8 +310,16 @@ namespace ShootRunner
             using var pen = new Pen(Color.LightGray, 5);
             if (selected)
             {
+                int size = 12;
 
-                e.Graphics.DrawRectangle(pen, rect);
+                var points = new[]
+                {
+                    new Point(ClientSize.Width - size, ClientSize.Height),
+                    new Point(ClientSize.Width, ClientSize.Height),
+                    new Point(ClientSize.Width, ClientSize.Height - size)
+                };
+
+                g.FillPolygon(Brushes.White, points);
             }
         }
 
@@ -293,6 +342,7 @@ namespace ShootRunner
         private void FormPin_ResizeEnd(object sender, EventArgs e)
         {
             this.MakeRoundy();
+            this.UpdateRegion();
         }
 
         // FORM
@@ -368,6 +418,8 @@ namespace ShootRunner
             Bitmap image = null;
             string[] files = null;
 
+            var altPressed = (Control.ModifierKeys & Keys.Alt) == Keys.Alt;
+
             try
             {
 
@@ -403,11 +455,20 @@ namespace ShootRunner
 
             }
 
-
-
             if (files != null)
             {
-                if (this.pin.useDirectorylink && Directory.Exists(this.pin.directorylink))
+                if (altPressed && files.Length == 1 && File.Exists(files[0]) && Os.HasImageOrIconExtension(files[0]))
+                {
+                    this.SetIcon(files[0]);
+                } 
+                else if (this.pin.useCommand && this.pin.command != null && this.pin.command.Contains("%FILE_LIST%")) {
+                    this.DoPinAction(files);
+                }
+                else if (this.pin.useScript && this.pin.script != null && this.pin.script.Contains("%FILE_LIST%"))
+                {
+                    this.DoPinAction(files);
+                }
+                else if (this.pin.useDirectorylink && Directory.Exists(this.pin.directorylink))
                 {
 
                     foreach (var file in files)
@@ -425,7 +486,8 @@ namespace ShootRunner
                 }
             }
 
-            if (html != null)
+
+            if (html != null && (text == null || !Uri.IsWellFormedUriString(text.Trim(), UriKind.Absolute)))
             {
 
                 if (Uri.IsWellFormedUriString(text.Trim(), UriKind.Absolute))
@@ -443,9 +505,17 @@ namespace ShootRunner
                     Os.SaveTextWithAutoRename(this.pin.directorylink, Os.ExtractHtmlFragment(html), "page", ".html");
                 }
 
-            }
-            else
-            if (text != null)
+                if (this.pin.useCommand && this.pin.command != null && this.pin.command.Contains("%TEXT%"))
+                {
+                    this.DoPinAction(null, html);
+                }
+
+                if (this.pin.useScript && this.pin.script != null && this.pin.script.Contains("%TEXT%"))
+                {
+                    this.DoPinAction(null, html);
+                }
+            } 
+            else if (text != null)
             {
                 if (this.pin.useDirectorylink && Directory.Exists(this.pin.directorylink))
                 {
@@ -463,7 +533,20 @@ namespace ShootRunner
                         Os.SaveTextWithAutoRename(this.pin.directorylink, text, "text", ".txt");
                     }
                 }
-            }
+
+                if (this.pin.useCommand && this.pin.command != null && this.pin.command.Contains("%TEXT%"))
+                {
+                    this.DoPinAction(null, text);
+                }
+
+                if (this.pin.useScript && this.pin.script != null && this.pin.script.Contains("%TEXT%"))
+                {
+                    this.DoPinAction(null, text);
+                }
+            } 
+            
+            
+
 
             if (image != null)
             {
@@ -474,6 +557,20 @@ namespace ShootRunner
                     Program.Info("Image saved to: " + path + "\r\n");
                 }
             }
+        }
+
+        // FORM ENTER FORM
+        private void FormPin_MouseEnter(object sender, EventArgs e)
+        {
+            this.Region = null;
+            this.MakeRoundy();
+            this.Refresh();
+        }
+
+        // FORM LEAVE FORM
+        private void FormPin_MouseLeave(object sender, EventArgs e)
+        {
+            this.UpdateRegion();
         }
 
         /*********************************************************************************/
@@ -506,26 +603,9 @@ namespace ShootRunner
         }
 
         // CONTEXTMENU PIN
-        private async void DuplicateToolStripMenuItem_Click(object sender, EventArgs e)
+        private void DuplicateToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (this.pin.useCommand)
-            {
-                SystemTools.RunPowerShellCommand(this.pin.command, null, this.pin.silentCommand);
-            }
-
-            if (this.pin.useWindow)
-            {
-                if (this.pin.window.app != null && this.pin.window.app.Trim() != "")
-                {
-                    Window window = await SystemTools.StartProcessAndGetWindowHandleAsync(this.pin.window.app, null, null, this.pin.silentCommand);
-
-                    if (window != null && window.Handle != IntPtr.Zero)
-                    {
-                        ToolsWindow.SetWindowData(window);
-                        Program.CreatePin(window);
-                    }
-                }
-            }
+            Program.DuplicatePin(this);
         }
 
         // CONTEXTMENU PIN
@@ -569,22 +649,7 @@ namespace ShootRunner
         {
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
-                try
-                {
-                    string selectedFilePath = openFileDialog.FileName;
-                    using (var image = Image.FromFile(selectedFilePath))
-                    {
-                        this.pin.customicon?.Dispose();
-                        this.pin.customicon = new Bitmap(image);
-                        this.Refresh();
-                    }
-
-                    Program.Update();
-                }
-                catch (Exception ex)
-                {
-                    Program.Error("Open image from file error: " + ex.Message);
-                }
+                this.SetIcon(openFileDialog.FileName);
             }
         }
 
@@ -737,7 +802,7 @@ namespace ShootRunner
         /*********************************************************************************/
 
         // ACTION PIN DO ACTION
-        public async void DoPinAction()
+        public async void DoPinAction(string[] files = null, string text = null)
         {
 
             string wordir = null;
@@ -769,21 +834,25 @@ namespace ShootRunner
 
             if (this.pin.useScript)
             {
-                //SystemTools.RunScript(this.pin.script, wordir, this.pin.silentCommand);
+                string script = this.ReplaceFileList(this.pin.script, files);
+                script = this.ReplaceDropText(script, text);
+
                 if (this.pin.usePowershell)
                 {
+                    int ms = pin.maxExecTime > 0 ? (int)Math.Ceiling(pin.maxExecTime * 1000) : 0;
                     if (this.pin.silentCommand)
                     {
-                        await SystemTools.RunPowershellScriptWithTimeoutAsync(this.pin.script, wordir, this.pin.silentCommand); // TODO this.pin.silentCommand 
+                        await SystemTools.RunPowershellScriptWithTimeoutAsync(script, wordir, this.pin.silentCommand, ms); // TODO this.pin.silentCommand 
                     }
                     else
                     {
-                        await SystemTools.RunPowershellScriptVisibleWithTimeout(this.pin.script, wordir);
+                        await SystemTools.RunPowershellScriptVisibleWithTimeout(script, wordir,false, ms);
                     }
                 }
+
                 if (this.pin.useCmdshell)
                 {
-                    await SystemTools.RunScriptWithTimeoutAsync(this.pin.script, wordir, this.pin.silentCommand);
+                    await SystemTools.RunScriptWithTimeoutAsync(script, wordir, this.pin.silentCommand);
                 }
             }
 
@@ -795,20 +864,27 @@ namespace ShootRunner
                 }
                 else
                 {
+                    string command = this.ReplaceFileList(this.pin.command, files);
+                    command = this.ReplaceDropText(command, text);
+                    
+
                     if (this.pin.usePowershell)
                     {
+                        int ms = pin.maxExecTime > 0 ? (int)Math.Ceiling(pin.maxExecTime * 1000) : 0;
                         if (this.pin.silentCommand)
                         {
-                            await SystemTools.RunPowershellScriptWithTimeoutAsync(this.pin.command, wordir, this.pin.silentCommand); // TODO this.pin.silentCommand 
+                            
+                            await SystemTools.RunPowershellScriptWithTimeoutAsync(command, wordir, this.pin.silentCommand, ms); // TODO this.pin.silentCommand 
                         }
                         else
-                        {
-                            await SystemTools.RunPowershellScriptVisibleWithTimeout(this.pin.command, wordir);
+                        {                            
+                            await SystemTools.RunPowershellScriptVisibleWithTimeout(command, wordir, false, ms);
                         }
                     }
+
                     if (this.pin.useCmdshell)
                     {
-                        await SystemTools.RunScriptWithTimeoutAsync(this.pin.command, wordir, this.pin.silentCommand);
+                        await SystemTools.RunScriptWithTimeoutAsync(command, wordir, this.pin.silentCommand);
                     }
                 }
             }
@@ -829,6 +905,59 @@ namespace ShootRunner
                     }
                 }
             }
+        }
+
+        // ACTION REPLACE FILE LIST IN COMMAND
+        string ReplaceFileList(string command, string[] files)
+        {
+            if (files == null || files.Length == 0)
+                return command.Replace("%FILE_LIST%", "");
+
+            var list = files
+                .Select(f => f.Contains(' ') ? $"\"{f}\"" : f);
+
+            return command.Replace("%FILE_LIST%", string.Join(" ", list));
+        }
+
+        string ReplaceDropText(string command, string text)
+        {
+            if (text == null || text.Length == 0)
+                return command.Replace("%TEXT%", "");
+
+
+            string EscapeForCmd(string s)
+            {
+                s = s.Replace("\r\n", " ")
+                     .Replace("\n", " ")
+                     .Replace("\r", " ");
+
+                s = s.Replace("^", "^^")
+                     .Replace("\"", "\\\"")
+                     .Replace("%", "%%");
+
+                return s;
+            }
+
+            bool NeedsQuoting(string s)
+            {
+                foreach (char c in s)
+                {
+                    if (char.IsWhiteSpace(c) || "&|<>^%\"".Contains(c))
+                        return true;
+                }
+                return false;
+            }
+
+            if (text == null)
+                return command.Replace("%TEXT%", "");
+
+            if (!NeedsQuoting(text))
+                return command.Replace("%TEXT%", text);
+
+            return command.Replace(
+                "%TEXT%",
+                $"\"{EscapeForCmd(text)}\""
+            );
         }
 
         // ACTION WINDOW FIND
@@ -1002,6 +1131,78 @@ namespace ShootRunner
             Program.pins.Remove(this);
             Program.Update();
             this.Close();
+        }
+
+        // ACTION SET ICON
+        public void SetIcon(string path)
+        {
+            try
+            {
+                string selectedFilePath = path;
+                using (var image = Image.FromFile(selectedFilePath))
+                {
+                    this.pin.customicon?.Dispose();
+                    this.pin.customicon = new Bitmap(image);
+                    this.UpdateRegion();
+                    this.Refresh();
+                }
+
+                Program.Update();
+                this.MakeRoundy();
+            }
+            catch (Exception ex)
+            {
+                Program.Error("Open image from file error: " + ex.Message);
+            }
+        }
+
+        // ACTION REGION
+        void UpdateRegion()
+        {
+            if (!this.selected)
+            {
+                if (this.pin.customicon != null)
+                {
+                    this.Region = this.CreateRegionFromAlpha(Pictures.ResizeBitmap(this.pin.customicon, this.Width, this.Height));
+                }
+                else if (this.pin.window != null && this.pin.window.icon != null)
+                {
+                    this.Region = this.CreateRegionFromAlpha(Pictures.ResizeBitmap(this.pin.window.icon, this.Width, this.Height));
+                }
+            }
+            else {
+                this.Region = null;
+            }
+        }
+
+        // ACTION REGION
+        Region CreateRegionFromAlpha(Bitmap bmp, byte alphaThreshold = 10)
+        {
+            var path = new GraphicsPath();
+
+            for (int y = 0; y < bmp.Height; y++)
+            {
+                int startX = -1;
+
+                for (int x = 0; x < bmp.Width; x++)
+                {
+                    if (bmp.GetPixel(x, y).A > alphaThreshold)
+                    {
+                        if (startX == -1)
+                            startX = x;
+                    }
+                    else if (startX != -1)
+                    {
+                        path.AddRectangle(new Rectangle(startX, y, x - startX, 1));
+                        startX = -1;
+                    }
+                }
+
+                if (startX != -1)
+                    path.AddRectangle(new Rectangle(startX, y, bmp.Width - startX, 1));
+            }
+
+            return new Region(path);
         }
 
         /*********************************************************************************/

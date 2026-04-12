@@ -9,6 +9,7 @@
     <Platforms>x64</Platforms>
     <SignAssembly>True</SignAssembly>
     <AssemblyOriginatorKeyFile>$(CERT_STRONG_NAME)</AssemblyOriginatorKeyFile>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">

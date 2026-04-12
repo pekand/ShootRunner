@@ -2,10 +2,29 @@
 
 #pragma warning disable IDE0130
 
+using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
+
 namespace ShootRunner
 {
     public class Pictures
     {
+        // ACTION RESIZE
+        public static Bitmap ResizeBitmap(Bitmap source, int width, int height)
+        {
+            var bmp = new Bitmap(width, height, PixelFormat.Format32bppArgb);
+
+            using var g = Graphics.FromImage(bmp);
+            g.Clear(Color.Transparent);
+            g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+            g.SmoothingMode = SmoothingMode.HighQuality;
+            g.PixelOffsetMode = PixelOffsetMode.HighQuality;
+
+            g.DrawImage(source, new Rectangle(0, 0, width, height));
+
+            return bmp;
+        }
+
         public static Icon CreateCustomIcon()
         {
 

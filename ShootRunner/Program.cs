@@ -373,6 +373,17 @@ namespace ShootRunner
             Program.Update();
         }
 
+        public static void DuplicatePin(FormPin oldPin)
+        {
+            FormPin pin = new(null, true);
+            pin.pin = oldPin.pin.ClonePin();
+            pins.Add(pin);
+            pin.Show();
+            pin.Center();
+
+            Program.Update();
+        }
+
         // PIN FORM
         public static void AddEmptyPin() {
             CreatePin(null);

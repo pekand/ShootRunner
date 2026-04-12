@@ -47,69 +47,6 @@ namespace ShootRunner
             InitializeComponent();
         }
 
-        private void FormTaskbar_Load(object sender, EventArgs e)
-        {
-            Visible = false;
-            this.TopMost = this.widget.mosttop;
-            this.Opacity = this.widget.opacity;
-            this.ShowInTaskbar = false;
-            this.BackColor = this.widget.backgroundColor;
-
-            SwitchIconType();
-
-            //InitList();
-
-            this.SetStartPosition();
-            Visible = true;
-
-            windowMonitor.OnWindowCreateTriggered += WindowCreate;
-            windowMonitor.OnWindowDestroyTriggered += WindowDestroy;
-            windowMonitor.Register();
-        }
-
-        public void ScreenshotCreated()
-        {
-            this.Invoke(new Action(() =>
-            {
-                this.Refresh();
-            }));
-        }
-
-        private void FormTaskbar_FormClosed(object sender, FormClosedEventArgs e)
-        {
-            windowMonitor.UnRegister();
-        }
-
-        public void SwitchIconType()
-        {
-            if (widget.useScreenshots)
-            {
-                if (widget.useBigIcons)
-                {
-                    IconWidth = 128;
-                    IconHeight = 128;
-                }
-                else
-                {
-                    IconWidth = 64;
-                    IconHeight = 64;
-                }
-            }
-            else
-            {
-                if (widget.useBigIcons)
-                {
-                    IconWidth = 64;
-                    IconHeight = 64;
-                }
-                else
-                {
-                    IconWidth = 32;
-                    IconHeight = 32;
-                }
-            }
-        }
-
         protected override CreateParams CreateParams
         {
             get
@@ -117,98 +54,6 @@ namespace ShootRunner
                 CreateParams cp = base.CreateParams;
                 cp.ExStyle |= WinApi.WS_EX_TOOLWINDOW; // Add the tool window style
                 return cp;
-            }
-        }
-
-        public void Center()
-        {
-            Screen currentScreen = Screen.FromPoint(Cursor.Position);
-            Rectangle screenBounds = currentScreen.WorkingArea;
-            this.StartPosition = FormStartPosition.Manual;
-            this.Location = new Point(
-                screenBounds.Left + (screenBounds.Width - this.Width) / 2,
-                screenBounds.Top + (screenBounds.Height - this.Height) / 2
-            );
-        }
-
-        public void SetStartPosition()
-        {
-            this.Resize -= FormTaskbar_Resize;
-            this.Move -= FormTaskbar_Move;
-            this.Left = this.widget.StartLeft;
-            this.Top = this.widget.StartTop;
-            this.Width = this.widget.StartWidth;
-            this.Height = this.widget.StartHeight;
-            this.BackColor = this.widget.backgroundColor;
-            this.Resize += FormTaskbar_Resize;
-            this.Move += FormTaskbar_Move;
-        }
-
-        void WindowCreate(IntPtr Handle)
-        {
-
-            if (taskbarWindowsHandle.Contains(Handle))
-            {
-                return;
-            }
-
-            taskbarWindowsHandle.Add(Handle);
-
-            try
-            {
-                Window window = new()
-                {
-                    Handle = Handle
-                };
-                ToolsWindow.SetWindowData(window);
-
-                if (this.widget.useScreenshots)
-                {
-                    if (!window.hidden)
-                    {
-                        WindowScreenshot.CaptureWindowTask(window, 256, 256, 100, this.ScreenshotCreated);
-                    }
-                }
-
-                taskbarWindows.Add(window);
-
-                this.Invoke(() => this.Refresh());
-            }
-            catch (Exception ex)
-            {
-                Program.Error(ex.Message);
-
-            }
-        }
-
-        void WindowDestroy(IntPtr Handle)
-        {
-            if (!taskbarWindowsHandle.Contains(Handle))
-            {
-                return;
-            }
-
-            taskbarWindowsHandle.Remove(Handle);
-
-            List<Window> toremove = [];
-
-            foreach (var win in taskbarWindows)
-            {
-                if (Handle == win.Handle)
-                {
-                    toremove.Add(win);
-                    break;
-                }
-            }
-
-            foreach (var win in toremove)
-            {
-                DisposeWindowResources(win);
-                taskbarWindows.Remove(win);
-            }
-            if (toremove.Count > 0)
-            {
-                this.Invoke(() => this.Refresh());
             }
         }
 
@@ -248,20 +93,36 @@ namespace ShootRunner
             base.WndProc(ref m);
         }
 
-        public void CloseForm()
+        /////////////////////////////////////////////////////////////////////////////////////////////
+        
+        // EVENT
+        private void FormTaskbar_Load(object sender, EventArgs e)
         {
-            foreach (Window win in this.taskbarWindows)
-            {
-                DisposeWindowResources(win);
-            }
+            Visible = false;
+            this.TopMost = this.widget.mosttop;
+            this.Opacity = this.widget.opacity;
+            this.ShowInTaskbar = false;
+            this.BackColor = this.widget.backgroundColor;
 
-            this.taskbarWindows.Clear();
+            SwitchIconType();
 
-            Program.widgetManager.RemoveTaskbarWidget(this);
-            Program.Update();
+            //InitList();
+
+            this.SetStartPosition();
+            Visible = true;
+
+            windowMonitor.OnWindowCreateTriggered += WindowCreate;
+            windowMonitor.OnWindowDestroyTriggered += WindowDestroy;
+            windowMonitor.Register();
         }
 
-        /////////////////////////////////////////////////////////////////////////////////////////////
+        // EVENT
+        private void FormTaskbar_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            windowMonitor.UnRegister();
+        }
+
+        // EVENT
         private void FormTaskbar_Paint(object sender, PaintEventArgs e)
         {
             int X = StartX;
@@ -313,6 +174,7 @@ namespace ShootRunner
 
         }
 
+        // EVENT
         private void FormTaskbar_Resize(object sender, EventArgs e)
         {
             this.widget.StartLeft = this.Left;
@@ -323,6 +185,7 @@ namespace ShootRunner
             this.Refresh();
         }
 
+        // EVENT
         private void FormTaskbar_Move(object sender, EventArgs e)
         {
             this.widget.StartLeft = this.Left;
@@ -333,21 +196,535 @@ namespace ShootRunner
             this.Refresh();
         }
 
-        private void Form_Deactivate(object sender, EventArgs e)
-        {
-            //RemoveTitleBar();
-        }
-
-        private void Form_Activated(object sender, EventArgs e)
-        {
-            //AddTitleBar();
-        }
-
+        // EVENT
         private void FormTaskbar_FormClosing(object sender, FormClosingEventArgs e)
         {
             CloseForm();
         }
 
+        // EVENT
+        private void FormTaskbar_MouseDown(object sender, MouseEventArgs e)
+        {
+            mouseDownX = e.X;
+            mouseDownY = e.Y;
+
+            if (!dragging && e.Button == MouseButtons.Left)
+            {
+                draggingWindow = GetWindowOnposition(e.X, e.Y);
+                if (draggingWindow != null)
+                {
+                    draggingItem = true;
+                    mouseDownPos = GetSpaceOnposition(e.X, e.Y);
+                }
+                else
+                {
+                    if (!this.widget.locked)
+                    {
+                        dragging = true;
+                        dragCursorPoint = Cursor.Position;
+                        dragFormPoint = this.Location;
+                    }
+                }
+
+            }
+
+        }
+
+        // EVENT
+        private void FormTaskbar_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (!this.widget.locked && dragging)
+            {
+                Point diff = Point.Subtract(Cursor.Position, new Size(dragCursorPoint));
+                this.Location = Point.Add(dragFormPoint, new Size(diff));
+                Program.Update();
+            }
+            else if (draggingItem && this.Cursor != Cursors.Hand &&
+                (Math.Abs(mouseDownX - e.X) > 10 || Math.Abs(mouseDownY - e.Y) > 10))
+            {
+                Cursor = Cursors.Hand;
+
+                if (draggingWindow != null)
+                {
+                    Bitmap pic = draggingWindow.screenshot;
+                    pic ??= draggingWindow.icon;
+
+                    if (pic != null)
+                    {
+                        ghostForm = new FormGhost(pic);
+                        Point screenPosition = Control.MousePosition;
+                        ghostForm.Location = new Point(screenPosition.X + 10, screenPosition.Y + 10);
+                        ghostForm.Show();
+
+
+                    }
+                }
+            }
+
+            if (draggingItem && ghostForm != null)
+            {
+                Point screenPosition = Control.MousePosition;
+                ghostForm.Location = new Point(screenPosition.X + 10, screenPosition.Y + 10);
+
+            }
+        }
+
+        // EVENT
+        private void FormTaskbar_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (dragging)
+            {
+                dragging = false;
+            }
+            else if (draggingItem && e.Button == MouseButtons.Left)
+            {
+                int mouseDownUpPos = GetSpaceOnposition(e.X, e.Y);
+
+                if (mouseDownPos != mouseDownUpPos)
+                {
+                    draggingItem = true;
+                    ListMove.MoveItem(this.taskbarWindows, mouseDownPos, mouseDownUpPos);
+                    this.Refresh();
+                }
+                else
+                {
+                    draggingItem = false;
+                }
+            }
+
+
+            Window onWindow = this.GetWindowOnposition(e.X, e.Y);
+
+            this.selectedWindow = null;
+
+            if (onWindow != null)
+            {
+                this.selectedWindow = onWindow;
+
+                if (!draggingItem && e.Button == MouseButtons.Left)
+                {
+                    ToolsWindow.BringWindowToFront(selectedWindow);
+                    WindowScreenshot.CaptureWindow3Task(selectedWindow, 256, 256, 300, this.ScreenshotCreated);
+                }
+
+                if (e.Button == MouseButtons.Middle)
+                {
+                    ToolsWindow.MinimizeWindow(onWindow);
+                }
+
+                if (e.Button == MouseButtons.Right)
+                {
+
+                }
+            }
+
+            if (dragging || draggingItem || Cursor != Cursors.Default)
+            {
+                dragging = false;
+                draggingItem = false;
+                Cursor = Cursors.Default;
+            }
+
+            if (ghostForm != null)
+            {
+                ghostForm?.Close();
+                ghostForm = null;
+            }
+        }
+
+        /////////////////////////////////////////////////////////////////////////////////////////////
+
+        // CONTEXTMENU
+        private void ContextMenuStrip1_Opening(object sender, CancelEventArgs e)
+        {
+            mostTopToolStripMenuItem.Checked = this.TopMost;
+            lockToolStripMenuItem.Checked = this.widget.locked;
+            useScreenshotsToolStripMenuItem.Checked = widget.useScreenshots;
+            useBigIconsToolStripMenuItem.Checked = widget.useBigIcons;
+        }
+
+        // CONTEXTMENU
+        private void MostTopToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+            this.TopMost = !this.TopMost;
+            mostTopToolStripMenuItem.Checked = this.TopMost;
+            this.widget.mosttop = this.TopMost;
+        }
+
+        // CONTEXTMENU
+        private void LockToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            this.widget.locked = !this.widget.locked;
+            lockToolStripMenuItem.Checked = this.widget.locked;
+        }
+
+        // CONTEXTMENU
+        private void ExitToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Program.Exit();
+        }
+
+        // CONTEXTMENU
+        private void RemoveToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            this.CloseForm();
+            this.Close();
+        }
+
+        // CONTEXTMENU
+        private void WindowToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        // CONTEXTMENU
+        private void MinimalizeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (this.selectedWindow != null)
+            {
+                ToolsWindow.MinimizeWindow(this.selectedWindow);
+            }
+        }
+
+        // CONTEXTMENU
+        private void CloseToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (this.selectedWindow != null)
+            {
+                ToolsWindow.CloseWindow(this.selectedWindow);
+            }
+        }
+
+        // CONTEXTMENU
+        private void createPinToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (this.selectedWindow != null)
+            {
+                Program.CreatePin(this.selectedWindow);
+            }
+        }
+
+        // CONTEXTMENU
+        private void UseScreenshotsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            widget.useScreenshots = !widget.useScreenshots;
+            useScreenshotsToolStripMenuItem.Checked = widget.useScreenshots;
+            SwitchIconType();
+            this.Refresh();
+        }
+
+        // CONTEXTMENU
+        private void UseBigIconsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            widget.useBigIcons = !widget.useBigIcons;
+            useBigIconsToolStripMenuItem.Checked = widget.useScreenshots;
+            SwitchIconType();
+            this.Refresh();
+        }
+
+        // CONTEXTMENU
+        private void BackgroundColorToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using ColorDialog colorDialog = new();
+            if (colorDialog.ShowDialog() == DialogResult.OK)
+            {
+                Color selectedColor = colorDialog.Color;
+                this.widget.backgroundColor = selectedColor;
+                this.BackColor = selectedColor;
+                this.Refresh();
+            }
+        }
+
+        // CONTEXTMENU
+        private void opacityToolStripMenuItem_DropDownOpening(object sender, EventArgs e)
+        {
+            toolStripMenuItem3.Checked = false;
+            toolStripMenuItem4.Checked = false;
+            toolStripMenuItem5.Checked = false;
+            toolStripMenuItem6.Checked = false;
+            toolStripMenuItem7.Checked = false;
+            toolStripMenuItem8.Checked = false;
+
+            if (this.Opacity == 0.1)
+            {
+                toolStripMenuItem3.Checked = true;
+            }
+
+            if (this.Opacity == 0.2)
+            {
+                toolStripMenuItem4.Checked = true;
+            }
+
+            if (this.Opacity == 0.4)
+            {
+                toolStripMenuItem5.Checked = true;
+            }
+
+            if (this.Opacity == 0.6)
+            {
+                toolStripMenuItem6.Checked = true;
+            }
+
+            if (this.Opacity == 0.8)
+            {
+                toolStripMenuItem7.Checked = true;
+            }
+
+            if (this.Opacity == 1.0)
+            {
+                toolStripMenuItem8.Checked = true;
+            }
+        }
+
+        // CONTEXTMENU
+        private void toolStripMenuItem3_Click(object sender, EventArgs e)
+        {
+            toolStripMenuItem3.Checked = true;
+            this.Opacity = 0.1;
+        }
+        
+        // CONTEXTMENU
+        private void toolStripMenuItem4_Click(object sender, EventArgs e)
+        {
+            toolStripMenuItem4.Checked = true;
+            this.Opacity = 0.2;
+        }
+
+        // CONTEXTMENU
+        private void toolStripMenuItem5_Click(object sender, EventArgs e)
+        {
+            toolStripMenuItem5.Checked = true;
+            this.Opacity = 0.4;
+        }
+
+        // CONTEXTMENU
+        private void toolStripMenuItem6_Click(object sender, EventArgs e)
+        {
+            toolStripMenuItem6.Checked = true;
+            this.Opacity = 0.6;
+        }
+
+        // CONTEXTMENU
+        private void toolStripMenuItem7_Click(object sender, EventArgs e)
+        {
+            toolStripMenuItem7.Checked = true;
+            this.Opacity = 0.8;
+        }
+
+        // CONTEXTMENU
+        private void toolStripMenuItem8_Click(object sender, EventArgs e)
+        {
+            toolStripMenuItem8.Checked = true;
+            this.Opacity = 1.0;
+        }
+
+        // CONTEXTMENU
+        private void ShowDesktopToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ToolsWindow.ShowDesktop();
+        }
+
+        // CONTEXTMENU
+        private void HiddeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (this.selectedWindow != null)
+            {
+                this.selectedWindow.hidden = true;
+                this.Refresh();
+            }
+        }
+
+        // CONTEXTMENU
+        private void ShowAllHiddenToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            foreach (Window window in taskbarWindows)
+            {
+                if (window.hidden)
+                {
+                    window.hidden = false;
+                    ToolsWindow.SetWindowData(window);
+                }
+            }
+            this.Refresh();
+        }
+
+        // CONTEXTMENU
+        private void InfoToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (this.selectedWindow != null)
+            {
+                FormWindowInfo windowInfoForm = new(this.selectedWindow);
+                Program.windowInfoForms.Add(windowInfoForm);
+                windowInfoForm.Show();
+            }
+        }
+
+        // CONTEXTMENU
+        private void ConsoleToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Program.ShowConsole();
+        }
+
+        // CONTEXTMENU REFRESH
+        private void refreshToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            this.windowMonitor.ManualUpdateTaskbarWindowsList();
+        }
+
+        /////////////////////////////////////////////////////////////////////////////////////////////
+        
+        // ACTION
+        public void ScreenshotCreated()
+        {
+            this.Invoke(new Action(() =>
+            {
+                this.Refresh();
+            }));
+        }
+
+        // ACTION
+        public void SwitchIconType()
+        {
+            if (widget.useScreenshots)
+            {
+                if (widget.useBigIcons)
+                {
+                    IconWidth = 128;
+                    IconHeight = 128;
+                }
+                else
+                {
+                    IconWidth = 64;
+                    IconHeight = 64;
+                }
+            }
+            else
+            {
+                if (widget.useBigIcons)
+                {
+                    IconWidth = 64;
+                    IconHeight = 64;
+                }
+                else
+                {
+                    IconWidth = 32;
+                    IconHeight = 32;
+                }
+            }
+        }
+
+        // ACTION
+        public void Center()
+        {
+            Screen currentScreen = Screen.FromPoint(Cursor.Position);
+            Rectangle screenBounds = currentScreen.WorkingArea;
+            this.StartPosition = FormStartPosition.Manual;
+            this.Location = new Point(
+                screenBounds.Left + (screenBounds.Width - this.Width) / 2,
+                screenBounds.Top + (screenBounds.Height - this.Height) / 2
+            );
+        }
+
+        // ACTION
+        public void SetStartPosition()
+        {
+            this.Resize -= FormTaskbar_Resize;
+            this.Move -= FormTaskbar_Move;
+            this.Left = this.widget.StartLeft;
+            this.Top = this.widget.StartTop;
+            this.Width = this.widget.StartWidth;
+            this.Height = this.widget.StartHeight;
+            this.BackColor = this.widget.backgroundColor;
+            this.Resize += FormTaskbar_Resize;
+            this.Move += FormTaskbar_Move;
+        }
+
+        // ACTION
+        void WindowCreate(IntPtr Handle)
+        {
+
+            if (taskbarWindowsHandle.Contains(Handle))
+            {
+                return;
+            }
+
+            taskbarWindowsHandle.Add(Handle);
+
+            try
+            {
+                Window window = new()
+                {
+                    Handle = Handle
+                };
+                ToolsWindow.SetWindowData(window);
+
+                if (this.widget.useScreenshots)
+                {
+                    if (!window.hidden)
+                    {
+                        WindowScreenshot.CaptureWindowTask(window, 256, 256, 100, this.ScreenshotCreated);
+                    }
+                }
+
+                taskbarWindows.Add(window);
+
+                this.Invoke(() => this.Refresh());
+            }
+            catch (Exception ex)
+            {
+                Program.Error(ex.Message);
+
+            }
+        }
+
+        // ACTION
+        void WindowDestroy(IntPtr Handle)
+        {
+            if (!taskbarWindowsHandle.Contains(Handle))
+            {
+                return;
+            }
+
+            taskbarWindowsHandle.Remove(Handle);
+
+            List<Window> toremove = [];
+
+            foreach (var win in taskbarWindows)
+            {
+                if (Handle == win.Handle)
+                {
+                    toremove.Add(win);
+                    break;
+                }
+            }
+
+            foreach (var win in toremove)
+            {
+                DisposeWindowResources(win);
+                taskbarWindows.Remove(win);
+            }
+            if (toremove.Count > 0)
+            {
+                this.Invoke(() => this.Refresh());
+            }
+        }
+
+        // ACTION
+        public void CloseForm()
+        {
+            foreach (Window win in this.taskbarWindows)
+            {
+                DisposeWindowResources(win);
+            }
+
+            this.taskbarWindows.Clear();
+
+            Program.widgetManager.RemoveTaskbarWidget(this);
+            Program.Update();
+        }
+
+        // ACTION
         public Window GetWindowOnposition(int eX, int eY)
         {
 
@@ -388,6 +765,7 @@ namespace ShootRunner
             return windowOnPosition;
         }
 
+        // ACTION
         public int GetSpaceOnposition(int eX, int eY)
         {
 
@@ -458,344 +836,7 @@ namespace ShootRunner
             return spaceOnPosition;
         }
 
-        private void FormTaskbar_MouseDown(object sender, MouseEventArgs e)
-        {
-            mouseDownX = e.X;
-            mouseDownY = e.Y;
-
-            if (!dragging && e.Button == MouseButtons.Left)
-            {
-                draggingWindow = GetWindowOnposition(e.X, e.Y);
-                if (draggingWindow != null)
-                {
-                    draggingItem = true;
-                    mouseDownPos = GetSpaceOnposition(e.X, e.Y);
-                }
-                else
-                {
-                    if (!this.widget.locked)
-                    {
-                        dragging = true;
-                        dragCursorPoint = Cursor.Position;
-                        dragFormPoint = this.Location;
-                    }
-                }
-
-            }
-
-        }
-
-        private void FormTaskbar_MouseMove(object sender, MouseEventArgs e)
-        {
-            if (!this.widget.locked && dragging)
-            {
-                Point diff = Point.Subtract(Cursor.Position, new Size(dragCursorPoint));
-                this.Location = Point.Add(dragFormPoint, new Size(diff));
-                Program.Update();
-            }
-            else if (draggingItem && this.Cursor != Cursors.Hand &&
-                (Math.Abs(mouseDownX - e.X) > 10 || Math.Abs(mouseDownY - e.Y) > 10))
-            {
-                Cursor = Cursors.Hand;
-
-                if (draggingWindow != null)
-                {
-                    Bitmap pic = draggingWindow.screenshot;
-                    pic ??= draggingWindow.icon;
-
-                    if (pic != null)
-                    {
-                        ghostForm = new FormGhost(pic);
-                        Point screenPosition = Control.MousePosition;
-                        ghostForm.Location = new Point(screenPosition.X + 10, screenPosition.Y + 10);
-                        ghostForm.Show();
-
-
-                    }
-                }
-            }
-
-            if (draggingItem && ghostForm != null)
-            {
-                Point screenPosition = Control.MousePosition;
-                ghostForm.Location = new Point(screenPosition.X + 10, screenPosition.Y + 10);
-
-            }
-        }
-
-        private void FormTaskbar_MouseUp(object sender, MouseEventArgs e)
-        {
-            if (dragging)
-            {
-                dragging = false;
-            }
-            else if (draggingItem && e.Button == MouseButtons.Left)
-            {
-                int mouseDownUpPos = GetSpaceOnposition(e.X, e.Y);
-
-                if (mouseDownPos != mouseDownUpPos)
-                {
-                    draggingItem = true;
-                    ListMove.MoveItem(this.taskbarWindows, mouseDownPos, mouseDownUpPos);
-                    this.Refresh();
-                }
-                else
-                {
-                    draggingItem = false;
-                }
-            }
-
-
-            Window onWindow = this.GetWindowOnposition(e.X, e.Y);
-
-            this.selectedWindow = null;
-
-            if (onWindow != null)
-            {
-                this.selectedWindow = onWindow;
-
-                if (!draggingItem && e.Button == MouseButtons.Left)
-                {
-                    ToolsWindow.BringWindowToFront(selectedWindow);
-                    WindowScreenshot.CaptureWindow3Task(selectedWindow, 256, 256, 300, this.ScreenshotCreated);
-                }
-
-                if (e.Button == MouseButtons.Middle)
-                {
-                    ToolsWindow.MinimizeWindow(onWindow);
-                }
-
-                if (e.Button == MouseButtons.Right)
-                {
-
-                }
-            }
-
-            if (dragging || draggingItem || Cursor != Cursors.Default)
-            {
-                dragging = false;
-                draggingItem = false;
-                Cursor = Cursors.Default;
-            }
-
-            if (ghostForm != null)
-            {
-                ghostForm?.Close();
-                ghostForm = null;
-            }
-        }
-
-        /////////////////////////////////////////////////////////////////////////////////////////////
-
-        private void ContextMenuStrip1_Opening(object sender, CancelEventArgs e)
-        {
-            mostTopToolStripMenuItem.Checked = this.TopMost;
-            lockToolStripMenuItem.Checked = this.widget.locked;
-            useScreenshotsToolStripMenuItem.Checked = widget.useScreenshots;
-            useBigIconsToolStripMenuItem.Checked = widget.useBigIcons;
-        }
-
-        private void MostTopToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-
-            this.TopMost = !this.TopMost;
-            mostTopToolStripMenuItem.Checked = this.TopMost;
-            this.widget.mosttop = this.TopMost;
-        }
-
-        private void LockToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            this.widget.locked = !this.widget.locked;
-            lockToolStripMenuItem.Checked = this.widget.locked;
-        }
-
-        private void ExitToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            Program.Exit();
-        }
-
-        private void RemoveToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            this.CloseForm();
-            this.Close();
-        }
-
-        private void WindowToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void MinimalizeToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (this.selectedWindow != null)
-            {
-                ToolsWindow.MinimizeWindow(this.selectedWindow);
-            }
-        }
-
-        private void CloseToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (this.selectedWindow != null)
-            {
-                ToolsWindow.CloseWindow(this.selectedWindow);
-            }
-        }
-
-        private void createPinToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (this.selectedWindow != null)
-            {
-                Program.CreatePin(this.selectedWindow);
-            }
-        }
-
-        private void UseScreenshotsToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            widget.useScreenshots = !widget.useScreenshots;
-            useScreenshotsToolStripMenuItem.Checked = widget.useScreenshots;
-            SwitchIconType();
-            this.Refresh();
-        }
-
-        private void UseBigIconsToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            widget.useBigIcons = !widget.useBigIcons;
-            useBigIconsToolStripMenuItem.Checked = widget.useScreenshots;
-            SwitchIconType();
-            this.Refresh();
-        }
-
-        private void BackgroundColorToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            using ColorDialog colorDialog = new();
-            if (colorDialog.ShowDialog() == DialogResult.OK)
-            {
-                Color selectedColor = colorDialog.Color;
-                this.widget.backgroundColor = selectedColor;
-                this.BackColor = selectedColor;
-                this.Refresh();
-            }
-        }
-        private void opacityToolStripMenuItem_DropDownOpening(object sender, EventArgs e)
-        {
-            toolStripMenuItem3.Checked = false;
-            toolStripMenuItem4.Checked = false;
-            toolStripMenuItem5.Checked = false;
-            toolStripMenuItem6.Checked = false;
-            toolStripMenuItem7.Checked = false;
-            toolStripMenuItem8.Checked = false;
-
-            if (this.Opacity == 0.1)
-            {
-                toolStripMenuItem3.Checked = true;
-            }
-
-            if (this.Opacity == 0.2)
-            {
-                toolStripMenuItem4.Checked = true;
-            }
-
-            if (this.Opacity == 0.4)
-            {
-                toolStripMenuItem5.Checked = true;
-            }
-
-            if (this.Opacity == 0.6)
-            {
-                toolStripMenuItem6.Checked = true;
-            }
-
-            if (this.Opacity == 0.8)
-            {
-                toolStripMenuItem7.Checked = true;
-            }
-
-            if (this.Opacity == 1.0)
-            {
-                toolStripMenuItem8.Checked = true;
-            }
-        }
-
-        private void toolStripMenuItem3_Click(object sender, EventArgs e)
-        {
-            toolStripMenuItem3.Checked = true;
-            this.Opacity = 0.1;
-        }
-
-        private void toolStripMenuItem4_Click(object sender, EventArgs e)
-        {
-            toolStripMenuItem4.Checked = true;
-            this.Opacity = 0.2;
-        }
-
-        private void toolStripMenuItem5_Click(object sender, EventArgs e)
-        {
-            toolStripMenuItem5.Checked = true;
-            this.Opacity = 0.4;
-        }
-
-        private void toolStripMenuItem6_Click(object sender, EventArgs e)
-        {
-            toolStripMenuItem6.Checked = true;
-            this.Opacity = 0.6;
-        }
-
-        private void toolStripMenuItem7_Click(object sender, EventArgs e)
-        {
-            toolStripMenuItem7.Checked = true;
-            this.Opacity = 0.8;
-        }
-
-        private void toolStripMenuItem8_Click(object sender, EventArgs e)
-        {
-            toolStripMenuItem8.Checked = true;
-            this.Opacity = 1.0;
-        }
-
-        private void ShowDesktopToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            ToolsWindow.ShowDesktop();
-        }
-
-        private void HiddeToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (this.selectedWindow != null)
-            {
-                this.selectedWindow.hidden = true;
-                this.Refresh();
-            }
-        }
-
-        private void ShowAllHiddenToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            foreach (Window window in taskbarWindows)
-            {
-                if (window.hidden)
-                {
-                    window.hidden = false;
-                    ToolsWindow.SetWindowData(window);
-                }
-            }
-            this.Refresh();
-        }
-
-        private void InfoToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (this.selectedWindow != null)
-            {
-                FormWindowInfo windowInfoForm = new(this.selectedWindow);
-                Program.windowInfoForms.Add(windowInfoForm);
-                windowInfoForm.Show();
-            }
-        }
-
-        private void ConsoleToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            Program.ShowConsole();
-        }
-
-        /////////////////////////////////////////////////////////////////////////////////////////////
-
+        // ACTION
         public void DisposeWindowResources(Window window)
         {
             if (window == null)
@@ -817,6 +858,7 @@ namespace ShootRunner
 
             window.isCurentWindowScreensot = false;
         }
+
 
     }
 }

@@ -24,6 +24,10 @@ namespace ShootRunner
         public event WindowCreate? OnWindowCreateTriggered;
         public event WindowDestroy? OnWindowDestroyTriggered;
 
+        private static uint _hookThreadId;
+
+        public WinApi.WinEventDelegate? winEventDelegate;
+
         public void InitTaskbarWindowsList(bool allowExclude = false)
         {
             List<IntPtr> taskbarWindowsNew = [];
@@ -337,8 +341,6 @@ namespace ShootRunner
                 }
         }
 
-        public WinApi.WinEventDelegate? winEventDelegate;
-
         public void Register() {
             
             Program.Message("WindowMonitor Registration");
@@ -355,7 +357,6 @@ namespace ShootRunner
             };
             eventHookThread.Start();
         }
-        private static uint _hookThreadId;
 
         private void EventHookThread(uint eventMin, uint eventMax, WinApi.WinEventDelegate winEventDelegate, CancellationToken token)
         {
@@ -426,17 +427,6 @@ namespace ShootRunner
             Program.Message("WindowMonitor Thread {_hookThreadId} closed succerusfuly");
         }
 
-        public void InitTimer() {
-            if (timer != null) { 
-                return;
-            }
-
-            timer = new System.Timers.Timer(10000);
-            timer.Elapsed += OnTimedEvent;
-            timer.AutoReset = true;
-            timer.Enabled = true;
-        }
-
         public void UpdateTaskbarWindowsList(bool allowExclude = false)
         {
             List<IntPtr> taskbarWindowsAdd = [];
@@ -449,14 +439,16 @@ namespace ShootRunner
                 // REMOVE OLD
                 foreach (IntPtr Handle in this.taskbarWindows)
                 {
-                    if (!windows.Contains(Handle)) {
+                    if (!windows.Contains(Handle))
+                    {
                         includedWindows.Remove(Handle);
                         excludedWindows.Remove(Handle);
                         createdWindows.Remove(Handle);
 
                         if (this.taskbarWindows.Contains(Handle) &&
                             !taskbarWindowsRemove.Contains(Handle)
-                        ) {
+                        )
+                        {
                             taskbarWindowsRemove.Add(Handle);
                         }
                     }
@@ -470,13 +462,17 @@ namespace ShootRunner
                         {
                             if (!this.taskbarWindows.Contains(Handle) &&
                                 !taskbarWindowsAdd.Contains(Handle)
-                            ) {
+                            )
+                            {
                                 taskbarWindowsAdd.Add(Handle);
                             }
-                        } else {
+                        }
+                        else
+                        {
                             if (this.taskbarWindows.Contains(Handle) &&
                                 !taskbarWindowsRemove.Contains(Handle)
-                            ) {
+                            )
+                            {
                                 taskbarWindowsRemove.Add(Handle);
                             }
                         }
@@ -514,7 +510,7 @@ namespace ShootRunner
                 {
                     try
                     {
-                        
+
                         if (this.taskbarWindows.Remove(Handle))
                         {
                             if (OnWindowDestroyTriggered != null)
@@ -523,7 +519,7 @@ namespace ShootRunner
                                 OnWindowDestroyTriggered.Invoke(Handle);
                             }
                         }
-                        
+
                     }
                     catch (Exception ex)
                     {
@@ -540,8 +536,23 @@ namespace ShootRunner
             }
         }
 
+        public void InitTimer() {
+            if (timer != null) { 
+                return;
+            }
+
+            timer = new System.Timers.Timer(10000);
+            timer.Elapsed += OnTimedEvent;
+            timer.AutoReset = true;
+            timer.Enabled = true;
+        }
+
         private void OnTimedEvent(Object? source, ElapsedEventArgs e)
         {
+            this.UpdateTaskbarWindowsList(true);
+        }
+
+        public void ManualUpdateTaskbarWindowsList() {
             this.UpdateTaskbarWindowsList(true);
         }
     }

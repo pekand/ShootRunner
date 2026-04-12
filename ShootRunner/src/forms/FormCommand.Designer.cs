@@ -63,6 +63,8 @@ namespace ShootRunner
             labelWindowApp = new TextBox();
             webViewHelp = new Microsoft.Web.WebView2.WinForms.WebView2();
             buttonCopyWinApp = new Button();
+            textBoxMaxExecTime = new TextBox();
+            labelMaxExecTime = new Label();
             ((System.ComponentModel.ISupportInitialize)pictureBoxIcon).BeginInit();
             ((System.ComponentModel.ISupportInitialize)webViewHelp).BeginInit();
             SuspendLayout();
@@ -379,6 +381,7 @@ namespace ShootRunner
             webViewHelp.Size = new Size(321, 931);
             webViewHelp.TabIndex = 33;
             webViewHelp.ZoomFactor = 1D;
+            webViewHelp.Click += webViewHelp_Click;
             // 
             // buttonCopyWinApp
             // 
@@ -391,11 +394,30 @@ namespace ShootRunner
             buttonCopyWinApp.UseVisualStyleBackColor = true;
             buttonCopyWinApp.Click += ButtonCopyWinApp_Click;
             // 
+            // textBoxMaxExecTime
+            // 
+            textBoxMaxExecTime.Location = new Point(1213, 846);
+            textBoxMaxExecTime.Name = "textBoxMaxExecTime";
+            textBoxMaxExecTime.Size = new Size(137, 35);
+            textBoxMaxExecTime.TabIndex = 35;
+            textBoxMaxExecTime.Text = "0";
+            // 
+            // labelMaxExecTime
+            // 
+            labelMaxExecTime.AutoSize = true;
+            labelMaxExecTime.Location = new Point(1032, 849);
+            labelMaxExecTime.Name = "labelMaxExecTime";
+            labelMaxExecTime.Size = new Size(175, 30);
+            labelMaxExecTime.TabIndex = 36;
+            labelMaxExecTime.Text = "Max exec time (s)";
+            // 
             // FormCommand
             // 
             AutoScaleDimensions = new SizeF(12F, 30F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1798, 1000);
+            Controls.Add(labelMaxExecTime);
+            Controls.Add(textBoxMaxExecTime);
             Controls.Add(buttonCopyWinApp);
             Controls.Add(webViewHelp);
             Controls.Add(labelWindowApp);
@@ -474,5 +496,7 @@ namespace ShootRunner
         private TextBox labelWindowApp;
         private Microsoft.Web.WebView2.WinForms.WebView2 webViewHelp;
         private Button buttonCopyWinApp;
+        private TextBox textBoxMaxExecTime;
+        private Label labelMaxExecTime;
     }
 }

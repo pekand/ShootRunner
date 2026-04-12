@@ -167,5 +167,11 @@ namespace ShootRunner
 
             return string.Join("\r\n", lines, startIndex, lines.Length - startIndex);
         }
+
+        public static bool HasImageOrIconExtension(string path)
+        {
+            var ext = Path.GetExtension(path).ToLowerInvariant();
+            return ext is ".png" or ".jpg" or ".jpeg" or ".bmp" or ".gif" or ".ico";
+        }
     }
 }

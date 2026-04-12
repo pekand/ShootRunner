@@ -63,6 +63,7 @@ namespace ShootRunner
             this.pin.matchNewWindow = this.checkMatchWindow.Checked;
             this.pin.silentCommand = checkBoxHideOutput.Checked;
             this.pin.doubleClickCommand = checkBoxDoubleclick.Checked;
+            this.pin.maxExecTime = ConvertTo.StringToDouble(this.textBoxMaxExecTime.Text, Pin.DefaultMaxCommandExecutionTime);
 
             if (selectedWindow != this.pin.window)
             {
@@ -115,6 +116,7 @@ namespace ShootRunner
             this.checkMatchWindow.Checked = this.pin.matchNewWindow;
             this.checkBoxHideOutput.Checked = this.pin.silentCommand;
             this.checkBoxDoubleclick.Checked = this.pin.doubleClickCommand;
+            this.textBoxMaxExecTime.Text = this.pin.maxExecTime.ToString();
 
             if (this.pin.window != null)
             {
@@ -395,6 +397,11 @@ namespace ShootRunner
         private void ButtonCopyWinApp_Click(object sender, EventArgs e)
         {
             Clipboard.SetText(labelWindowApp.Text);
+        }
+
+        private void webViewHelp_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

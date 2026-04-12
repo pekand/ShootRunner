@@ -167,6 +167,7 @@ namespace ShootRunner
             transparentToolStripMenuItem.Name = "transparentToolStripMenuItem";
             transparentToolStripMenuItem.Size = new Size(226, 24);
             transparentToolStripMenuItem.Text = "Transparent";
+            transparentToolStripMenuItem.Visible = false;
             transparentToolStripMenuItem.Click += TransparentToolStripMenuItem_Click;
             // 
             // topMostToolStripMenuItem
@@ -187,70 +188,70 @@ namespace ShootRunner
             // toolStripMenuItem3
             // 
             toolStripMenuItem3.Name = "toolStripMenuItem3";
-            toolStripMenuItem3.Size = new Size(180, 24);
+            toolStripMenuItem3.Size = new Size(114, 24);
             toolStripMenuItem3.Text = "10%";
             toolStripMenuItem3.Click += toolStripMenuItem3_Click;
             // 
             // toolStripMenuItem4
             // 
             toolStripMenuItem4.Name = "toolStripMenuItem4";
-            toolStripMenuItem4.Size = new Size(180, 24);
+            toolStripMenuItem4.Size = new Size(114, 24);
             toolStripMenuItem4.Text = "20%";
             toolStripMenuItem4.Click += toolStripMenuItem4_Click;
             // 
             // toolStripMenuItem11
             // 
             toolStripMenuItem11.Name = "toolStripMenuItem11";
-            toolStripMenuItem11.Size = new Size(180, 24);
+            toolStripMenuItem11.Size = new Size(114, 24);
             toolStripMenuItem11.Text = "30%";
             toolStripMenuItem11.Click += toolStripMenuItem11_Click;
             // 
             // toolStripMenuItem5
             // 
             toolStripMenuItem5.Name = "toolStripMenuItem5";
-            toolStripMenuItem5.Size = new Size(180, 24);
+            toolStripMenuItem5.Size = new Size(114, 24);
             toolStripMenuItem5.Text = "40%";
             toolStripMenuItem5.Click += toolStripMenuItem5_Click;
             // 
             // toolStripMenuItem6
             // 
             toolStripMenuItem6.Name = "toolStripMenuItem6";
-            toolStripMenuItem6.Size = new Size(180, 24);
+            toolStripMenuItem6.Size = new Size(114, 24);
             toolStripMenuItem6.Text = "50%";
             toolStripMenuItem6.Click += toolStripMenuItem6_Click;
             // 
             // toolStripMenuItem7
             // 
             toolStripMenuItem7.Name = "toolStripMenuItem7";
-            toolStripMenuItem7.Size = new Size(180, 24);
+            toolStripMenuItem7.Size = new Size(114, 24);
             toolStripMenuItem7.Text = "60%";
             toolStripMenuItem7.Click += toolStripMenuItem7_Click;
             // 
             // toolStripMenuItem12
             // 
             toolStripMenuItem12.Name = "toolStripMenuItem12";
-            toolStripMenuItem12.Size = new Size(180, 24);
+            toolStripMenuItem12.Size = new Size(114, 24);
             toolStripMenuItem12.Text = "70%";
             toolStripMenuItem12.Click += toolStripMenuItem12_Click;
             // 
             // toolStripMenuItem8
             // 
             toolStripMenuItem8.Name = "toolStripMenuItem8";
-            toolStripMenuItem8.Size = new Size(180, 24);
+            toolStripMenuItem8.Size = new Size(114, 24);
             toolStripMenuItem8.Text = "80%";
             toolStripMenuItem8.Click += toolStripMenuItem8_Click;
             // 
             // toolStripMenuItem9
             // 
             toolStripMenuItem9.Name = "toolStripMenuItem9";
-            toolStripMenuItem9.Size = new Size(180, 24);
+            toolStripMenuItem9.Size = new Size(114, 24);
             toolStripMenuItem9.Text = "90%";
             toolStripMenuItem9.Click += toolStripMenuItem9_Click;
             // 
             // toolStripMenuItem10
             // 
             toolStripMenuItem10.Name = "toolStripMenuItem10";
-            toolStripMenuItem10.Size = new Size(180, 24);
+            toolStripMenuItem10.Size = new Size(114, 24);
             toolStripMenuItem10.Text = "100%";
             toolStripMenuItem10.Click += toolStripMenuItem10_Click;
             // 
@@ -337,6 +338,8 @@ namespace ShootRunner
             KeyDown += FormPin_KeyDown;
             MouseDoubleClick += FormPin_MouseDoubleClick;
             MouseDown += FormPin_MouseDown;
+            MouseEnter += FormPin_MouseEnter;
+            MouseLeave += FormPin_MouseLeave;
             MouseMove += FormPin_MouseMove;
             MouseUp += FormPin_MouseUp;
             Resize += FormPin_Resize;

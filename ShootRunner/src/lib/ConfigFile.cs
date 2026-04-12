@@ -92,7 +92,8 @@ namespace ShootRunner
                 item.Add(new XElement("silentcommand", ConvertTo.BoolToString(pinForm.pin.silentCommand)));
                 item.Add(new XElement("matchNewWindow", ConvertTo.BoolToString(pinForm.pin.matchNewWindow)));
                 item.Add(new XElement("doubleclickcommand", ConvertTo.BoolToString(pinForm.pin.doubleClickCommand)));
-                
+                item.Add(new XElement("maxExecTime", ConvertTo.DoubleToString(pinForm.pin.maxExecTime)));
+
                 if (pinForm.pin.customicon != null) {
                     item.Add(new XElement("customicon", ConvertTo.BitmapToString(pinForm.pin.customicon)));
                 }
@@ -331,6 +332,11 @@ namespace ShootRunner
                                             formPin.pin.doubleClickCommand = ConvertTo.StringToBool(el.Value);
                                         }
 
+                                        if (el.Name.ToString() == "maxExecTime")
+                                        {
+                                            formPin.pin.maxExecTime = ConvertTo.StringToInt(el.Value, 60);
+                                        }
+
                                         if (el.Name.ToString() == "icon")
                                         {
                                             window.icon = ConvertTo.StringToBitmap(el.Value);
@@ -508,9 +514,5 @@ namespace ShootRunner
                 Program.Error(ex.Message);
             }
         }
-
-
-        
-
     }
 }

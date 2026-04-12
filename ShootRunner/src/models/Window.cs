@@ -51,6 +51,33 @@ namespace ShootRunner
             GC.SuppressFinalize(this);
         }
 
+        public Window CloneWindow()
+        {
+            Window newWindow = new();
+
+            newWindow.Type = this.Type;
+            newWindow.Title = this.Title;
+            newWindow.Handle = this.Handle;
+            newWindow.isDesktop = this.isDesktop;
+            newWindow.isTaskbar = this.isTaskbar;
+            newWindow.processId = this.processId;
+            newWindow.className = this.className;
+            newWindow.app = this.app;
+            newWindow.directory = this.directory;
+            newWindow.executable = this.executable;
+            newWindow.command = this.command;
+            newWindow.icon = Duplicate.FastClone(this.icon);
+            newWindow.screenshot = Duplicate.FastClone(this.screenshot);
+            newWindow.isCurentWindowScreensot = this.isCurentWindowScreensot;
+            newWindow.locked = this.locked;
+            newWindow.transparent = this.transparent;
+            newWindow.mosttop = this.mosttop;
+            newWindow.hidden = this.hidden;
+            newWindow.disposed = this.disposed;
+
+            return newWindow;
+        }
+
         protected virtual void Dispose(bool disposing)
         {
             if (!disposed)

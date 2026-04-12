@@ -18,6 +18,9 @@ namespace ShootRunner
         private FileSystemWatcher watcher = null;
         public static IntPtr _hookID = IntPtr.Zero;
 
+        //COMMAND EDITOR
+        public bool commandEditorIsOppened = false;
+
         /*************************************************************************/
 
         // CONSTRUCTOR
@@ -142,18 +145,6 @@ namespace ShootRunner
             Program.Exit();
         }
 
-        // POPUP COMMANDS EDIT
-        private void CommandsToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                Process.Start(new ProcessStartInfo(Program.commandFielPath) { UseShellExecute = true });
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("An error occurred: " + ex.Message);
-            }
-        }
 
         // POPUP COMMANDS SHORTCUTFORM
         private void ShortcutFormToolStripMenuItem_Click(object sender, EventArgs e)
@@ -209,6 +200,12 @@ namespace ShootRunner
             autorunToolStripMenuItem.Checked = Program.autorun;
 
             Program.Update();
+        }
+
+        // POPUP OPEN COMMAND EDITOR
+        private void commandsEditorToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            this.OpenCommanEditor();
         }
 
         // POPUP SELECTION HIDE ALL
@@ -280,6 +277,12 @@ namespace ShootRunner
             else if (command.action == "CreatePin") // CREATE PIN
             {
                 this.CreatPin();
+                return true;
+            }
+
+            else if (command.action == "OpenCommandEditor") // OPEN COMMAND EDITOR
+            {
+                this.OpenCommanEditor();
                 return true;
             }
             else if (command.action == "AddEmptyPin") // CREATE EMPTY PIN
@@ -745,5 +748,23 @@ namespace ShootRunner
         }
 
         /*************************************************************************/
+
+        public void OpenCommanEditor()
+        {
+
+            if (!commandEditorIsOppened)
+            {
+                commandEditorIsOppened = true;
+                FormCommandEditor editor = new();
+
+                editor.FormClosed += (s, e) =>
+                {
+                    this.commandEditorIsOppened = false;
+                };
+
+                editor.Show();
+                editor.BringToFront();
+            }
+        }
     }
 }

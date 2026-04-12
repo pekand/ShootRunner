@@ -62,6 +62,7 @@ namespace ShootRunner
             applicationToolStripMenuItem = new ToolStripMenuItem();
             consoleToolStripMenuItem = new ToolStripMenuItem();
             exitToolStripMenuItem = new ToolStripMenuItem();
+            refreshToolStripMenuItem = new ToolStripMenuItem();
             contextMenuStripTaskbar.SuspendLayout();
             SuspendLayout();
             // 
@@ -74,7 +75,7 @@ namespace ShootRunner
             // 
             // taskbarToolStripMenuItem
             // 
-            taskbarToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { removeToolStripMenuItem, showAllHiddenToolStripMenuItem });
+            taskbarToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { removeToolStripMenuItem, showAllHiddenToolStripMenuItem, refreshToolStripMenuItem });
             taskbarToolStripMenuItem.Name = "taskbarToolStripMenuItem";
             taskbarToolStripMenuItem.Size = new Size(180, 24);
             taskbarToolStripMenuItem.Text = "Taskbar";
@@ -203,42 +204,42 @@ namespace ShootRunner
             // toolStripMenuItem3
             // 
             toolStripMenuItem3.Name = "toolStripMenuItem3";
-            toolStripMenuItem3.Size = new Size(180, 24);
+            toolStripMenuItem3.Size = new Size(114, 24);
             toolStripMenuItem3.Text = "10%";
             toolStripMenuItem3.Click += toolStripMenuItem3_Click;
             // 
             // toolStripMenuItem4
             // 
             toolStripMenuItem4.Name = "toolStripMenuItem4";
-            toolStripMenuItem4.Size = new Size(180, 24);
+            toolStripMenuItem4.Size = new Size(114, 24);
             toolStripMenuItem4.Text = "20%";
             toolStripMenuItem4.Click += toolStripMenuItem4_Click;
             // 
             // toolStripMenuItem5
             // 
             toolStripMenuItem5.Name = "toolStripMenuItem5";
-            toolStripMenuItem5.Size = new Size(180, 24);
+            toolStripMenuItem5.Size = new Size(114, 24);
             toolStripMenuItem5.Text = "40%";
             toolStripMenuItem5.Click += toolStripMenuItem5_Click;
             // 
             // toolStripMenuItem6
             // 
             toolStripMenuItem6.Name = "toolStripMenuItem6";
-            toolStripMenuItem6.Size = new Size(180, 24);
+            toolStripMenuItem6.Size = new Size(114, 24);
             toolStripMenuItem6.Text = "60%";
             toolStripMenuItem6.Click += toolStripMenuItem6_Click;
             // 
             // toolStripMenuItem7
             // 
             toolStripMenuItem7.Name = "toolStripMenuItem7";
-            toolStripMenuItem7.Size = new Size(180, 24);
+            toolStripMenuItem7.Size = new Size(114, 24);
             toolStripMenuItem7.Text = "80%";
             toolStripMenuItem7.Click += toolStripMenuItem7_Click;
             // 
             // toolStripMenuItem8
             // 
             toolStripMenuItem8.Name = "toolStripMenuItem8";
-            toolStripMenuItem8.Size = new Size(180, 24);
+            toolStripMenuItem8.Size = new Size(114, 24);
             toolStripMenuItem8.Text = "100%";
             toolStripMenuItem8.Click += toolStripMenuItem8_Click;
             // 
@@ -268,6 +269,13 @@ namespace ShootRunner
             exitToolStripMenuItem.Text = "Exit";
             exitToolStripMenuItem.Click += ExitToolStripMenuItem_Click;
             // 
+            // refreshToolStripMenuItem
+            // 
+            refreshToolStripMenuItem.Name = "refreshToolStripMenuItem";
+            refreshToolStripMenuItem.Size = new Size(184, 24);
+            refreshToolStripMenuItem.Text = "Refresh";
+            refreshToolStripMenuItem.Click += refreshToolStripMenuItem_Click;
+            // 
             // FormTaskbar
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
@@ -284,8 +292,6 @@ namespace ShootRunner
             StartPosition = FormStartPosition.Manual;
             Text = "Taskbar";
             TopMost = true;
-            Activated += Form_Activated;
-            Deactivate += Form_Deactivate;
             FormClosing += FormTaskbar_FormClosing;
             FormClosed += FormTaskbar_FormClosed;
             Load += FormTaskbar_Load;
@@ -327,5 +333,6 @@ namespace ShootRunner
         private ToolStripMenuItem toolStripMenuItem6;
         private ToolStripMenuItem toolStripMenuItem7;
         private ToolStripMenuItem toolStripMenuItem8;
+        private ToolStripMenuItem refreshToolStripMenuItem;
     }
 }
