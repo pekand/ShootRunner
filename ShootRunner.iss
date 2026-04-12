@@ -41,13 +41,13 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 
 [Files]
 
-Source: "ShootRunner\bin\x64\Release\net8.0-windows\runtimes\win-x64\*"; DestDir: "{app}\runtimes\win-x64"; Flags: ignoreversion createallsubdirs recursesubdirs comparetimestamp
-Source: "ShootRunner\bin\x64\Release\net8.0-windows\runtimes\win\*"; DestDir: "{app}\runtimes\win"; Flags: ignoreversion createallsubdirs recursesubdirs comparetimestamp
-Source: "ShootRunner\bin\x64\Release\net8.0-windows\ref\*"; DestDir: "{app}\ref"; Flags: ignoreversion createallsubdirs recursesubdirs comparetimestamp
-Source: "ShootRunner\bin\x64\Release\net8.0-windows\*.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "ShootRunner\bin\x64\Release\net8.0-windows\*.json"; DestDir: "{app}"; Flags: ignoreversion
-Source: "ShootRunner\bin\x64\Release\net8.0-windows\*.xml"; DestDir: "{app}"; Flags: ignoreversion
-Source: "ShootRunner\bin\x64\Release\net8.0-windows\ShootRunner.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "ShootRunner\bin\x64\Release\net9.0-windows7.0\runtimes\win-x64\*"; DestDir: "{app}\runtimes\win-x64"; Flags: ignoreversion createallsubdirs recursesubdirs comparetimestamp
+Source: "ShootRunner\bin\x64\Release\net9.0-windows7.0\runtimes\win\*"; DestDir: "{app}\runtimes\win"; Flags: ignoreversion createallsubdirs recursesubdirs comparetimestamp
+Source: "ShootRunner\bin\x64\Release\net9.0-windows7.0\ref\*"; DestDir: "{app}\ref"; Flags: ignoreversion createallsubdirs recursesubdirs comparetimestamp
+Source: "ShootRunner\bin\x64\Release\net9.0-windows7.0\*.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "ShootRunner\bin\x64\Release\net9.0-windows7.0\*.json"; DestDir: "{app}"; Flags: ignoreversion
+Source: "ShootRunner\bin\x64\Release\net9.0-windows7.0\*.xml"; DestDir: "{app}"; Flags: ignoreversion
+Source: "ShootRunner\bin\x64\Release\net9.0-windows7.0\ShootRunner.exe"; DestDir: "{app}"; Flags: ignoreversion
 
 Source: "widgets\*"; DestDir: "{userappdata}\ShootRunner\widgets"; Flags: ignoreversion createallsubdirs recursesubdirs comparetimestamp
 

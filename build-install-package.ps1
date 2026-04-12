@@ -66,8 +66,8 @@ $tag = git describe --tags --abbrev=0
 Write-Output "TAG=>$tag<"
 
 $paths = @(
-    "ShootRunner\bin\x64\Release\net8.0-windows\ShootRunner.dll"
-    "ShootRunner\bin\x64\Release\net8.0-windows\ShootRunner.exe"
+    "ShootRunner\bin\x64\Release\net9.0-windows7.0\ShootRunner.dll"
+    "ShootRunner\bin\x64\Release\net9.0-windows7.0\ShootRunner.exe"
 )
 
 foreach ($path in $paths) {
