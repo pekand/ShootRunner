@@ -6,6 +6,8 @@ param (
     [string]$TargetPath
 )
 
+function Get-DecryptedSecret($path) { [System.Text.Encoding]::UTF8.GetString([System.Security.Cryptography.ProtectedData]::Unprotect([System.Convert]::FromBase64String(([System.IO.File]::ReadAllText($path)).Trim()), $null, 'CurrentUser')) }
+
 if ($ConfigurationName -eq "Release") {
 
 # Output the parameters for debugging
@@ -16,7 +18,7 @@ Write-Host "OutDir=>$OutDir<"
 Write-Host "TargetPath=>$TargetPath<"
 $CERT_CODE = $env:CERT_CODE
 Write-Host "CERT_CODE=>$CERT_CODE<"
-$CERT_PWD = $env:CERT_PWD
+$CERT_PWD = (& Get-DecryptedSecret.ps1 -FilePath $CERT_CODE -ErrorAction SilentlyContinue) ?? ""
 Write-Host "CERT_PWD=>$CERT_PWD<"
 $CERT_STRONG_NAME = $env:CERT_STRONG_NAME
 Write-Host "CERT_STRONG_NAME=>$CERT_STRONG_NAME<"

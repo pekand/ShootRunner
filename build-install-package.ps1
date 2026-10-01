@@ -53,10 +53,12 @@ $snPath = 'sn.exe'
 $signtoolPath = 'signtool.exe'
 $innoInstallPath = 'iscc'
 
+function Get-DecryptedSecret($path) { [System.Text.Encoding]::UTF8.GetString([System.Security.Cryptography.ProtectedData]::Unprotect([System.Convert]::FromBase64String(([System.IO.File]::ReadAllText($path)).Trim()), $null, 'CurrentUser')) }
+
 $CERT_CODE = $env:CERT_CODE
 Write-Host "CERT_CODE=>$CERT_CODE<"
 
-$CERT_PWD = $env:CERT_PWD
+$CERT_PWD = (& Get-DecryptedSecret.ps1 -FilePath $CERT_CODE -ErrorAction SilentlyContinue) ?? ""
 Write-Host "CERT_PWD=>$CERT_PWD<"
 
 $CERT_PUBLISHER = $env:CERT_PUBLISHER
